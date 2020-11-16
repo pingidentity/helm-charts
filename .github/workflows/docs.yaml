@@ -3,6 +3,9 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'mkdocs.yaml'
+      - 'docs/**'
 jobs:
   deploy-docs:
     runs-on: ubuntu-latest
