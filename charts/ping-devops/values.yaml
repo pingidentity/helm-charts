@@ -9,7 +9,6 @@
 #  - image  - For every image/product, the values will
 #             be merged with the global settings, and
 #             take precedence.
-#
 ############################################################
 
 ############################################################
