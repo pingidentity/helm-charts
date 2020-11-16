@@ -6,7 +6,9 @@ name: ping-devops
 ########################################################################
 # 0.2.0 - Initial ping devops charts (using sprint 2009)
 # 0.2.1 - Removed default storage class on directory pvc.  Blank is default
-# 0.2.2 - Next rev
+# 0.2.2 - Added service-cluster to pingdatasync and pingdatagoverance for
+#         pingdataconsole access.
+#       - Appended '-cluster' to hostname for pingdataconsole.
 ########################################################################
 version: 0.2.2
 description: All Ping Identity product images with integration

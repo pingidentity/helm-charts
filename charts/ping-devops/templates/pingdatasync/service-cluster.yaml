@@ -1,0 +1,5 @@
+{{- include "pinglib.service-cluster" (list . "pingdatasync") -}}
+
+
+{{- define "pingdatasync.service-cluster" -}}
+{{- end -}}
