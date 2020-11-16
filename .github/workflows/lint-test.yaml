@@ -13,19 +13,25 @@ jobs:
       - name: Fetch history
         run: git fetch --prune --unshallow
 
-      - name: Run chart-testing (lint)
-        id: lint
-        uses: helm/chart-testing-action@v1.0.0-rc.2
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.0.1
         with:
-          command: lint --validate-maintainers=false
-#          config: ct.yaml
-#
+          version: v3.3.0
+
+      - name: Run chart-testing (list-changed)
+        id: list-changed
+        run: |
+          changed=$(ct list-changed)
+          if [[ -n "$changed" ]]; then
+            echo "::set-output name=changed::true"
+          fi
+
+      - name: Run chart-testing (lint)
+        run: ct lint --validate-maintainers=false
+
 #      - name: Create kind cluster
-#        uses: helm/kind-action@v1.0.0-rc.1
-#        if: steps.lint.outputs.changed == 'true'
+#        uses: helm/kind-action@v1.1.0
+#        if: steps.list-changed.outputs.changed == 'true'
 #
 #      - name: Run chart-testing (install)
-#        uses: helm/chart-testing-action@v1.0.0-rc.2
-#        with:
-#          command: install
-#          config: ct.yaml
+#        run: ct install --config ct.yaml
