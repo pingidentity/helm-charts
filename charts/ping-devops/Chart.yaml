@@ -5,8 +5,9 @@ apiVersion: v2
 name: ping-devops
 ########################################################################
 # 0.2.0 - Initial ping devops charts (using sprint 2009)
+# 0.2.1 - Removed default storage class on directory pvc.  Blank is default
 ########################################################################
-version: 0.2.0
+version: 0.2.1
 description: All Ping Identity product images with integration
 type: application
 home: https://devops.pingidentity.com/
