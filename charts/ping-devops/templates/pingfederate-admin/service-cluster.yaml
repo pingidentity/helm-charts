@@ -1,0 +1,10 @@
+{{- include "pinglib.service-cluster" (list . "pingfederate-admin") -}}
+
+
+{{- define "pingfederate-admin.service-cluster" -}}
+metadata:
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+spec:
+  publishNotReadyAddresses: true
+{{- end }}

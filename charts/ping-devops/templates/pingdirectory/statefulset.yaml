@@ -1,0 +1,13 @@
+{{- include "pinglib.statefulset" (list . "pingdirectory") -}}
+
+
+
+{{- define "pingdirectory.statefulset" -}}
+{{- $top := index . 0 -}}
+{{- $v := index . 1 -}}
+spec:
+  template:
+    metadata:
+      labels:
+        clusterIdentifier: {{ include "pinglib.fullimagename" . }}
+{{- end -}}

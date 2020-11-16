@@ -1,0 +1,22 @@
+{{ include "pinglib.notes.header" . }}
+#
+#         Product             Enabled
+#  ------------------------ ------------
+{{- with .Values }}
+#  pingaccess               {{ .pingaccess.enabled }}
+#  pingdataconsole          {{ .pingdataconsole.enabled }}
+#  pingdatagovernance       {{ .pingdatagovernance.enabled }}
+#  pingdatasync             {{ .pingdatasync.enabled }}
+#  pingdelegator            {{ .pingdelegator.enabled }}
+#  pingdirectory            {{ .pingdirectory.enabled }}
+#  pingfederate-admin       {{ (index . "pingfederate-admin").enabled }}
+#  pingfederate-engine      {{ (index . "pingfederate-engine").enabled }}
+#
+#  ldap-sdk-tools           {{ (index . "ldap-sdk-tools").enabled }}
+#  pd-replication-timing    {{ (index . "pd-replication-timing").enabled }}
+{{- end -}}
+{{- range .Chart.Dependencies }}
+#  {{ printf "%-24.18s %-12.12t" .Name (index $.Values .Name).chartEnabled  }}
+{{- end }}
+#
+{{ include "pinglib.notes.footer" . }}

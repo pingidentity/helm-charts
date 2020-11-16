@@ -1,0 +1,4 @@
+{{- include "pinglib.service" (list . "pingfederate-engine") -}}
+
+{{- define "pingfederate-engine.service" -}}
+{{- end -}}

@@ -1,0 +1,6 @@
+{{- include "pinglib.deployment" (list . "pingdelegator") -}}
+
+
+
+{{- define "pingdelegator.deployment" -}}
+{{- end -}}

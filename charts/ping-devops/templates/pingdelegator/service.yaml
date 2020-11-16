@@ -1,0 +1,6 @@
+{{- include "pinglib.service" (list . "pingdelegator") -}}
+
+
+
+{{- define "pingdelegator.service" -}}
+{{- end -}}

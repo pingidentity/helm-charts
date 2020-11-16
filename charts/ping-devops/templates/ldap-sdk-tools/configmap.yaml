@@ -1,0 +1,8 @@
+{{- include "pinglib.configmap" (list . "ldap-sdk-tools") -}}
+
+
+{{- define "ldap-sdk-tools.configmap" -}}
+data:
+  STARTUP_COMMAND: "tail"
+  STARTUP_BACKGROUND_OPTS: "-f /dev/null"
+{{- end -}}

@@ -1,0 +1,5 @@
+{{- include "pinglib.deployment" (list . "ldap-sdk-tools" ) -}}
+
+
+{{- define "ldap-sdk-tools.deployment" -}}
+{{- end -}}

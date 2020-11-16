@@ -1,0 +1,5 @@
+{{- include "pinglib.deployment" (list . "pd-replication-timing" ) -}}
+
+
+{{- define "pd-replication-timing.deployment" -}}
+{{- end -}}

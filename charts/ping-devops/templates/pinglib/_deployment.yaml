@@ -1,0 +1,46 @@
+{{- define "pinglib.deployment.tpl" -}}
+{{- $top := index . 0 -}}
+{{- $v := index . 1 -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata: {{ include "pinglib.metadata.labels" .  | nindent 2  }}
+  name: {{ include "pinglib.fullname" . }}
+spec:
+{{ include "pinglib.replicas" $v.container | indent 2 }}
+{{ toYaml $v.deployment | indent 2 }}
+  selector:
+    matchLabels: {{ include "pinglib.selector.labels" . | nindent 6 }}
+  strategy:
+    type: {{ $v.deployment.strategy.type }}
+    {{- if eq $v.deployment.strategy.type "RollingUpdate" }}
+    rollingUpdate: {{- toYaml $v.deployment.strategy.rollingUpdate | nindent 6 }}
+    {{- end }}
+  template:
+    metadata: {{- include "pinglib.metadata.labels" .  | nindent 6  }}
+        clusterIdentifier: {{ include "pinglib.fullimagename" . }}
+        {{- include "pinglib.selector.labels" . | nindent 8 }}
+      annotations: {{ include "pinglib.annotations.vault" $v.vault | nindent 8 }}
+        checksum/config: {{ include (print $top.Template.BasePath "/" $v.name "/configmap.yaml") $top | sha256sum }}
+    spec:
+      {{- if $v.vault.enabled }}
+      serviceAccountName: vault-auth
+      {{- end }}
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: {{ $v.name }}
+        env: []
+
+{{ include "pinglib.container.command" $v.container.command | indent 8 }}
+{{ include "pinglib.imagetags" $v.image  | indent 8 }}
+{{ include "pinglib.container.ports" $v.services | indent 8 }}
+{{ include "pinglib.envfrom" . | indent 8 }}
+{{ include "pinglib.probes" $v.probes  | indent 8 }}
+        resources: {{ toYaml $v.container.resources | nindent 10 }}
+      nodeSelector: {{ toYaml $v.container.nodeSelector | nindent 8 }}
+      tolerations: {{ toYaml $v.container.tolerations | nindent 8 }}
+{{- end -}}
+
+
+{{- define "pinglib.deployment" -}}
+  {{- include "pinglib.merge.templates" (append . "deployment") -}}
+{{- end -}}

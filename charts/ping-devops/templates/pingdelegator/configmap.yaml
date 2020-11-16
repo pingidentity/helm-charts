@@ -1,0 +1,15 @@
+{{- include "pinglib.configmap" (list . "pingdelegator") -}}
+
+
+
+{{- define "pingdelegator.configmap" -}}
+{{- $top := index . 0 -}}
+{{- $v := index . 1 -}}
+data:
+  PD_DELEGATOR_PUBLIC_HOSTNAME: {{ $v.publicHostname | quote  }}
+  PF_ENGINE_PUBLIC_HOSTNAME: {{ $v.tokenProvider.hostname | quote  }}
+  PF_ENGINE_PUBLIC_PORT: {{ $v.tokenProvider.port | quote  }}
+  PF_DELEGATOR_CLIENTID: {{ $v.tokenProvider.clientId | quote  }}
+  PD_ENGINE_PRIVATE_HOSTNAME: {{ $v.pingDirectoryServer.hostname | quote  }}
+  PD_ENGINE_PRIVATE_PORT: {{ $v.pingDirectoryServer.port | quote  }}
+{{- end -}}

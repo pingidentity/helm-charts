@@ -1,0 +1,13 @@
+#######################################################################
+# Ping Identity DevOps Chart
+########################################################################
+apiVersion: v2
+name: ping-devops
+########################################################################
+# 0.2.0 - Initial ping devops charts (using sprint 2009)
+########################################################################
+version: 0.2.0
+description: All Ping Identity product images with integration
+type: application
+home: https://devops.pingidentity.com/
+appVersion: "2.0"

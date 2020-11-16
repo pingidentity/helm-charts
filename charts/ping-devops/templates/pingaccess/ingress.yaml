@@ -1,0 +1,8 @@
+{{- if (merge (index .Values "pingaccess") .Values.global).ingress.enabled }}
+{{- include "pinglib.ingress" (list . "pingaccess") -}}
+{{- end -}}
+
+
+
+{{- define "pingaccess.ingress" -}}
+{{- end -}}

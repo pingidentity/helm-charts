@@ -1,0 +1,10 @@
+{{- include "pinglib.configmap" (list . "pingdirectory") -}}
+
+
+
+{{- define "pingdirectory.configmap" -}}
+data:
+  ORCHESTRATION_TYPE: KUBERNETES
+  K8S_STATEFUL_SET_NAME: {{ include "pinglib.fullname" . }}
+  K8S_STATEFUL_SET_SERVICE_NAME: {{ include "pinglib.fullname" . }}-cluster
+{{- end -}}

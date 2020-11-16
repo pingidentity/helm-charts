@@ -1,0 +1,5 @@
+{{- include "pinglib.service" (list . "pingfederate-admin") -}}
+
+
+{{- define "pingfederate-admin.service" -}}
+{{- end -}}

@@ -1,0 +1,8 @@
+{{- include "pinglib.configmap" (list . "pd-replication-timing") -}}
+
+
+{{- define "pd-replication-timing.configmap" -}}
+data:
+  STARTUP_COMMAND: "tail"
+  STARTUP_BACKGROUND_OPTS: "-f /dev/null"
+{{- end -}}

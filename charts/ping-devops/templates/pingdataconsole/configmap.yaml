@@ -1,0 +1,12 @@
+{{- include "pinglib.configmap" (list . "pingdataconsole") -}}
+
+
+
+{{- define "pingdataconsole.configmap" -}}
+{{- $top := index . 0 -}}
+{{- $v := index . 1 -}}
+data:
+  PD_ENGINE_PRIVATE_HOSTNAME: {{ include "pinglib.addreleasename" (append . $v.defaultLogin.server.host) | quote }}
+  LDAPS_PORT: {{ $top.Values.pingdirectory.services.ldaps.port | quote }}
+  ROOT_USER: {{ $v.defaultLogin.username | quote }}
+{{- end -}}

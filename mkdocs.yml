@@ -1,0 +1,59 @@
+site_name: Ping Identity DevOps Helm Charts
+repo_name: pingidentity/helm-charts
+repo_url: https://github.com/pingidentity/helm-charts
+site_url: https://helm.pingidentity.com/
+
+theme:
+  name: material
+
+  features:
+    - tabs
+    - instant
+
+  palette:
+    scheme: preference
+    primary: indigo
+    accent: blue
+
+edit_uri: ""
+
+markdown_extensions:
+  - attr_list
+  - pymdownx.emoji
+  - admonition
+  - codehilite
+  - pymdownx.inlinehilite
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.superfences
+  - meta
+  - toc:
+      # insert a blank space before the character
+      permalink: " ¶"
+
+nav:
+  - Welcome: "index.md"
+#  - Deployment: 
+#      - Getting Started: "deploy/index.md"
+#  - Value Configs: 
+#      - Introduction: "config/index.md"
+#      - global:
+#          - Introduction: "config/global/index.md"
+#          - Container: "config/global/container.md"
+#          - Deployment: "config/global/deployment.md"
+#          - Image: "config/global/image.md"
+#          - Ingress: "config/global/ingress.md"
+#          - License: "config/global/license.md"
+#          - Probes: "config/global/probes.md"
+#          - Service: "config/global/service.md"
+#          - Vault: "config/global/vault.md"
+#      - pingaccess: "config/pingaccess.md"
+#      - pingdataconsole: "config/pingdataconsole.md"
+#      - pingdatagovernance: "config/pingdatagovernance.md"
+#      - pingdelegator: "config/pingdelegator.md"
+#      - pingdirectory: "config/pingdirectory.md"
+#      - pingfederate: "config/pingfederate.md"
+#      - ldap-sdk-tools: "config/ldap-sdk-tools.md"
+#      - pd-replication-timing: "config/pd-replicaiton-timing.md"
+#  - Examples:
+#      - Full Deployment: "examples/index.md"

@@ -1,0 +1,7 @@
+{{- include "pinglib.configmap" (list . "pingaccess") -}}
+
+
+
+{{- define "pingaccess.configmap" -}}
+data:
+{{- end -}}
