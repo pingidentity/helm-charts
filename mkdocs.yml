@@ -33,10 +33,9 @@ markdown_extensions:
 
 nav:
   - Welcome: "index.md"
-  - Deployment: 
-      - Getting Started: "deploy/index.md"
+  - Getting Started: "getting-started.md"
 
-#  - Value Configs: 
+#  - Value Configs:
 #      - Introduction: "config/index.md"
 #      - global:
 #          - Introduction: "config/global/index.md"
