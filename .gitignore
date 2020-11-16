@@ -1,2 +1,5 @@
 # Chart Releaser Files
 .cr-*
+
+# mkdocs files
+site/
