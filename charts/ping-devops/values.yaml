@@ -477,14 +477,9 @@ pingdatasync:
     SERVER_PROFILE_BRANCH: master
 
   services:
-    ldap:
-      port: 389
-      targetPort: 389
-      dataService: true
     ldaps:
       port: 636
       targetPort: 636
-      dataService: true
       clusterService: true
     https:
       port: 443
@@ -510,6 +505,10 @@ pingdatagovernance:
       port: 443
       targetPort: 443
       dataService: true
+    ldaps:
+      port: 636
+      targetPort: 636
+      clusterService: true
 
   ingress:
     hosts:

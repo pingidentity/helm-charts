@@ -1,0 +1,5 @@
+{{- include "pinglib.service-cluster" (list . "pingdatagovernance") -}}
+
+
+{{- define "pingdatagovernance.service-cluster" -}}
+{{- end -}}
