@@ -9,8 +9,9 @@ name: ping-devops
 # 0.2.2 - Added service-cluster to pingdatasync and pingdatagoverance for
 #         pingdataconsole access.
 #       - Appended '-cluster' to hostname for pingdataconsole.
+# 0.2.3 - Resolved PD_ENGINE_PRIVATE_HOSTNAME issue on pingdataconsole configmap
 ########################################################################
-version: 0.2.2
+version: 0.2.3
 description: All Ping Identity product images with integration
 type: application
 home: https://devops.pingidentity.com/
