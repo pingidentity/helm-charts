@@ -31,7 +31,7 @@ Ensure that you have Helm 3 installed.
     brew install helm
     ```
 
-* Installing on other OS - https://helm.sh/docs/intro/install/
+* Installing on other OS - <https://helm.sh/docs/intro/install/>
 
 ## Add Helm Ping DevOps Repo
 
