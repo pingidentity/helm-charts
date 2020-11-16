@@ -8,7 +8,7 @@ name: ping-devops
 # 0.2.1 - Removed default storage class on directory pvc.  Blank is default
 # 0.2.2 - 
 ########################################################################
-version: 0.2.1
+version: 0.2.2
 description: All Ping Identity product images with integration
 type: application
 home: https://devops.pingidentity.com/
