@@ -11,8 +11,9 @@ name: ping-devops
 #       - Appended '-cluster' to hostname for pingdataconsole.
 # 0.2.3 - Resolved PD_ENGINE_PRIVATE_HOSTNAME issue on pingdataconsole configmap
 # 0.2.4 - Turn off vault for ldap-sdk-tools
+# 0.2.5 - Add ability to use external images (GDO-590, helm-charts/issues/10)
 ########################################################################
-version: 0.2.4
+version: 0.2.5
 description: All Ping Identity product images with integration
 type: application
 home: https://devops.pingidentity.com/
