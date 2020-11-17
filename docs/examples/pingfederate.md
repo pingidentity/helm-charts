@@ -30,13 +30,13 @@ global:
 #  - PingFederate Engines clustered with console
 ############################################################
 pingfederate-admin:
-  chartEnabled: true
+  enabled: true
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: getting-started/pingfederate
 
 pingfederate-engine:
-  chartEnabled: true
+  enabled: true
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: getting-started/pingfederate
