@@ -40,6 +40,7 @@ nav:
       - global: "config/global.md"
       - Container: "config/container.md"
       - Deployment: "config/deployment.md"
+      - External Image: "config/external-image.md"
       - Image: "config/image.md"
       - Ingress: "config/ingress.md"
       - License: "config/license.md"
