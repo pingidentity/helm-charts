@@ -2,7 +2,7 @@
 # Ping Identity DevOps values.yaml
 ############################################################
 # The yaml is seperated into 2 major sections:
-#  - global - Represents the base set of valus that will
+#  - global - Represents the base set of values that will
 #             be used for each product, if that product
 #             doesn't override the global values.
 #
@@ -55,7 +55,7 @@ global:
       # secretPrefix: path/to/secrets
       # secrets:
       # - name: secret-name
-      #   secret: path/to/secret
+      #   secret: secret-name
 
   ############################################################
   # Image
@@ -70,7 +70,7 @@ global:
   ############################################################
   image:
     repository: pingidentity
-    name: ldap-sdk-tools
+    name:
     tag: 2010
     pullPolicy: IfNotPresent
 
@@ -223,9 +223,6 @@ ldap-sdk-tools:
   image:
     name: "ldap-sdk-tools"
     tag: edge
-
-  vault:
-    enabled: true
 
   container:
     command: "tail -f /dev/null"
