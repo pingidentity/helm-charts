@@ -81,7 +81,7 @@ global:
   # Provides ability to use external images for various purposes
   # such as using curl.
   ############################################################
-  externalImages:
+  externalImage:
     curl: curlimages/curl:latest
 
   ############################################################
