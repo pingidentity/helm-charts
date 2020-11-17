@@ -19,7 +19,36 @@ helm uninstall everything
 
 ```yaml
 global:
-  enabled: true  # Enables ALL images
   image:
     tag: "edge"  # Uses images with the "edge" tag
+
+pingaccess:
+  enabled: true
+
+pingdataconsole:
+  enabled: true
+
+pingdatagovernance:
+  enabled: true
+
+pingdatasync:
+  enabled: true
+
+pingdelegator:
+  enabled: true
+
+pingdirectory:
+  enabled: true
+
+pingfederate-admin:
+  enabled: true
+
+pingfederate-engine:
+  enabled: true
+
+ldap-sdk-tools:
+  enabled: false
+
+pd-replication-timing:
+  enabled: false
 ```
