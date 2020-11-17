@@ -1,0 +1,10 @@
+############################################################
+# Ping Identity
+#
+############################################################
+
+
+global:
+  enabled: true  # Enables ALL images
+  image:
+    tag: "edge"  # Uses images with the "edge" tag
