@@ -12,7 +12,7 @@ spec:
     spec:
       initContainers:
       - name: init
-        image: curlimages/curl:latest
+        image: {{ $v.externalImage.curl }}
         command: ['sh', '-c', 'until curl --connect-timeout 1 --silent -k https://{{ include "pinglib.fullname" . | replace "-engine" "-admin" }}:{{ $v.envs.PF_ADMIN_PORT }}/pingfederate/app ; do echo waiting for https://{{ include "pinglib.fullname" . | replace "-engine" "-admin" }}:{{ $v.envs.PF_ADMIN_PORT }}/pingfederate/app ; sleep 2 ; done']
 
 {{- end -}}

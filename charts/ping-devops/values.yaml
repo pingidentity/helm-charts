@@ -73,6 +73,16 @@ global:
     name:
     tag: 2010
     pullPolicy: IfNotPresent
+    # used by images to perform curl commands
+
+  ############################################################
+  # External Images
+  #
+  # Provides ability to use external images for various purposes
+  # such as using curl.
+  ############################################################
+  externalImage:
+    curl: curlimages/curl:latest
 
   ############################################################
   # Services
