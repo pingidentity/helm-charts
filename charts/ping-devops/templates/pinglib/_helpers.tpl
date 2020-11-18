@@ -26,7 +26,7 @@ If release name contains image name it will be used as a full name.
 {{- define "pinglib.fullimagename" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
-    {{- include "pinglib.addreleasename" (append . $v.name) -}}
+    {{- include "pinglib.addreleasename" (append . $v.image.name) -}}
 {{- end -}}
 
 
