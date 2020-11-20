@@ -17,7 +17,7 @@ name: ping-devops
 #         Increasing liveness/readiness probe timeoutSeconds to 5 as 1 is often to short
 # 0.2.8 - Create release env-vars congigmap.  Provides each products PRIVATE_HOSTNAME
 ########################################################################
-version: 0.2.7
+version: 0.2.8
 description: All Ping Identity product images with integration
 type: application
 home: https://devops.pingidentity.com/
