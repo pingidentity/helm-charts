@@ -9,12 +9,12 @@ The example found in the `global:` section is:
     repository: pingidentity
     name:                                 # Should be completed in product section
     tag: 2010
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
 ```
 
 Translating to kubernetes manifest information:
 
 ```yaml
     image: pingidentity/pingaccess:2010   # Example if image.name=pingaccess
-    imagePullPolicy: IfNotPresent
+    imagePullPolicy: Always
 ```
