@@ -13,14 +13,14 @@ global:
       command: /opt/liveness.sh
       initialDelaySeconds: 30
       periodSeconds: 30
-      timeoutSeconds: 1
+      timeoutSeconds: 5
       successThreshold: 1
       failureThreshold: 4
     readiness:
       command: /opt/liveness.sh
       initialDelaySeconds: 30
       periodSeconds: 30
-      timeoutSeconds: 1
+      timeoutSeconds: 5
       successThreshold: 1
       failureThreshold: 4
 ```
