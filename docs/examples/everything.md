@@ -42,9 +42,15 @@ pingdirectory:
 
 pingfederate-admin:
   enabled: true
+  envs:
+    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+    SERVER_PROFILE_PATH: baseline/pingfederate
 
 pingfederate-engine:
   enabled: true
+  envs:
+    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+    SERVER_PROFILE_PATH: baseline/pingfederate
 
 ldap-sdk-tools:
   enabled: false
