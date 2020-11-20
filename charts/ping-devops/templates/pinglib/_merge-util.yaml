@@ -15,7 +15,7 @@ These will create
     {{- $resourceType := index . 2 -}}
 
     {{- $mergedValues := merge (index $top.Values $prodName) $top.Values.global -}}
-    {{- if $mergedValues.enabled -}}
+    {{- if or $mergedValues.enabled (eq $prodName "global") -}}
         {{- $paramList := list $top $mergedValues -}}
 
         {{- $overrideTemplate := printf "%s.%s" $prodName $resourceType -}}
