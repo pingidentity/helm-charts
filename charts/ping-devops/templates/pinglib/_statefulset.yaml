@@ -19,8 +19,8 @@ spec:
     metadata: {{ include "pinglib.metadata.labels" .  | nindent 6  }}
         {{ include "pinglib.selector.labels" . | nindent 8 }}
       annotations: {{ include "pinglib.annotations.vault" $v.vault | nindent 8 }}
-        checksum/config: {{ include (print $top.Template.BasePath "/" $v.name "/configmap.yaml") $top | sha256sum }}
-
+        {{/* Following checksum pulls in release and product configmaps and creates checksum to force restart  */}}
+        checksum/config: {{ printf "%s%s" (include (print $top.Template.BasePath "/global/configmap.yaml") $top) (include (print $top.Template.BasePath "/" $v.name "/configmap.yaml") $top) | sha256sum }}
     spec:
       terminationGracePeriodSeconds: 300
       {{- if $v.vault.enabled }}

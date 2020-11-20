@@ -1,0 +1,20 @@
+{{- include "pinglib.configmap" (list . "global") -}}
+
+
+
+{{- define "global.configmap" -}}
+{{- $top := index . 0 -}}
+{{- $v := index . 1 -}}
+data:
+  {{/* Remove the pingaccess when we move to an engine/admin */}}
+  {{ if (index $top.Values "pingaccess").enabled }}PA_ENGINE_PRIVATE_HOSTNAME: {{ include "pinglib.addreleasename" (append . (index $top.Values "pingaccess").name) | quote }}{{ end }}
+  {{ if (index $top.Values "pingaccess-engine").enabled }}PA_ENGINE_PRIVATE_HOSTNAME: {{ include "pinglib.addreleasename" (append . (index $top.Values "pingaccess-engine").name) | quote }}{{ end }}
+  {{ if (index $top.Values "pingaccess-admin").enabled }}PA_ADMIN_PRIVATE_HOSTNAME: {{ include "pinglib.addreleasename" (append . (index $top.Values "pingaccess-admin").name) | quote }}{{ end }}
+  {{ if (index $top.Values "pingdatasync").enabled }}PDS_ENGINE_PRIVATE_HOSTNAME: {{ include "pinglib.addreleasename" (append . (index $top.Values "pingdatasync").name) | quote }}{{ end }}
+  {{ if (index $top.Values "pingdatagovernance").enabled }}PDG_ENGINE_PRIVATE_HOSTNAME: {{ include "pinglib.addreleasename" (append . (index $top.Values "pingdatagovernance").name) | quote }}{{ end }}
+  {{ if (index $top.Values "pingdatagovernancepap").enabled }}PDGP_ENGINE_PRIVATE_HOSTNAME: {{ include "pinglib.addreleasename" (append . (index $top.Values "pingdatagovernancepap").name) | quote }}{{ end }}
+  {{ if (index $top.Values "pingdirectory").enabled }}PD_ENGINE_PRIVATE_HOSTNAME: {{ include "pinglib.addreleasename" (append . (index $top.Values "pingdirectory").name) | quote }}{{ end }}
+  {{ if (index $top.Values "pingdirectoryproxy").enabled }}PDP_ENGINE_PRIVATE_HOSTNAME: {{ include "pinglib.addreleasename" (append . (index $top.Values "pingdirectoryproxy").name) | quote }}{{ end }}
+  {{ if (index $top.Values "pingfederate-engine").enabled }}PF_ENGINE_PRIVATE_HOSTNAME: {{ include "pinglib.addreleasename" (append . (index $top.Values "pingfederate-engine").name) | quote }}{{ end }}
+  {{ if (index $top.Values "pingfederate-admin").enabled }}PF_ADMIN_PRIVATE_HOSTNAME: {{ include "pinglib.addreleasename" (append . (index $top.Values "pingfederate-admin").name) | quote }}{{ end }}
+{{- end -}}

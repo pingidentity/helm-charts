@@ -4,7 +4,7 @@ Expand the name of the chart.
 {{- define "pinglib.name" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
-{{- default $v.name | trunc 63 | trimSuffix "-" -}}
+{{- default "global" $v.name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/**********************************************************************
@@ -15,7 +15,7 @@ If release name contains chart name it will be used as a full name.
 {{- define "pinglib.fullname" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
-    {{- include "pinglib.addreleasename" (append . $v.name) -}}
+    {{- include "pinglib.addreleasename" (append . (default "global" $v.name)) -}}
 {{- end -}}
 
 {{/**********************************************************************
