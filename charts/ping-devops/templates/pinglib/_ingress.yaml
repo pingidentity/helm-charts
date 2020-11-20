@@ -20,6 +20,7 @@ spec:
     - {{ include "pinglib.ingress.gethostprepend" $ }}
       {{- $rawHost}}
       {{- include "pinglib.ingress.gethostappend" $ -}}
+      {{- include "pinglib.ingress.gethostsubdomain" $ -}}
       .{{ $defaultDomain }}
     {{- else }}
     - {{ . | quote }}
@@ -35,6 +36,7 @@ spec:
     - host: {{ include "pinglib.ingress.gethostprepend" $ }}
       {{- $rawHost}}
       {{- include "pinglib.ingress.gethostappend" $ -}}
+      {{- include "pinglib.ingress.gethostsubdomain" $ -}}
       .{{ $defaultDomain }}
     {{- else }}
     - host: {{ . | quote }}
@@ -60,25 +62,23 @@ spec:
 {{- define "pinglib.ingress.gethostprepend" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
-  {{- $mode := $v.ingress.addReleaseNameToHost }}
-  {{- if eq $mode "append" }}
-    {{- printf ""  -}}
-  {{- else if eq $mode "prepend" }}
+  {{- if eq $v.ingress.addReleaseNameToHost "prepend" }}
     {{- printf "%s-" $top.Release.Name -}}
-  {{- else if eq $mode "subdomain"}}
-    {{- printf "" -}}
   {{- end }}
 {{- end -}}
 
 {{- define "pinglib.ingress.gethostappend" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
-  {{- $mode := $v.ingress.addReleaseNameToHost }}
-  {{- if eq $mode "append" }}
+  {{- if eq $v.ingress.addReleaseNameToHost "append" }}
     {{- printf "-%s" $top.Release.Name -}}
-  {{- else if eq $mode "prepend" }}
-    {{- printf ""  -}}
-  {{- else if eq $mode "subdomain"}}
+  {{- end }}
+{{- end -}}
+
+{{- define "pinglib.ingress.gethostsubdomain" -}}
+{{- $top := index . 0 -}}
+{{- $v := index . 1 -}}
+  {{- if eq $v.ingress.addReleaseNameToHost "subdomain"}}
     {{- printf ".%s" $top.Release.Name -}}
   {{- end }}
 {{- end -}}

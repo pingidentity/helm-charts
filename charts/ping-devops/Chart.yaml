@@ -15,8 +15,9 @@ name: ping-devops
 # 0.2.6 - Fix a regression with the clusterIdentifier on depoyments/statefulsets
 # 0.2.7 - Changing default pullPolicy to Always.  Helps when using changing edge tag
 #         Increasing liveness/readiness probe timeoutSeconds to 5 as 1 is often to short
+# 0.2.8 - Cleanup _ingress template
 ########################################################################
-version: 0.2.7
+version: 0.2.8
 description: All Ping Identity product images with integration
 type: application
 home: https://devops.pingidentity.com/
