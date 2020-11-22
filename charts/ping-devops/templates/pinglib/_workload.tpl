@@ -82,16 +82,22 @@ spec:
         {{/*--------------------- Environment -----------------*/}}
         envFrom:
         - configMapRef:
-            name: {{ include "pinglib.fullname" . }}-env-vars
-        - configMapRef:
             name: {{ $top.Release.Name }}-global-env-vars
             optional: true
+        - configMapRef:
+            name: {{ $top.Release.Name }}-env-vars
+            optional: true
+        - configMapRef:
+            name: {{ include "pinglib.fullname" . }}-env-vars
         - secretRef:
             name: {{ $v.license.secret.devOps }}
             optional: true
         - secretRef:
             name: {{ include "pinglib.fullname" . }}-git-secret
             optional: true
+        {{- if $v.container.envFrom }}
+        {{- toYaml $v.container.envFrom | nindent 8}}
+        {{- end }}
 
         {{/*--------------------- Probes ---------------------*/}}
         {{- with $v.probes }}

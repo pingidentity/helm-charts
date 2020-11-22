@@ -1,3 +1,23 @@
+## Release 0.3.1
+
+* Add container envFrom for `{release-name}-env-vars` back as optional.
+  Fixes breaking change from 0.2.8 to 0.2.9 for those that used this configmap.
+* Added ability for deployer to add their own envFrom's via their values.yaml.
+  An example (adding an optional configmap/secrets to all products).  Just change
+  global to the name of the product to only have that product use the references.
+
+```yaml
+global:
+  container:
+    envFrom:
+    - configMapRef:
+        name: my-killer-configmap
+        optional: true
+    - secretRef:
+        name: my-killer-secrets
+        optional: true
+```
+
 ## Release 0.3.0
 
 * Consolidate deployment/stateful set templates to a single workload template.
