@@ -20,8 +20,10 @@ name: ping-devops
 # 0.3.0 - Consolidate deployment/statefulset templates to a workload template
 #         consolidated deployment values into a workload.deployment and
 #         workload.statefulSet values.
+# 0.3.1 - Add back {release}-env-vars configmap ref back as well as supporting
+#         container.envFrom values
 ########################################################################
-version: 0.3.0
+version: 0.3.1
 description: All Ping Identity product images with integration
 type: application
 home: https://devops.pingidentity.com/

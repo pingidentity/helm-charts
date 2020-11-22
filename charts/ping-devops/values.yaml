@@ -191,6 +191,13 @@ global:
     tolerations: []
     terminationGracePeriodSeconds: 30
 
+    # Additional envFrom configmap/secret refences can be added
+    # envFrom:
+    # - configMapRep:
+    #     name: my-example-configmap
+    # - secretRef:
+    #     name: my-example-secrets
+
   ############################################################
   # Probes
   #
