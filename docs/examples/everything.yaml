@@ -10,6 +10,13 @@ global:
 
 pingaccess:
   enabled: true
+  # There are known issues with certificates when release names affect the hostname.
+  # We hope to resolve those soon.  For now, the default getting-started server profile
+  # is used.
+  #
+  # envs:
+  #   SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+  #   SERVER_PROFILE_PATH: baseline/pingaccess
 
 pingdataconsole:
   enabled: true
