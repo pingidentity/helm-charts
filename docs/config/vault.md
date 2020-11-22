@@ -15,6 +15,7 @@ The example found in the `global:` section is:
       preserve-secret-case: true
       secret-volume-path: /run/secrets
       pre-populate-only: true
+      serviceAccountName: vault-auth
       # secretPrefix: path/to/secrets
       # secrets:
       # - name: secret-name

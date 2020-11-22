@@ -34,12 +34,10 @@ markdown_extensions:
 nav:
   - Welcome: "index.md"
   - Getting Started: "getting-started.md"
-
+  - Release Notes: "release-notes.md"
   - Value Configs:
       - Introduction: "config/index.md"
       - global: "config/global.md"
-      - Container: "config/container.md"
-      - Deployment: "config/deployment.md"
       - External Image: "config/external-image.md"
       - Image: "config/image.md"
       - Ingress: "config/ingress.md"
@@ -47,6 +45,7 @@ nav:
       - Probes: "config/probes.md"
       - Service: "config/service.md"
       - Vault: "config/vault.md"
+      - Workload: "config/workload.md"
   - Examples:
       - Everything: "examples/everything.md"
       - PingFederate: "examples/pingfederate.md"

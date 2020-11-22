@@ -129,23 +129,19 @@ global:
   # https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
   ############################################################
   workload:
+    # Can be Deployment or StatefulSet (see warning above)
     type: Deployment
-    # type: statefulset
-    # Deployment strategy type:
-    #   If RollingUpdate - default of maxSurge/maxUnavaible provided
-    #   If ReCreate - terminates existing Pod before ReCreating
+
     deployment:
       strategy:
-    #   type: Recreate
+        # Can be RollingUpdate or Recreate
         type: RollingUpdate
         rollingUpdate:
           maxSurge: 1
           maxUnavailable: 0
 
-    # StatefulSet partition:
-    #   When set to 0, it will update all pods
-    #   When set to n, it will update all pod ordinals of n+ (i.e. canary)
     statefulSet:
+      # Used for canary testing if n>0
       partition: 0
 
       ############################################################
