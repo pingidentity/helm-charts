@@ -84,7 +84,7 @@ spec:
         - configMapRef:
             name: {{ include "pinglib.fullname" . }}-env-vars
         - configMapRef:
-            name: {{ $top.Release.Name }}-env-vars
+            name: {{ $top.Release.Name }}-global-env-vars
             optional: true
         - secretRef:
             name: {{ $v.license.secret.devOps }}
