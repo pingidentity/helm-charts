@@ -1,0 +1,5 @@
+{{- include "pinglib.workload" (list . "pd-replication-timing" ) -}}
+
+
+{{- define "pd-replication-timing.workload" -}}
+{{- end -}}

@@ -1,0 +1,6 @@
+{{- include "pinglib.workload" (list . "pingfederate-admin") -}}
+
+
+
+{{- define "pingfederate-admin.workload" -}}
+{{- end -}}

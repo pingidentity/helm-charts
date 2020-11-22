@@ -1,41 +1,7 @@
-{{/**********************************************************************
-** images snippet
-**********************************************************************/}}
-{{- define "pinglib.imagetags" -}}
-image: "{{ .repository }}/{{ .name }}:{{ .tag }}"
-imagePullPolicy: {{ .pullPolicy }}
-{{- end -}}
 
 {{/**********************************************************************
-** replicas snippet
-**********************************************************************/}}
-{{- define "pinglib.replicas" -}}
-replicas: {{ .replicaCount }}
-{{- end -}}
-
-{{/**********************************************************************
-** envfrom snippet
-**********************************************************************/}}
-{{- define "pinglib.envfrom" -}}
-{{- $top := index . 0 -}}
-{{- $v := index . 1 -}}
-envFrom:
-- configMapRef:
-    name: {{ include "pinglib.fullname" . }}-env-vars
-- configMapRef:
-    name: {{ $top.Release.Name }}-global-env-vars
-    optional: true
-- secretRef:
-    name: {{ $v.license.secret.devOps }}
-    optional: true
-- secretRef:
-    name: {{ include "pinglib.fullname" . }}-git-secret
-    optional: true
-{{- end -}}
-
-{{/**********************************************************************
-** metadata.labels snippet
-**********************************************************************/}}
+   ** metadata.labels snippet
+   **********************************************************************/}}
 {{- define "pinglib.metadata.labels" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
@@ -49,8 +15,8 @@ labels:
 {{- end -}}
 
 {{/**********************************************************************
-** selector.label snippet
-**********************************************************************/}}
+   ** selector.label snippet
+   **********************************************************************/}}
 {{- define "pinglib.selector.labels" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
@@ -59,30 +25,8 @@ app.kubernetes.io/instance: {{ $top.Release.Name }}
 {{- end -}}
 
 {{/**********************************************************************
-** probes snippets
-**********************************************************************/}}
-{{- define "pinglib.probes" -}}
-livenessProbe:
-  exec:
-    command: [ {{ .liveness.command }} ]
-  initialDelaySeconds: {{ .liveness.initialDelaySeconds }}
-  periodSeconds: {{ .liveness.periodSeconds }}
-  timeoutSeconds: {{ .liveness.timeoutSeconds }}
-  successThreshold: {{ .liveness.successThreshold }}
-  failureThreshold: {{ .liveness.failureThreshold }}
-readinessProbe:
-  exec:
-    command: [ {{ .readiness.command }} ]
-  initialDelaySeconds: {{ .readiness.initialDelaySeconds }}
-  periodSeconds: {{ .readiness.periodSeconds }}
-  timeoutSeconds: {{ .readiness.timeoutSeconds }}
-  successThreshold: {{ .readiness.successThreshold }}
-  failureThreshold: {{ .readiness.failureThreshold }}
-{{- end -}}
-
-{{/**********************************************************************
-** confgmap env snippets
-**********************************************************************/}}
+   ** confgmap env snippets
+   **********************************************************************/}}
 {{- define "pinglib.configMapEnvs" -}}
 #####
 # .envs values
@@ -99,8 +43,8 @@ readinessProbe:
 {{- end -}}
 
 {{/**********************************************************************
-** deployment/statefulset licenseSecret snippets
-**********************************************************************/}}
+   ** deployment/statefulset licenseSecret snippets
+   **********************************************************************/}}
 {{- define "pinglib.licenseSecretVolume" -}}
 - name: license
   secret:
@@ -108,14 +52,14 @@ readinessProbe:
 {{- end -}}
 
 {{/**********************************************************************
-** service/ports snippets
-**
-**   ports:
-**     - port: 9999
-**       targetPort: 9999
-**       name: pf-admin
-**       protocol: TCP
-**********************************************************************/}}
+   ** service/ports snippets
+   **
+   **   ports:
+   **     - port: 9999
+   **       targetPort: 9999
+   **       name: pf-admin
+   **       protocol: TCP
+   **********************************************************************/}}
 {{- define "pinglib.service.ports" -}}
 {{- range .ports }}
 {{ if .clusterService }}
@@ -128,43 +72,8 @@ readinessProbe:
 {{- end -}}
 
 {{/**********************************************************************
-** service/ports snippets
-**
-**   ports:
-**     - port: 9999
-**       name: pf-admin
-**********************************************************************/}}
-{{- define "pinglib.container.ports" -}}
-ports:
-{{- range $serviceName, $val := . }}
-{{- if ne $serviceName "clusterExternalDNSHostname" }}
-- containerPort: {{ $val.port }}
-  name: {{ $serviceName }}
-{{- end }}
-{{- end }}
-{{- end -}}
-
-{{/**********************************************************************
-** container startupcommand
-**
-**   container:
-**     - name: ...
-        command: ['sh', '-c', 'until curl --connect-timeout 1 --silent -k https://{{ include "pinglib.fullname" . | replace "-engine" "-admin" }}:{{ .Values.envs.PF_ADMIN_PORT }}/pingfederate/app ; do echo waiting for https://{{ include "pinglib.fullname" . | replace "-engine" "-admin" }}:{{ .Values.envs.PF_ADMIN_PORT }}/pingfederate/app ; sleep 2 ; done']
-**********************************************************************/}}
-{{- define "pinglib.container.command" -}}
-{{- if . }}
-command:
-  {{- range regexSplit " " ( default "" . ) -1 }}
-    - {{ . | quote }}
-  {{- end }}
-{{- end }}
-{{- end -}}
-
-
-
-{{/**********************************************************************
-** metadata.vault.headers snippet
-**********************************************************************/}}
+   ** metadata.vault.headers snippet
+   **********************************************************************/}}
 {{- define "pinglib.annotations.vault" -}}
 {{- if .enabled }}
 {{- with .hashicorp -}}

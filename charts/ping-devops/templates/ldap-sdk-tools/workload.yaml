@@ -1,0 +1,5 @@
+{{- include "pinglib.workload" (list . "ldap-sdk-tools" ) -}}
+
+
+{{- define "ldap-sdk-tools.workload" -}}
+{{- end -}}

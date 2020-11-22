@@ -1,6 +1,0 @@
-{{- include "pinglib.deployment" (list . "pingdatagovernance") -}}
-
-
-
-{{- define "pingdatagovernance.deployment" -}}
-{{- end -}}

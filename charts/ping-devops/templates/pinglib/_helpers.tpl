@@ -1,6 +1,6 @@
 {{/**********************************************************************
-Expand the name of the chart.
-**********************************************************************/}}
+   ** Expand the name of the chart.
+   **********************************************************************/}}
 {{- define "pinglib.name" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
@@ -8,10 +8,10 @@ Expand the name of the chart.
 {{- end -}}
 
 {{/**********************************************************************
-Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-If release name contains chart name it will be used as a full name.
-**********************************************************************/}}
+   ** Create a default fully qualified app name.
+   ** We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+   ** If release name contains chart name it will be used as a full name.
+   **********************************************************************/}}
 {{- define "pinglib.fullname" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
@@ -19,10 +19,10 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 
 {{/**********************************************************************
-Create a default fully qualified image name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-If release name contains image name it will be used as a full name.
-**********************************************************************/}}
+   ** Create a default fully qualified image name.
+   ** We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+   ** If release name contains image name it will be used as a full name.
+   **********************************************************************/}}
 {{- define "pinglib.fullimagename" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
@@ -31,8 +31,8 @@ If release name contains image name it will be used as a full name.
 
 
 {{/**********************************************************************
-Create chart name and version as used by the chart label.
-**********************************************************************/}}
+   ** Create chart name and version as used by the chart label.
+   **********************************************************************/}}
 {{- define "pinglib.chart" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
@@ -40,8 +40,8 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{/**********************************************************************
-Add Release Name
-**********************************************************************/}}
+   ** Add Release Name
+   **********************************************************************/}}
 {{- define "pinglib.addreleasename" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}

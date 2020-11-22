@@ -1,0 +1,152 @@
+{{- define "pinglib.workload.tpl" -}}
+{{- $top := index . 0 -}}
+{{- $v := index . 1 -}}
+apiVersion: apps/v1
+{{/*--------------- Deployment | StatefulSet ---------------*/}}
+kind: {{ $v.workload.type }}
+metadata: {{ include "pinglib.metadata.labels" .  | nindent 2 }}
+  name: {{ include "pinglib.fullname" . }}
+spec:
+  replicas: {{ $v.container.replicaCount }}
+  selector:
+    matchLabels: {{ include "pinglib.selector.labels" . | nindent 6 }}
+
+  {{- if eq $v.workload.type "Deployment" }}
+  {{/*--------------------- Deployment ---------------------*/}}
+  strategy:
+    {{- with $v.workload.deployment.strategy }}
+    type: {{ .type}}
+    {{- if (eq .type "RollingUpdate") }}
+    rollingUpdate: {{ toYaml .rollingUpdate | nindent 6 }}
+    {{- end }}
+    {{- end }}
+
+  {{- else if eq $v.workload.type "StatefulSet" }}
+  {{/*--------------------- StatefulSet ---------------------*/}}
+  serviceName: {{ include "pinglib.fullname" . }}-cluster
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: {{ $v.workload.statefulSet.partition }}
+  podManagementPolicy: OrderedReady
+  {{- end }}
+  {{/*-------------------------------------------------------*/}}
+
+  template:
+    metadata:
+      {{ include "pinglib.metadata.labels" .  | nindent 6  }}
+        {{ include "pinglib.selector.labels" . | nindent 8 }}
+        clusterIdentifier: {{ include "pinglib.fullimagename" . }}
+      annotations: {{ include "pinglib.annotations.vault" $v.vault | nindent 8 }}
+        checksum/config: {{ include (print $top.Template.BasePath "/" $v.name "/configmap.yaml") $top | sha256sum }}
+    spec:
+      terminationGracePeriodSeconds: {{ $v.container.terminationGracePeriodSeconds }}
+      {{- if $v.vault.enabled }}
+      serviceAccountName: {{ $v.vault.hashicorp.serviceAccountName }}
+      {{- end }}
+      nodeSelector: {{ toYaml $v.container.nodeSelector | nindent 8 }}
+      tolerations: {{ toYaml $v.container.tolerations | nindent 8 }}
+      containers:
+      - name: {{ $v.name }}
+        env: []
+
+
+        {{/*--------------------- Image -------------------------*/}}
+        {{- with $v.image }}
+        image: "{{ .repository }}/{{ .name }}:{{ .tag }}"
+        imagePullPolicy: {{ .pullPolicy }}
+        {{- end }}
+
+
+        {{/*--------------------- Command -----------------------*/}}
+        {{- with $v.container.command }}
+        command:
+          {{- range regexSplit " " ( default "" . ) -1 }}
+            - {{ . | quote }}
+          {{- end }}
+        {{- end }}
+
+
+        {{/*--------------------- Ports -----------------------*/}}
+        {{- with $v.services }}
+        ports:
+        {{- range $serviceName, $val := . }}
+        {{- if ne $serviceName "clusterExternalDNSHostname" }}
+        - containerPort: {{ $val.port }}
+          name: {{ $serviceName }}
+        {{- end }}
+        {{- end }}
+        {{- end }}
+
+
+        {{/*--------------------- Environment -----------------*/}}
+        envFrom:
+        - configMapRef:
+            name: {{ include "pinglib.fullname" . }}-env-vars
+        - configMapRef:
+            name: {{ $top.Release.Name }}-env-vars
+            optional: true
+        - secretRef:
+            name: {{ $v.license.secret.devOps }}
+            optional: true
+        - secretRef:
+            name: {{ include "pinglib.fullname" . }}-git-secret
+            optional: true
+
+        {{/*--------------------- Probes ---------------------*/}}
+        {{- with $v.probes }}
+        livenessProbe:
+          exec:
+            command: [ {{ .liveness.command }} ]
+          initialDelaySeconds: {{ .liveness.initialDelaySeconds }}
+          periodSeconds: {{ .liveness.periodSeconds }}
+          timeoutSeconds: {{ .liveness.timeoutSeconds }}
+          successThreshold: {{ .liveness.successThreshold }}
+          failureThreshold: {{ .liveness.failureThreshold }}
+        readinessProbe:
+          exec:
+            command: [ {{ .readiness.command }} ]
+          initialDelaySeconds: {{ .readiness.initialDelaySeconds }}
+          periodSeconds: {{ .readiness.periodSeconds }}
+          timeoutSeconds: {{ .readiness.timeoutSeconds }}
+          successThreshold: {{ .readiness.successThreshold }}
+          failureThreshold: {{ .readiness.failureThreshold }}
+        {{- end }}
+
+        {{/*--------------------- Resources ------------------*/}}
+        resources: {{ toYaml $v.container.resources | nindent 10 }}
+        {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
+        volumeMounts:
+        {{- range $volName, $val := $v.workload.statefulSet.persistentvolume.volumes }}
+        - name: {{ $volName }}{{ if eq "none" $v.addReleaseNameToResource }}-{{ $top.Release.Name }}{{ end }}
+          mountPath: {{ .mountPath }}
+        {{- end }}
+        {{- end }}
+
+      {{/*--------------------- Volumes ------------------*/}}
+      {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
+      volumes:
+      {{- range $volName, $val := $v.workload.statefulSet.persistentvolume.volumes }}
+      - name: {{ $volName }}{{ if eq "none" $v.addReleaseNameToResource }}-{{ $top.Release.Name }}{{ end }}
+        persistentVolumeClaim:
+          claimName: {{ $volName }}{{ if eq "none" $v.addReleaseNameToResource }}-{{ $top.Release.Name }}{{ end }}
+      {{- end }}
+      {{- end }}
+
+  {{/*----------------- VolumeClameTemplates ------------------*/}}
+  {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
+  volumeClaimTemplates:
+  {{- range $volName, $val := $v.workload.statefulSet.persistentvolume.volumes }}
+  - metadata:
+      name: {{ $volName }}{{ if eq "none" $v.addReleaseNameToResource }}-{{ $top.Release.Name }}{{ end }}
+    spec:
+      {{ toYaml $val.persistentVolumeClaim | nindent 6 }}
+  {{- end }}
+  {{- end }}
+{{- end -}}
+
+
+{{- define "pinglib.workload" -}}
+{{- include "pinglib.merge.templates" (append . "workload") -}}
+{{- end -}}
+

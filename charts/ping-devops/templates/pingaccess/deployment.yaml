@@ -1,6 +1,0 @@
-{{- include "pinglib.deployment" (list . "pingaccess") -}}
-
-
-
-{{- define "pingaccess.deployment" -}}
-{{- end -}}
