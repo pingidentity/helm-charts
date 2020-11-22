@@ -7,7 +7,7 @@ theme:
   name: material
 
   features:
-    - tabs
+    - navigation.tabs
     - instant
 
   palette:
@@ -32,9 +32,10 @@ markdown_extensions:
       permalink: " ¶"
 
 nav:
-  - Welcome: "index.md"
-  - Getting Started: "getting-started.md"
-  - Release Notes: "release-notes.md"
+  - Welcome:
+      - Installation: "index.md"
+      - Getting Started: "getting-started.md"
+      - Release Notes: "release-notes.md"
   - Value Configs:
       - Introduction: "config/index.md"
       - global: "config/global.md"
