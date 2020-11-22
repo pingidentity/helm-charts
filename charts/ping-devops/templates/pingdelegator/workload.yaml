@@ -1,0 +1,6 @@
+{{- include "pinglib.workload" (list . "pingdelegator") -}}
+
+
+
+{{- define "pingdelegator.workload" -}}
+{{- end -}}

@@ -52,6 +52,7 @@ global:
       preserve-secret-case: true
       secret-volume-path: /run/secrets
       pre-populate-only: true
+      serviceAccountName: vault-auth
       # secretPrefix: path/to/secrets
       # secrets:
       # - name: secret-name
@@ -119,33 +120,66 @@ global:
 
 
   ############################################################
-  # Deployment
+  # Workload
   #
-  # strategy - specifies the strategy used to replace old Pods
-  #            by new ones.
-  #   strategy.type can be "Recreate" or "RollingUpdate".
-  #   "RollingUpdate" is the default value.
+  # Two workloads supported:
+  #  - Deployment
+  #  - StatefulSet
   #
   # https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
   ############################################################
-  deployment:
-    strategy:
-      type: RollingUpdate
-  #   type: Recreate
-      rollingUpdate:
-        maxSurge: 1
-        maxUnavailable: 0
+  workload:
+    # Can be Deployment or StatefulSet (see warning above)
+    type: Deployment
+
+    deployment:
+      strategy:
+        # Can be RollingUpdate or Recreate
+        type: RollingUpdate
+        rollingUpdate:
+          maxSurge: 1
+          maxUnavailable: 0
+
+    statefulSet:
+      # Used for canary testing if n>0
+      partition: 0
+
+      ############################################################
+      # Persistent Volumes
+      #
+      # For every volume defined in the volumes list, 3 items will be
+      # created in the StatefulSet
+      #   1. container.volumeMounts - name and mountPath
+      #   2. template.spec.volume - name and persistentVolumeClaim.claimName
+      #   3. spec.volumeClaimTemplates - persistentVolumeClaim
+      #
+      # https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+      ############################################################
+      persistentvolume:
+        enabled: true
+        volumes:
+          out-dir:
+            mountPath: /opt/out
+            persistentVolumeClaim:
+              accessModes:
+              - ReadWriteOnce
+              storageClassName:
+              resources:
+                requests:
+                  storage: 4Gi
+
 
   ############################################################
   # Container Information
   #
-  # Indicates several general container variables to control
-  # how the container is run, scheduled, placed
-  #
   # https://kubernetes.io/docs/concepts/workloads/controllers/
   ############################################################
   container:
+    # replicaCount - Instructs Deployment/StatefulSet now many containers to run
     replicaCount: 1
+
+    # resources - Reqeust  0.5 cpu/0.5 GB
+    #             Limit    4.0 cpu/8.0 GB
     resources:
       requests:
         cpu: 500m
@@ -155,7 +189,7 @@ global:
         memory: 8Gi
     nodeSelector: {}
     tolerations: []
-
+    terminationGracePeriodSeconds: 30
 
   ############################################################
   # Probes
@@ -230,9 +264,10 @@ pingfederate-admin:
   image:
     name: pingfederate
 
-  deployment:
-    strategy:
-      type: Recreate
+  workload:
+    deployment:
+      strategy:
+        type: Recreate
 
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
@@ -345,13 +380,19 @@ pingdirectory:
       limits:
         cpu: 8000m
         memory: 8Gi
+    terminationGracePeriodSeconds: 300
 
-  # partition:
-  #   When set to 0, it will update all pods
-  #   When set to n, it will update all pod ordinals of n+ (i.e. canary)
-  statefulSet:
-    updateStrategy:
-      partition: 0
+
+  workload:
+    type: StatefulSet
+    statefulSet:
+      persistentvolume:
+        volumes:
+          out-dir:
+            persistentVolumeClaim:
+              resources:
+                requests:
+                  storage: 8Gi
 
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
@@ -377,14 +418,6 @@ pingdirectory:
       port: 2443
       targetPort: 2443
       dataService: true
-
-  persistentvolume:
-    enabled: true
-    volumes:
-      - name: out-dir
-        mountPath: /opt/out
-        storage: 8Gi
-        storageClassName:
 
   ingress:
     hosts:

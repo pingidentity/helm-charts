@@ -1,7 +1,7 @@
-{{- include "pinglib.deployment" (list . "pingfederate-engine") -}}
+{{- include "pinglib.workload" (list . "pingfederate-engine") -}}
 
 
-{{- define "pingfederate-engine.deployment" -}}
+{{- define "pingfederate-engine.workload" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
 spec:

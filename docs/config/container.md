@@ -19,6 +19,7 @@ The example found in the `global:` section is:
         memory: 8Gi
     nodeSelector: {}
     tolerations: []
+    terminationGracePeriodSeconds: 30
 ```
 
 Translating to applicable kubernetes manifest sections:
@@ -40,4 +41,5 @@ spec:
             memory: 500Mi
       nodeSelector: {}
       tolerations: []
+      terminationGracePeriodSeconds: 30
 ```
