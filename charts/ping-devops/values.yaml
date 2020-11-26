@@ -36,9 +36,11 @@ global:
     addReleaseNameToHost: subdomain
     defaultDomain: example.com
     defaultTlsSecret:
-    annotations:
-      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-      kubernetes.io/ingress.class: "nginx-public"
+    annotations: {}
+      # nginx example
+      # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+      # kubernetes.io/ingress.class: "nginx-public"
+
   ############################################################
   # Fields used to annotate secret hashicorp vault information
   #
@@ -83,6 +85,8 @@ global:
   ############################################################
   externalImage:
     curl: curlimages/curl:latest
+    # pingtoolkit - based on alpine
+    pingtoolkit: pingidentity/pingtoolkit:latest
 
   ############################################################
   # Services
@@ -453,15 +457,13 @@ pingdelegator:
   image:
     name: pingdelegator
 
-  publicHostname: localhost
+  publicPort: 443
 
   tokenProvider:
-    hostname: localhost
-    port: 443
+    port: 9031
     clientId: dadmin
 
   pingDirectoryServer:
-    hostname: pingdirectory
     port: 443
 
   envs:
