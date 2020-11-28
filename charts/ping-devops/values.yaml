@@ -283,7 +283,6 @@ pingfederate-admin:
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: getting-started/pingfederate
-    SERVER_PROFILE_BRANCH: master
 
   services:
     admin:
@@ -324,7 +323,6 @@ pingfederate-engine:
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: getting-started/pingfederate
-    SERVER_PROFILE_BRANCH: master
     PF_ADMIN_PORT: "9999"
 
   clustering:
@@ -408,7 +406,6 @@ pingdirectory:
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: baseline/pingdirectory
-    SERVER_PROFILE_BRANCH: master
     MAKELDIF_USERS: "20000"
 
   services:
@@ -469,7 +466,6 @@ pingdelegator:
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: baseline/pingdelegator
-    SERVER_PROFILE_BRANCH: master
 
   services:
     https:
@@ -501,7 +497,6 @@ pingdatasync:
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: simple-sync/pingdatasync
-    SERVER_PROFILE_BRANCH: master
 
   services:
     ldaps:
@@ -525,7 +520,6 @@ pingdatagovernance:
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: baseline/pingdatagovernance-8.1.0.0
-    SERVER_PROFILE_BRANCH: master
 
   services:
     https:
@@ -561,7 +555,6 @@ pingaccess:
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: getting-started/pingaccess
-    SERVER_PROFILE_BRANCH: master
 
   services:
     admin:
@@ -613,7 +606,6 @@ pingdataconsole:
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: baseline/pingdataconsole
-    SERVER_PROFILE_BRANCH: master
 
   services:
     https:
@@ -645,6 +637,5 @@ pd-replication-timing:
   envs:
     SERVER_PROFILE_URL: https://www.github.com/pingidentity/pingidentity-server-profiles
     SERVER_PROFILE_PATH: dsreplication-timing
-    SERVER_PROFILE_BRANCH: master
     STARTUP_COMMAND: /opt/out/instance/bin/start-server
     STARTUP_BACKGROUND_OPTS: ""
