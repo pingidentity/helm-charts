@@ -84,7 +84,6 @@ global:
   # such as using curl.
   ############################################################
   externalImage:
-    curl: curlimages/curl:latest
     # pingtoolkit - based on alpine
     pingtoolkit: pingidentity/pingtoolkit:latest
 
