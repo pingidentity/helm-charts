@@ -24,12 +24,6 @@ pingdataconsole:
 pingdatagovernance:
   enabled: true
 
-pingdatasync:
-  enabled: true
-
-pingdelegator:
-  enabled: true
-
 pingdirectory:
   enabled: true
 
@@ -44,9 +38,3 @@ pingfederate-engine:
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: baseline/pingfederate
-
-ldap-sdk-tools:
-  enabled: false
-
-pd-replication-timing:
-  enabled: false
