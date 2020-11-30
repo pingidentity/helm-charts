@@ -18,9 +18,10 @@
 
 ```yaml
 global:
- annotations:
-   nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-   kubernetes.io/ingress.class: "nginx-public"
+  ingress:
+    annotations:
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+      kubernetes.io/ingress.class: "nginx-public"
 ```
 
 ## Release 0.3.1
