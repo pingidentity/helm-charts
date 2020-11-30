@@ -1,3 +1,28 @@
+# Release Notes
+
+## Release 0.3.2
+
+* Replaced init container on pingfederate-engine to use pingtoolkit rather than 3rd party
+  curlimage.  Addtionally added resource constraints and security context to this init
+  container.
+* Remove hardcoded SERVER_PROFILE_BRANCH set to master, relying on git repo default branch
+* Cleanup pingdelegator values.  public hostnames for pingfederate and pingdirectory
+  built based off of ingress hostnames, part of `{release-name}-blobal-env-vars` configmap.
+* Remove default nginx annotations of ingress resources.  If an nginx controller is used
+  for ingress, the following ingress annotations should be included:
+
+    !!! warning
+    By removing the following annotations from the default, use of current config values
+    will result in no ingress being set.  You must add these in via your .yaml file or via
+    seperate --set settings.
+
+```yaml
+global:
+ annotations:
+   nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+   kubernetes.io/ingress.class: "nginx-public"
+```
+
 ## Release 0.3.1
 
 * Add container envFrom for `{release-name}-env-vars` back as optional.
