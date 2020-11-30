@@ -48,5 +48,4 @@ nav:
       - Vault: "config/vault.md"
       - Workload: "config/workload.md"
   - Examples:
-      - Everything: "examples/everything.md"
-      - PingFederate: "examples/pingfederate.md"
+      - Introduction: "examples/index.md"
