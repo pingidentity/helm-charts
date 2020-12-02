@@ -1,12 +1,13 @@
 # Ingress Configuration
 
-[Kuernetes Ingress resources](https://kubernetes.io/docs/concepts/services-networking/ingress/) can be craeted depending on configuration values.
+[Kuernetes Ingress resources](https://kubernetes.io/docs/concepts/services-networking/ingress/) are created depending on configuration values.
 
 ## Global Section
 
 Default yaml defined in the global ingress section, followed by definitions for each parameter.
 
 ```yaml
+global:
   ingress:
     enabled: true
     addReleaseNameToHost: subdomain

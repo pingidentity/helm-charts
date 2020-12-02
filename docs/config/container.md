@@ -1,13 +1,18 @@
 # Container Configuration
 
-Provides values to define kubernetes container information to workload resources, such as
-deployments and statefulsets.
+[Kuernetes Workload Controller](https://kubernetes.io/docs/concepts/workloads/controllers/) resources:
 
-More information on Kuernetes workload resources can be found [here](https://kubernetes.io/docs/concepts/workloads/controllers/).
+* [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
+* [StatefulSets](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
 
-The example found in the `global:` section is:
+are created depending on configuration values.
+
+## Global Section
+
+Default yaml defined in the global ingress section.
 
 ```yaml
+global:
   container:
     replicaCount: 1
     resources:
@@ -20,26 +25,4 @@ The example found in the `global:` section is:
     nodeSelector: {}
     tolerations: []
     terminationGracePeriodSeconds: 30
-```
-
-Translating to applicable kubernetes manifest sections:
-
-```yaml
----
-
-spec:
-  replicas: 1
-  template:
-    spec:
-      containers:
-        resources:
-          limits:
-            cpu: 4
-            memory: 8Gi
-          requests:
-            cpu: 500m
-            memory: 500Mi
-      nodeSelector: {}
-      tolerations: []
-      terminationGracePeriodSeconds: 30
 ```

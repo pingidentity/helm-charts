@@ -1,42 +1,31 @@
 # Workload Configuration
 
-Provides values to define kubernetes depoyment information to Deployments or StatefulSets.
-
-More information on Kuernetes deployment resources:
+Kuernetes Workload resources:
 
 * [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
 * [StatefulSets](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
 
-The example found in the `global:` section is:
+are created depending on configuration values.
+
+## Global Section
+
+Default yaml defined in the product workload section.
 
 ```yaml
+global:
   workload:
-    # Can be Deployment or StatefulSet (see warning above)
     type: Deployment
 
     deployment:
       strategy:
-        # Can be RollingUpdate or Recreate
         type: RollingUpdate
         rollingUpdate:
           maxSurge: 1
           maxUnavailable: 0
 
     statefulSet:
-      # Used for canary testing if n>0
       partition: 0
 
-      ############################################################
-      # Persistent Volumes
-      #
-      # For every volume defined in the volumes list, 3 items will be
-      # created in the StatefulSet
-      #   1. container.volumeMounts - name and mountPath
-      #   2. template.spec.volume - name and persistentVolumeClaim.claimName
-      #   3. spec.volumeClaimTemplates - persistentVolumeClaim
-      #
-      # https://kubernetes.io/docs/concepts/storage/persistent-volumes/
-      ############################################################
       persistentvolume:
         enabled: true
         volumes:
@@ -50,3 +39,21 @@ The example found in the `global:` section is:
                 requests:
                   storage: 4Gi
 ```
+
+| Workload Parameters               | Description                                                 |
+| --------------------------------- | ----------------------------------------------------------- |
+| type                              | One of Deployment or StatefulSet                            |
+| deployment.strategy.type          | One of RollingUpdate or ReCreate                            |
+| deployment.strategy.rollingUpdate | If type=RollingUpdate                                       |
+| statefulSet.partition             | Used for canary testing if n>0                              |
+| statefulSet.persistentVolume      | Provides details around creation of PVC/Volumes (see below) |
+
+!!! note "Persistent Volumes"
+    For every volume defined in the volumes list, 3 items will be
+    created in the StatefulSet:
+
+    * container.volumeMounts - name and mountPath
+    * template.spec.volume - name and persistentVolumeClaim.claimName
+    * spec.volumeClaimTemplates - persistentVolumeClaim
+
+    More Info - <https://kubernetes.io/docs/concepts/storage/persistent-volumes/>

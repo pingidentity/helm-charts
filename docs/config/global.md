@@ -8,8 +8,8 @@ namespace.
 
 Provides global ability to add the Helm `.Release.Name` to kubernetes resources.
 
-| Value         | Description             | Example: (Release.Name=acme, resource=pingdirectory)
-|---------------|-----------------------------------------|---
-| prepend       | Prepends the Release.Name **DEFAULT**   | acme-pingdirectory
-| append        | Appends the Release.Name                | pingdirectory-acme
-| none          | No use of Release.Name                  | pingdirectory
+| Value   | Description                           | Example: (Release.Name=acme, resource=pingdirectory) |
+| ------- | ------------------------------------- | ---------------------------------------------------- |
+| prepend | Prepends the Release.Name **DEFAULT** | acme-pingdirectory                                   |
+| append  | Appends the Release.Name              | pingdirectory-acme                                   |
+| none    | No use of Release.Name                | pingdirectory                                        |
