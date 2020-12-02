@@ -194,12 +194,27 @@ global:
     tolerations: []
     terminationGracePeriodSeconds: 30
 
-    # Additional envFrom configmap/secret refences can be added
+    # Additional envFrom configmap/secret references can be added
     # envFrom:
     # - configMapRep:
     #     name: my-example-configmap
     # - secretRef:
     #     name: my-example-secrets
+
+    # securityContext
+    #
+    # Note: the majority of images will have issues when running with a
+    #       security context set by k8s, due to expecations of file system
+    #       permissions and ports.  Use with caution
+    # Currently unable to use - readOnlyRootFilesystem: true
+    securityContext: {}
+      # allowPrivilegeEscalation: false
+      # capabilities:
+      #   drop:
+      #   - ALL
+      # runAsGroup: 1000
+      # runAsNonRoot: true
+      # runAsUser: 100
 
   ############################################################
   # Probes
