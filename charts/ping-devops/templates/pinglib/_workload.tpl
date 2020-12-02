@@ -130,7 +130,12 @@ spec:
         {{- end }}
 
         {{/*---------------- Security Context -------------*/}}
-        securityContext: {{ toYaml $v.container.securityContext | nindent 10 }}
+        {{/* Futures: Support for container securityContexts */}}
+        {{/*securityContext: {{ toYaml $v.container.securityContext | nindent 10 }}*/}}
+
+
+      {{/*---------------- Security Context -------------*/}}
+      securityContext: {{ toYaml $v.workload.securityContext | nindent 8 }}
 
       {{/*--------------------- Volumes ------------------*/}}
       {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
@@ -159,3 +164,27 @@ spec:
 {{- include "pinglib.merge.templates" (append . "workload") -}}
 {{- end -}}
 
+{{- define "pinglib.workload.init.waitfor" -}}
+{{- $v := index . 0 -}}
+{{- $server := index . 1 -}}
+- name: wait-for-admin-init
+  imagePullPolicy: {{ $v.image.pullPolicy }}
+  image: {{ $v.externalImage.pingtoolkit }}
+  command: ['sh', '-c', 'echo "Waiting for {{ $server }}..." && wait-for {{ $server }} -- echo "{{ $server }} running"']
+  resources:
+    limits:
+      cpu: 500m
+      memory: 128Mi
+    requests:
+      cpu: 250m
+      memory: 64Mi
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    readOnlyRootFilesystem: true
+    runAsGroup: 1000
+    runAsNonRoot: true
+    runAsUser: 100
+{{- end -}}
