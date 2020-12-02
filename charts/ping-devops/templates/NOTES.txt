@@ -1,22 +1,16 @@
 {{ include "pinglib.notes.header" . }}
 #
-#         Product             Enabled
-#  ------------------------ ------------
-{{- with .Values }}
-#  pingaccess               {{ .pingaccess.enabled }}
-#  pingdataconsole          {{ .pingdataconsole.enabled }}
-#  pingdatagovernance       {{ .pingdatagovernance.enabled }}
-#  pingdatasync             {{ .pingdatasync.enabled }}
-#  pingdelegator            {{ .pingdelegator.enabled }}
-#  pingdirectory            {{ .pingdirectory.enabled }}
-#  pingfederate-admin       {{ (index . "pingfederate-admin").enabled }}
-#  pingfederate-engine      {{ (index . "pingfederate-engine").enabled }}
+#         Product
+#  ------------------------
+{{- $products := list "pingaccess" "pingdataconsole" "pingdatagovernance" "pingdatasync" "pingdelegator" "pingdirectory" "pingfederate-admin" "pingfederate-engine" "---" "ldap-sdk-tools" "pd-replication-timing" }}
+{{- range $prodName := $products }}
+    {{- if eq $prodName "---" }}
 #
-#  ldap-sdk-tools           {{ (index . "ldap-sdk-tools").enabled }}
-#  pd-replication-timing    {{ (index . "pd-replication-timing").enabled }}
-{{- end -}}
-{{- range .Chart.Dependencies }}
-#  {{ printf "%-24.18s %-12.12t" .Name (index $.Values .Name).chartEnabled  }}
+    {{- else if (index $.Values $prodName).enabled }}
+#  √ {{ $prodName }}
+    {{- else }}
+#    {{ $prodName }}
+    {{- end }}
 {{- end }}
 #
 {{ include "pinglib.notes.footer" . }}

@@ -129,6 +129,9 @@ spec:
         {{- end }}
         {{- end }}
 
+        {{/*---------------- Security Context -------------*/}}
+        securityContext: {{ toYaml $v.container.securityContext | nindent 10 }}
+
       {{/*--------------------- Volumes ------------------*/}}
       {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
       volumes:

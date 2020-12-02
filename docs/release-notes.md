@@ -1,20 +1,52 @@
 # Release Notes
 
+## Release 0.3.3
+
+* Adding the ability for a deployer to add a securityContext to the containers.
+  Currently, there are warning messages in the images when an outside-in pattern is
+  used (i.e. securityContext is set). Also, many of the default ports require privileged
+  access, so care should be taken along with testing to ensure the containers start up
+  fine. Additional, one should not change the security context when doing and upgrade
+  or using a PCV from a previous deployment.
+
+An example securityContext that can be used might look like:
+
+```yaml
+global:
+  container:
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      runAsGroup: 1000
+      runAsNonRoot: true
+      runAsUser: 100
+```
+
+By default, the values.yaml in the chart will set the securityContext to empty:
+
+```yaml
+global:
+  container:
+    securityContext: {}
+```
+
 ## Release 0.3.2
 
 * Replaced init container on pingfederate-engine to use pingtoolkit rather than 3rd party
-  curlimage.  Addtionally added resource constraints and security context to this init
+  curlimage.  Additionally added resource constraints and security context to this init
   container.
 * Remove hardcoded SERVER_PROFILE_BRANCH set to master, relying on git repo default branch
 * Cleanup pingdelegator values.  public hostnames for pingfederate and pingdirectory
-  built based off of ingress hostnames, part of `{release-name}-blobal-env-vars` configmap.
+  built based off of ingress hostnames, part of `{release-name}-global-env-vars` configmap.
 * Remove default nginx annotations of ingress resources.  If an nginx controller is used
   for ingress, the following ingress annotations should be included:
 
     !!! warning
     By removing the following annotations from the default, use of current config values
     will result in no ingress being set.  You must add these in via your .yaml file or via
-    seperate --set settings.
+    separate --set settings.
 
 ```yaml
 global:
@@ -101,5 +133,5 @@ global:
 
 * Renamed template files in pinglib from .yaml to .tpl
 * Added `terminationGracePeriodSeconds` to container to support setting in values
-* Added `serviceAccountName` to vault.hashicorp to specify to the continer what service
+* Added `serviceAccountName` to vault.hashicorp to specify to the container what service
   account can be used to authenticate to the Hashicorp Vault Injector
