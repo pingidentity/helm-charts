@@ -1,5 +1,13 @@
 # Release Notes
 
+## Release 0.3.4
+
+* Adding init container to PingFederate Admin to wait-for PingDirectory's LDAPs
+  port if the pingdirectory.enabled=true.  This fixes an issue that keeps
+  PingFederate Admin from starting when it's dependent on PingDirectory.  In
+  the case that PingFederate isn't dependent on PingDirectory and it is still
+  enabled, it will simply delay the start time of PingFederate admin.
+
 ## Release 0.3.3
 
 * Adding the ability for a deployer to add a securityContext to the containers.

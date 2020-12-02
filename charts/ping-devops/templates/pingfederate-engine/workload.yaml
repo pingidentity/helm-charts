@@ -4,34 +4,14 @@
 {{- define "pingfederate-engine.workload" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
-{{- $adminServer := printf "%s:%s" (include "pinglib.fullname" . | replace "-engine" "-admin" ) (default 9999 $v.envs.PF_ADMIN_PORT) -}}
+{{- $adminServer := printf "%s:%s" (include "pinglib.fullname" . | replace "-engine" "-admin" ) (default 9999 $v.envs.PF_ADMIN_PORT | quote) -}}
 spec:
   template:
     metadata:
       labels:
         clusterIdentifier: {{ include "pinglib.fullimagename" . }}
     spec:
-      initContainers:
-      - name: wait-for-admin-init
-        imagePullPolicy: {{ $v.image.pullPolicy }}
-        image: {{ $v.externalImage.pingtoolkit }}
-        command: ['sh', '-c', 'echo "Waiting for {{ $adminServer }}..." && wait-for {{ $adminServer }} -- echo "{{ $adminServer }} running"']
-        resources:
-          limits:
-            cpu: 500m
-            memory: 128Mi
-          requests:
-            cpu: 250m
-            memory: 64Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
-          readOnlyRootFilesystem: true
-          runAsGroup: 1000
-          runAsNonRoot: true
-          runAsUser: 100
+      initContainers: {{ include "pinglib.workload.init.waitfor" (list $v $adminServer) | nindent 6 }}
 {{- end -}}
 
 
