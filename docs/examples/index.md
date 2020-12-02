@@ -1,5 +1,8 @@
 # Helm Chart Example Configs
 
+The folowing contains example configs and examples of how to run and configure ping products
+using the Ping Devops Helm Chart. Please review the [Getting Started Page](../getting-started) before trying them.
+
 | Config       | Description                                    | .yaml                                  |
 | ------------ | ---------------------------------------------- | -------------------------------------- |
 | Everything   | Example with most products integrated together | [everything.yaml](everything.yaml)     |

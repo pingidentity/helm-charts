@@ -1,12 +1,15 @@
 # Service Configuration
 
-Provides values to define kubernetes service detail.
+[Kuernetes Service resources](https://kubernetes.io/docs/concepts/services-networking/service/)
+are created depending on configuration values.
 
-More information on Kuernetes services can be found [here](https://kubernetes.io/docs/concepts/services-networking/service/).
+## Product Section
 
-The example found in the `product.pingfederate-admin:` section is:
+Default yaml defined in the product services section.
+The example found in the `pingfederate-admin` section is:
 
 ```yaml
+pingfederate-admin:
   services:
     admin:
       port: 9999
@@ -23,44 +26,12 @@ The example found in the `product.pingfederate-admin:` section is:
     clusterExternalDNSHostname:
 ```
 
-This will create a regular data service (i.e. 9999) and cluster, aka "headless" service (i.e. 7600, 7700), depending on the settings of the `dataService` and `clusterService` booleans.
-
-Translating to applicable kubernetes manifest sections:
-
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: acme-pingfederate-admin
-spec:
-  ports:
-  - name: admin
-    port: 9999
-    protocol: TCP
-    targetPort: 9999
-  selector:
-    app.kubernetes.io/instance: pf
-    app.kubernetes.io/name: pingfederate-admin
----
-apiVersion: v1
-kind: Service
-metadata:
-  annotations:
-    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
-  name: acme-pingfederate-admin-cluster
-spec:
-  clusterIP: None
-  ports:
-  - name: clusterbind
-    port: 7600
-    protocol: TCP
-    targetPort: 7600
-  - name: clusterfail
-    port: 7700
-    protocol: TCP
-    targetPort: 7700
-  publishNotReadyAddresses: true
-  selector:
-    clusterIdentifier: acme-pingfederate-admin
-  type: ClusterIP
-```
+| Service Parameters                  | Description                                                   |
+| ----------------------------------- | ------------------------------------------------------------- |
+| services                            | Array of services                                             |
+| services[].{name}                   | Service Name. (i.e. https, ldap, admin, api)                  |
+| services[].{name}.port              | External port of service                                      |
+| services[].{name}.targetPort        | Port on target container                                      |
+| services[].{name}.dataService       | Adds to a ClusterIP service with single DNS/IP                |
+| services[].{name}.clusterService    | Adds to a headless service with DNS request returning all IPs |
+| services.clusterExternalDNSHostname |                                                               |

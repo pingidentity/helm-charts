@@ -1,10 +1,13 @@
-# Image Configuration
+# Vault Configuration
 
 Provides values to define kubernetes image information to deployments and statefulsets.
 
-The example found in the `global:` section is:
+## Global Section
+
+Default yaml defined in the product vault section.
 
 ```yaml
+image:
   image:
     repository: pingidentity
     name:                                 # Should be completed in product section
@@ -12,9 +15,22 @@ The example found in the `global:` section is:
     pullPolicy: Always
 ```
 
-Translating to kubernetes manifest information:
+## Product Section
+
+An example product section specifies the name.
 
 ```yaml
-    image: pingidentity/pingaccess:2010   # Example if image.name=pingaccess
-    imagePullPolicy: Always
+pingaccess:
+  image:
+    name: pingaccess
 ```
+
+!!! note "To have images use a different repository and tag"
+    ```yaml
+    global:
+      image:
+        tag: edge
+        repository: my.company.docker-repo.com
+    ```
+
+    This would result in pulling a pingaccess image: `my.company.docker-repo.com/pingaccess:edge`

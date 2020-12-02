@@ -1,10 +1,11 @@
 # Probes Configuration
 
-Provides values to define kubernetes probe detail to deployments and statefulsets.
+[Kuernetes Probes resources](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+to be added to workloads (i.e. Deployments/StatefulSets).
 
-More information on Kuernetes probes can be found [here](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/).
+## Global Section
 
-The example found in the `global:` section is:
+Default yaml defined in the global probes section.
 
 ```yaml
 global:
@@ -25,26 +26,5 @@ global:
       failureThreshold: 4
 ```
 
-Translating to applicable kubernetes manifest sections:
-
-```yaml
-        readinessProbe:
-          exec:
-            command:
-            - /opt/liveness.sh
-          failureThreshold: 4
-          initialDelaySeconds: 30
-          periodSeconds: 30
-          successThreshold: 1
-          timeoutSeconds: 1
-
-        livenessProbe:
-          exec:
-            command:
-            - /opt/liveness.sh
-          failureThreshold: 4
-          initialDelaySeconds: 30
-          periodSeconds: 30
-          successThreshold: 1
-          timeoutSeconds: 1
-```
+The definition of parameters can be found at
+[probe definitions](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes)
