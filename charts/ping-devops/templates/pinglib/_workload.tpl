@@ -130,7 +130,12 @@ spec:
         {{- end }}
 
         {{/*---------------- Security Context -------------*/}}
-        securityContext: {{ toYaml $v.container.securityContext | nindent 10 }}
+        {{/* Futures: Support for container securityContexts */}}
+        {{/*securityContext: {{ toYaml $v.container.securityContext | nindent 10 }}*/}}
+
+
+      {{/*---------------- Security Context -------------*/}}
+      securityContext: {{ toYaml $v.workload.securityContext | nindent 8 }}
 
       {{/*--------------------- Volumes ------------------*/}}
       {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}

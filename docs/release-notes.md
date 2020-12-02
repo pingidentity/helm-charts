@@ -6,7 +6,12 @@
   port if the pingdirectory.enabled=true.  This fixes an issue that keeps
   PingFederate Admin from starting when it's dependent on PingDirectory.  In
   the case that PingFederate isn't dependent on PingDirectory and it is still
-  enabled, it will simply delay the start time of PingFederate admin.
+  enabled, it will simply delay the start time of PingFederate admin.  A future
+  version will allow for specifying a list of services to wait-for so this can
+  be turned off/on by deployer.
+* Moved the securityContext settings added to release 0.3.3 from the container
+  to the workload, as that is the proper place to use them.  Required for use of
+  `fsGroup` setting.
 
 ## Release 0.3.3
 
