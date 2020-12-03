@@ -1,16 +1,20 @@
 {{ include "pinglib.notes.header" . }}
+{{- $format := "%-1.1s %-21.21s %-11.11s %5.5s" }}
 #
-#         Product
-#  ------------------------
+#  {{ printf $format " " "       Product       " " Workload  " " Ing "}}
+#  {{ printf $format " " "---------------------" "-----------" "-----"}}
 {{- $products := list "pingaccess" "pingdataconsole" "pingdatagovernance" "pingdatasync" "pingdelegator" "pingdirectory" "pingfederate-admin" "pingfederate-engine" "---" "ldap-sdk-tools" "pd-replication-timing" }}
 {{- range $prodName := $products }}
-    {{- if eq $prodName "---" }}
+{{- if eq $prodName "---" }}
 #
-    {{- else if (index $.Values $prodName).enabled }}
-#  √ {{ $prodName }}
+{{- end }}
+{{- with (index $.Values $prodName)}}
+    {{- if .enabled }}
+#  {{ printf $format "√" $prodName (.workload.type | lower) (toString .ingress.enabled) }}
     {{- else }}
-#    {{ $prodName }}
+#  {{ printf $format "" $prodName "" "" }}
     {{- end }}
+{{- end }}
 {{- end }}
 #
 {{ include "pinglib.notes.footer" . }}

@@ -1,5 +1,27 @@
 # Release Notes
 
+## Release 0.3.5
+
+* Allowing config values to determine use of init containers to wait-for other chart products.
+  For each product, you can now provide a `waitFor` structure providing the name
+  and service that should be waited on before the running container con continue.  This
+  will basically inject an initContainer using the PingToolkit wait-for utility until it
+  can `nc host:port` before continuing.
+
+    !!! example "PingFederate Admin waiting on pingdirectory ldaps service to be available"
+        ```yaml
+        pingfederate-admin:
+          container:
+            waitFor:
+              pingdirectory:
+                service: ldaps
+              pingdatagovernance:
+                service: https
+        ```
+
+* By default, the `pingfederate-engine` will waitFor `pingfederate-admin` before it
+  starts.
+
 ## Release 0.3.4
 
 * Adding init container to PingFederate Admin to wait-for PingDirectory's LDAPs
@@ -57,17 +79,17 @@ global:
   for ingress, the following ingress annotations should be included:
 
     !!! warning
-    By removing the following annotations from the default, use of current config values
-    will result in no ingress being set.  You must add these in via your .yaml file or via
-    separate --set settings.
+        By removing the following annotations from the default, use of current config values
+        will result in no ingress being set.  You must add these in via your .yaml file or via
+        separate --set settings.
 
-```yaml
-global:
-  ingress:
-    annotations:
-      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-      kubernetes.io/ingress.class: "nginx-public"
-```
+        ```yaml
+        global:
+          ingress:
+            annotations:
+              nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+              kubernetes.io/ingress.class: "nginx-public"
+        ```
 
 ## Release 0.3.1
 
@@ -101,47 +123,47 @@ global:
     * Allows for any product to be run as a deployment or statefulSet
 
     !!! warning
-    Using `workload.type=StatefulSet` will create `pvc` resources and allow for
-    persistence on restarts of containers.  This is helpful during development.  Be aware
-    that the `pvc` resources will need to be deleted to startup a fresh copy of the
-    product images.
+        Using `workload.type=StatefulSet` will create `pvc` resources and allow for
+        persistence on restarts of containers.  This is helpful during development.  Be aware
+        that the `pvc` resources will need to be deleted to startup a fresh copy of the
+        product images.
 
-```yaml
-global:
-  workload:
-    type: Deployment        # Can be Deployment or StatefulSet (see warning above)
+        ```yaml
+        global:
+          workload:
+            type: Deployment        # Can be Deployment or StatefulSet (see warning above)
 
-    deployment:
-      strategy:
-        type: RollingUpdate # Can be RollingUpdate or Recreate
-        rollingUpdate:
-          maxSurge: 1
-          maxUnavailable: 0
+            deployment:
+              strategy:
+                type: RollingUpdate # Can be RollingUpdate or Recreate
+                rollingUpdate:
+                  maxSurge: 1
+                  maxUnavailable: 0
 
-    statefulSet:
-      partition: 0          # Used for canary testing if n>0
+            statefulSet:
+              partition: 0          # Used for canary testing if n>0
 
-      persistentvolume:
-        enabled: true
-        ############################################################
-        # For every volume defined in the volumes list, 3 items will be
-        # created in the StatefulSet
-        #   1. container.volumeMounts - name and mountPath
-        #   2. template.spec.volume - name and persistentVolumeClaim.claimName
-        #   3. spec.volumeClaimTemplates - persistentVolumeClaim
-        #
-        # https://kubernetes.io/docs/concepts/storage/persistent-volumes/
-        ############################################################
-        volumes:
-          out-dir:
-            mountPath: /opt/out
-            persistentVolumeClaim:
-              accessModes:
-              - ReadWriteOnce
-              storageClassName:
-              resources:
-                requests:
-                  storage: 4Gi
+              persistentvolume:
+                enabled: true
+                ############################################################
+                # For every volume defined in the volumes list, 3 items will be
+                # created in the StatefulSet
+                #   1. container.volumeMounts - name and mountPath
+                #   2. template.spec.volume - name and persistentVolumeClaim.claimName
+                #   3. spec.volumeClaimTemplates - persistentVolumeClaim
+                #
+                # https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+                ############################################################
+                volumes:
+                  out-dir:
+                    mountPath: /opt/out
+                    persistentVolumeClaim:
+                      accessModes:
+                      - ReadWriteOnce
+                      storageClassName:
+                      resources:
+                        requests:
+                          storage: 4Gi
 ```
 
 * Renamed template files in pinglib from .yaml to .tpl
