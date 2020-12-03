@@ -293,6 +293,14 @@ pingfederate-admin:
       strategy:
         type: Recreate
 
+  # Example: If PingFederate Admin relies on pingdirectory for AuthN
+  #          Creates init container wait-for on pingdirectory ldaps service
+  #
+  # container:
+  #   waitFor:
+  #     pingdirectory:
+  #       service: ldaps
+
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: getting-started/pingfederate
@@ -332,6 +340,11 @@ pingfederate-engine:
   name: pingfederate-engine
   image:
     name: pingfederate
+
+  container:
+    waitFor:
+      pingfederate-admin:
+        service: admin
 
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git

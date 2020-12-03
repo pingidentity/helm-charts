@@ -2,16 +2,11 @@
 
 
 {{- define "pingfederate-engine.workload" -}}
-{{- $top := index . 0 -}}
-{{- $v := index . 1 -}}
-{{- $adminServer := printf "%s:%s" (include "pinglib.fullname" . | replace "-engine" "-admin" ) (default 9999 $v.envs.PF_ADMIN_PORT | quote) -}}
 spec:
   template:
     metadata:
       labels:
         clusterIdentifier: {{ include "pinglib.fullimagename" . }}
-    spec:
-      initContainers: {{ include "pinglib.workload.init.waitfor" (list $v $adminServer) | nindent 6 }}
 {{- end -}}
 
 

@@ -46,6 +46,7 @@ spec:
       {{- end }}
       nodeSelector: {{ toYaml $v.container.nodeSelector | nindent 8 }}
       tolerations: {{ toYaml $v.container.tolerations | nindent 8 }}
+      initContainers: {{ include "pinglib.workload.init.waitfor" . | nindent 6 }}
       containers:
       - name: {{ $v.name }}
         env: []
@@ -165,9 +166,15 @@ spec:
 {{- end -}}
 
 {{- define "pinglib.workload.init.waitfor" -}}
-{{- $v := index . 0 -}}
-{{- $server := index . 1 -}}
-- name: wait-for-admin-init
+{{- $top := index . 0 -}}
+{{- $v := index . 1 -}}
+{{- range $prod, $val := $v.container.waitFor }}
+{{- if (index $top.Values $prod).enabled -}}
+{{- $host := include "pinglib.addreleasename" (list $top $v $prod) -}}
+{{- $waitForServices := (index $top.Values $prod).services -}}
+{{- $port := (index $waitForServices $val.service).port | quote -}}
+{{- $server := printf "%s:%s" $host $port -}}
+- name: wait-for-{{ $prod }}-init
   imagePullPolicy: {{ $v.image.pullPolicy }}
   image: {{ $v.externalImage.pingtoolkit }}
   command: ['sh', '-c', 'echo "Waiting for {{ $server }}..." && wait-for {{ $server }} -- echo "{{ $server }} running"']
@@ -187,4 +194,6 @@ spec:
     runAsGroup: 1000
     runAsNonRoot: true
     runAsUser: 100
+{{- end -}}
+{{- end -}}
 {{- end -}}

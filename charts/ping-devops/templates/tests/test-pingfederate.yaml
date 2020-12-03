@@ -1,0 +1,26 @@
+{{- include "pinglib.test.pod" (list . "pingfederate-engine") -}}
+
+
+{{- define "pingfederate-engine.test.pod" -}}
+{{- $top := index . 0 -}}
+{{- $v := index . 1 -}}
+spec:
+  containers:
+    - name: {{ include "pinglib.fullname" . }}-test
+      image: {{ $v.externalImage.pingtoolkit }}
+      command: ['sh', '-c', 'wait-for {{ include "pinglib.fullname" . | replace "-engine" "-admin" }}:{{ $v.envs.PF_ADMIN_PORT }}']
+
+      {{/*--------------------- Environment -----------------*/}}
+      envFrom:
+      - configMapRef:
+          name: {{ include "pinglib.fullname" . }}-env-vars
+      - configMapRef:
+          name: {{ $top.Release.Name }}-env-vars
+          optional: true
+      - secretRef:
+          name: {{ $v.license.secret.devOps }}
+          optional: true
+      - secretRef:
+          name: {{ include "pinglib.fullname" . }}-git-secret
+          optional: true
+{{- end -}}

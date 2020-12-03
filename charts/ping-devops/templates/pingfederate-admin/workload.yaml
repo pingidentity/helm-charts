@@ -3,16 +3,9 @@
 
 
 {{- define "pingfederate-admin.workload" -}}
-{{- $top := index . 0 -}}
-{{- $v := index . 1 -}}
-{{- if $top.Values.pingdirectory.enabled -}}
-{{- $pingDirectoryServer := printf "%s:%s" (include "pinglib.fullname" . | replace "pingfederate-admin" "pingdirectory" ) (default 636 $top.Values.pingdirectory.services.ldaps.port | quote) -}}
 spec:
   template:
     metadata:
       labels:
         clusterIdentifier: {{ include "pinglib.fullimagename" . }}
-    spec:
-      initContainers: {{ include "pinglib.workload.init.waitfor" (list $v $pingDirectoryServer) | nindent 6 }}
-{{- end -}}
 {{- end -}}
