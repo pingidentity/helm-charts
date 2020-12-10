@@ -15,7 +15,7 @@ theme:
     - instant
 
   palette:
-    scheme: preference
+    #scheme: preference
     primary: indigo
     accent: blue
 
