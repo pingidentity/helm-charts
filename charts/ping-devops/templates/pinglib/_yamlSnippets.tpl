@@ -52,26 +52,6 @@ app.kubernetes.io/instance: {{ $top.Release.Name }}
 {{- end -}}
 
 {{/**********************************************************************
-   ** service/ports snippets
-   **
-   **   ports:
-   **     - port: 9999
-   **       targetPort: 9999
-   **       name: pf-admin
-   **       protocol: TCP
-   **********************************************************************/}}
-{{- define "pinglib.service.ports" -}}
-{{- range .ports }}
-{{ if .clusterService }}
-- port: {{ .port }}
-  targetPort: {{ .targetPort }}
-  name: {{ .name }}
-  protocol: {{ default "TCP" .protocol }}
-{{ end }}
-{{- end -}}
-{{- end -}}
-
-{{/**********************************************************************
    ** metadata.vault.headers snippet
    **********************************************************************/}}
 {{- define "pinglib.annotations.vault" -}}

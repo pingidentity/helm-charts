@@ -108,16 +108,17 @@ global:
   ############################################################
   services: {}
   #  admin:
-  #    port: 9999
-  #    targetPort: 9999
+  #    containerPort: 9999
+  #    servicePort: 9999
+  #    ingressPort: 9999
   #    dataService: true
   #  clusterbind:
-  #    port: 7600
-  #    targetPort: 7600
+  #    containerPort: 7600
+  #    servicePort: 7600
   #    clusterService: true
   #  clusterfail:
-  #    port: 7700
-  #    targetPort: 7700
+  #    containerPort: 7700
+  #    servicePort: 7700
   #    clusterService: true
   #  clusterExternalDNSHostname:
 
@@ -307,16 +308,17 @@ pingfederate-admin:
 
   services:
     admin:
-      port: 9999
-      targetPort: 9999
+      servicePort: 9999
+      containerPort: 9999
+      ingressPort: 443
       dataService: true
     clusterbind:
-      port: 7600
-      targetPort: 7600
+      servicePort: 7600
+      containerPort: 7600
       clusterService: true
     clusterfail:
-      port: 7700
-      targetPort: 7700
+      servicePort: 7700
+      containerPort: 7700
       clusterService: true
     clusterExternalDNSHostname:
 
@@ -326,7 +328,7 @@ pingfederate-admin:
         paths:
         - path: /
           backend:
-            servicePort: 9999
+            serviceName: admin
     tls:
       - secretName: _defaultTlsSecret_
         hosts:
@@ -372,16 +374,17 @@ pingfederate-engine:
 
   services:
     engine:
-      port: 9031
-      targetPort: 9031
+      servicePort: 9031
+      containerPort: 9031
+      ingressPort: 443
       dataService: true
     clusterbind:
-      port: 7600
-      targetPort: 7600
+      servicePort: 7600
+      containerPort: 7600
       clusterService: true
     clusterfail:
-      port: 7700
-      targetPort: 7700
+      servicePort: 7700
+      containerPort: 7700
       clusterService: true
     clusterExternalDNSHostname:
 
@@ -391,7 +394,7 @@ pingfederate-engine:
         paths:
         - path: /
           backend:
-            servicePort: 9031
+            serviceName: engine
     tls:
       - secretName: _defaultTlsSecret_
         hosts:
@@ -436,21 +439,18 @@ pingdirectory:
 
   services:
     ldap:
-      port: 389
-      targetPort: 389
+      servicePort: 389
+      containerPort: 389
       dataService: true
     ldaps:
-      port: 636
-      targetPort: 636
+      servicePort: 636
+      containerPort: 636
       dataService: true
       clusterService: true
     https:
-      port: 443
-      targetPort: 443
-      dataService: true
-    apis:
-      port: 2443
-      targetPort: 2443
+      servicePort: 443
+      containerPort: 443
+      ingressPort: 443
       dataService: true
 
   ingress:
@@ -459,7 +459,7 @@ pingdirectory:
         paths:
         - path: /
           backend:
-            servicePort: 443
+            serviceName: https
     tls:
       - secretName: _defaultTlsSecret_
         hosts:
@@ -495,8 +495,9 @@ pingdelegator:
 
   services:
     https:
-      port: 6443
-      targetPort: 6443
+      servicePort: 6443
+      containerPort: 6443
+      ingressPort: 443
       dataService: true
 
   ingress:
@@ -505,7 +506,7 @@ pingdelegator:
         paths:
         - path: /
           backend:
-            servicePort: 6443
+            serviceName: https
     tls:
       - secretName: _defaultTlsSecret_
         hosts:
@@ -526,12 +527,12 @@ pingdatasync:
 
   services:
     ldaps:
-      port: 636
-      targetPort: 636
+      servicePort: 636
+      containerPort: 636
       clusterService: true
     https:
-      port: 443
-      targetPort: 443
+      servicePort: 443
+      containerPort: 443
       dataService: true
 
 #############################################################
@@ -549,12 +550,13 @@ pingdatagovernance:
 
   services:
     https:
-      port: 443
-      targetPort: 443
+      servicePort: 443
+      containerPort: 443
+      ingressPort: 443
       dataService: true
     ldaps:
-      port: 636
-      targetPort: 636
+      servicePort: 636
+      containerPort: 636
       clusterService: true
 
   ingress:
@@ -563,7 +565,7 @@ pingdatagovernance:
         paths:
         - path: /
           backend:
-            servicePort: 443
+            serviceName: https
     tls:
       - secretName: _defaultTlsSecret_
         hosts:
@@ -584,16 +586,18 @@ pingaccess:
 
   services:
     admin:
-      port: 9000
-      targetPort: 9000
+      servicePort: 9000
+      containerPort: 9000
+      ingressPort: 443
       dataService: true
-    runtime:
-      port: 3000
-      targetPort: 3000
+    engine:
+      servicePort: 3000
+      containerPort: 3000
+      ingressPort: 443
       dataService: true
     acme:
-      port: 8080
-      targetPort: 8080
+      servicePort: 8080
+      containerPort: 8080
       dataService: true
 
   ingress:
@@ -602,12 +606,12 @@ pingaccess:
         paths:
         - path: /
           backend:
-            servicePort: 3000
+            serviceName: engine
       - host: pingaccess-admin._defaultDomain_
         paths:
         - path: /
           backend:
-            servicePort: 9000
+            serviceName: admin
     tls:
       - secretName: _defaultTlsSecret_
         hosts:
@@ -635,8 +639,9 @@ pingdataconsole:
 
   services:
     https:
-      port: 8443
-      targetPort: 8443
+      containerPort: 8443
+      servicePort: 8443
+      ingressPort: 443
       dataService: true
 
   ingress:
@@ -645,7 +650,7 @@ pingdataconsole:
         paths:
         - path: /
           backend:
-            servicePort: 8443
+            serviceName: https
     tls:
       - secretName: _defaultTlsSecret_
         hosts:

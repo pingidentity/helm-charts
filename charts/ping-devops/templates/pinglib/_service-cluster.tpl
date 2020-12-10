@@ -17,8 +17,8 @@ spec:
   {{- if ne $serviceName "clusterExternalDNSHostname" }}
   {{- if $val.clusterService }}
     - name: {{ $serviceName }}
-      port: {{ $val.port }}
-      targetPort: {{ default $val.port $val.targetPort }}
+      port: {{ $val.servicePort }}
+      targetPort: {{ default $val.servicePort $val.containerPort }}
       protocol: {{ default "TCP" $val.protocol }}
   {{- end }}
   {{- end }}
