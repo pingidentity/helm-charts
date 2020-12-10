@@ -171,6 +171,20 @@ global:
                 requests:
                   storage: 4Gi
 
+    # securityContext
+    #
+    # Note: the majority of images will have issues when running with a
+    #       security context set by k8s, due to expecations of file system
+    #       permissions and ports.  Use with caution
+    # Currently unable to use - readOnlyRootFilesystem: true
+    securityContext: {}
+      # allowPrivilegeEscalation: false
+      # capabilities:
+      #   drop:
+      #   - ALL
+      # runAsGroup: 1000
+      # runAsNonRoot: true
+      # runAsUser: 100
 
   ############################################################
   # Container Information
@@ -194,7 +208,7 @@ global:
     tolerations: []
     terminationGracePeriodSeconds: 30
 
-    # Additional envFrom configmap/secret refences can be added
+    # Additional envFrom configmap/secret references can be added
     # envFrom:
     # - configMapRep:
     #     name: my-example-configmap
@@ -279,6 +293,14 @@ pingfederate-admin:
       strategy:
         type: Recreate
 
+  # Example: If PingFederate Admin relies on pingdirectory for AuthN
+  #          Creates init container wait-for on pingdirectory ldaps service
+  #
+  # container:
+  #   waitFor:
+  #     pingdirectory:
+  #       service: ldaps
+
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: getting-started/pingfederate
@@ -318,6 +340,11 @@ pingfederate-engine:
   name: pingfederate-engine
   image:
     name: pingfederate
+
+  container:
+    waitFor:
+      pingfederate-admin:
+        service: admin
 
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git

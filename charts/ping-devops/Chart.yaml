@@ -22,9 +22,12 @@ name: ping-devops
 #         workload.statefulSet values.
 # 0.3.1 - Add back {release}-env-vars configmap ref back as well as supporting
 #         container.envFrom values
-# 0.3.2 - Refer to http://localhost:8000/release-notes/#release-032
+# 0.3.2 - Refer to http://helm.pingidentity.com/release-notes/#release-032
+# 0.3.3 - Refer to http://helm.pingidentity.com/release-notes/#release-033
+# 0.3.4 - Refer to http://helm.pingidentity.com/release-notes/#release-034
+# 0.3.5 - Refer to http://helm.pingidentity.com/release-notes/#release-035
 ########################################################################
-version: 0.3.2
+version: 0.3.5
 description: All Ping Identity product images with integration
 type: application
 home: https://devops.pingidentity.com/

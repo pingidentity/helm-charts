@@ -3,8 +3,6 @@
 
 
 {{- define "pingdirectory.workload" -}}
-{{- $top := index . 0 -}}
-{{- $v := index . 1 -}}
 spec:
   template:
     metadata:

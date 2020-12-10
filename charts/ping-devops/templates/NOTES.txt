@@ -1,22 +1,20 @@
 {{ include "pinglib.notes.header" . }}
+{{- $format := "%-1.1s %-21.21s %-11.11s %5.5s" }}
 #
-#         Product             Enabled
-#  ------------------------ ------------
-{{- with .Values }}
-#  pingaccess               {{ .pingaccess.enabled }}
-#  pingdataconsole          {{ .pingdataconsole.enabled }}
-#  pingdatagovernance       {{ .pingdatagovernance.enabled }}
-#  pingdatasync             {{ .pingdatasync.enabled }}
-#  pingdelegator            {{ .pingdelegator.enabled }}
-#  pingdirectory            {{ .pingdirectory.enabled }}
-#  pingfederate-admin       {{ (index . "pingfederate-admin").enabled }}
-#  pingfederate-engine      {{ (index . "pingfederate-engine").enabled }}
+#  {{ printf $format " " "       Product       " " Workload  " " Ing "}}
+#  {{ printf $format " " "---------------------" "-----------" "-----"}}
+{{- $products := list "pingaccess" "pingdataconsole" "pingdatagovernance" "pingdatasync" "pingdelegator" "pingdirectory" "pingfederate-admin" "pingfederate-engine" "---" "ldap-sdk-tools" "pd-replication-timing" }}
+{{- range $prodName := $products }}
+{{- if eq $prodName "---" }}
 #
-#  ldap-sdk-tools           {{ (index . "ldap-sdk-tools").enabled }}
-#  pd-replication-timing    {{ (index . "pd-replication-timing").enabled }}
-{{- end -}}
-{{- range .Chart.Dependencies }}
-#  {{ printf "%-24.18s %-12.12t" .Name (index $.Values .Name).chartEnabled  }}
+{{- end }}
+{{- with (index $.Values $prodName)}}
+    {{- if .enabled }}
+#  {{ printf $format "√" $prodName (.workload.type | lower) (toString .ingress.enabled) }}
+    {{- else }}
+#  {{ printf $format "" $prodName "" "" }}
+    {{- end }}
+{{- end }}
 {{- end }}
 #
 {{ include "pinglib.notes.footer" . }}

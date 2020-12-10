@@ -46,6 +46,7 @@ spec:
       {{- end }}
       nodeSelector: {{ toYaml $v.container.nodeSelector | nindent 8 }}
       tolerations: {{ toYaml $v.container.tolerations | nindent 8 }}
+      initContainers: {{ include "pinglib.workload.init.waitfor" . | nindent 6 }}
       containers:
       - name: {{ $v.name }}
         env: []
@@ -129,6 +130,14 @@ spec:
         {{- end }}
         {{- end }}
 
+        {{/*---------------- Security Context -------------*/}}
+        {{/* Futures: Support for container securityContexts */}}
+        {{/*securityContext: {{ toYaml $v.container.securityContext | nindent 10 }}*/}}
+
+
+      {{/*---------------- Security Context -------------*/}}
+      securityContext: {{ toYaml $v.workload.securityContext | nindent 8 }}
+
       {{/*--------------------- Volumes ------------------*/}}
       {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
       volumes:
@@ -156,3 +165,35 @@ spec:
 {{- include "pinglib.merge.templates" (append . "workload") -}}
 {{- end -}}
 
+{{- define "pinglib.workload.init.waitfor" -}}
+{{- $top := index . 0 -}}
+{{- $v := index . 1 -}}
+{{- range $prod, $val := $v.container.waitFor }}
+{{- if (index $top.Values $prod).enabled -}}
+{{- $host := include "pinglib.addreleasename" (list $top $v $prod) -}}
+{{- $waitForServices := (index $top.Values $prod).services -}}
+{{- $port := (index $waitForServices $val.service).port | quote -}}
+{{- $server := printf "%s:%s" $host $port -}}
+- name: wait-for-{{ $prod }}-init
+  imagePullPolicy: {{ $v.image.pullPolicy }}
+  image: {{ $v.externalImage.pingtoolkit }}
+  command: ['sh', '-c', 'echo "Waiting for {{ $server }}..." && wait-for {{ $server }} -- echo "{{ $server }} running"']
+  resources:
+    limits:
+      cpu: 500m
+      memory: 128Mi
+    requests:
+      cpu: 250m
+      memory: 64Mi
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    readOnlyRootFilesystem: true
+    runAsGroup: 1000
+    runAsNonRoot: true
+    runAsUser: 100
+{{- end -}}
+{{- end -}}
+{{- end -}}

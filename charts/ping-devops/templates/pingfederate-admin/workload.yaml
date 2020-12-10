@@ -3,4 +3,9 @@
 
 
 {{- define "pingfederate-admin.workload" -}}
+spec:
+  template:
+    metadata:
+      labels:
+        clusterIdentifier: {{ include "pinglib.fullimagename" . }}
 {{- end -}}

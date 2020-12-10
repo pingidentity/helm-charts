@@ -25,4 +25,5 @@ global:
     nodeSelector: {}
     tolerations: []
     terminationGracePeriodSeconds: 30
+    securityContext: {}
 ```
