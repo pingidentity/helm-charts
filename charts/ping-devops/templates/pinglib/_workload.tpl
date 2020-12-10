@@ -38,7 +38,9 @@ spec:
         {{ include "pinglib.selector.labels" . | nindent 8 }}
         clusterIdentifier: {{ include "pinglib.fullimagename" . }}
       annotations: {{ include "pinglib.annotations.vault" $v.vault | nindent 8 }}
-        checksum/config: {{ include (print $top.Template.BasePath "/" $v.name "/configmap.yaml") $top | sha256sum }}
+        {{ $prodChecksum := include (print $top.Template.BasePath "/" $v.name "/configmap.yaml") $top | sha256sum }}
+        {{ $globChecksum := include (print $top.Template.BasePath "/global/configmap.yaml") $top | sha256sum }}
+        checksum/config: {{ print $prodChecksum $globChecksum | sha256sum }}
     spec:
       terminationGracePeriodSeconds: {{ $v.container.terminationGracePeriodSeconds }}
       {{- if $v.vault.enabled }}
@@ -46,7 +48,7 @@ spec:
       {{- end }}
       nodeSelector: {{ toYaml $v.container.nodeSelector | nindent 8 }}
       tolerations: {{ toYaml $v.container.tolerations | nindent 8 }}
-      initContainers: {{ include "pinglib.workload.init.waitfor" . | nindent 6 }}
+      initContainers: {{ include "pinglib.workload.init.waitfor" (append . $v.container.waitFor) | nindent 6 }}
       containers:
       - name: {{ $v.name }}
         env: []
@@ -73,7 +75,7 @@ spec:
         ports:
         {{- range $serviceName, $val := . }}
         {{- if ne $serviceName "clusterExternalDNSHostname" }}
-        - containerPort: {{ $val.port }}
+        - containerPort: {{ $val.containerPort }}
           name: {{ $serviceName }}
         {{- end }}
         {{- end }}
@@ -168,12 +170,13 @@ spec:
 {{- define "pinglib.workload.init.waitfor" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
-{{- range $prod, $val := $v.container.waitFor }}
-{{- if (index $top.Values $prod).enabled -}}
-{{- $host := include "pinglib.addreleasename" (list $top $v $prod) -}}
-{{- $waitForServices := (index $top.Values $prod).services -}}
-{{- $port := (index $waitForServices $val.service).port | quote -}}
-{{- $server := printf "%s:%s" $host $port -}}
+{{- $waitFor := index . 2 -}}
+{{- range $prod, $val := $waitFor }}
+  {{- if (index $top.Values $prod).enabled }}
+    {{- $host := include "pinglib.addreleasename" (list $top $v $prod) }}
+    {{- $waitForServices := (index $top.Values $prod).services }}
+    {{- $port := (index $waitForServices $val.service).servicePort | quote }}
+    {{- $server := printf "%s:%s" $host $port }}
 - name: wait-for-{{ $prod }}-init
   imagePullPolicy: {{ $v.image.pullPolicy }}
   image: {{ $v.externalImage.pingtoolkit }}
@@ -194,6 +197,6 @@ spec:
     runAsGroup: 1000
     runAsNonRoot: true
     runAsUser: 100
-{{- end -}}
-{{- end -}}
+    {{- end }}
+  {{- end }}
 {{- end -}}

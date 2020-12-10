@@ -42,7 +42,7 @@ Default yaml defined in the product ingress section, followed by definitions for
         paths:
         - path: /
           backend:
-            servicePort: 9999
+            serviceName: admin
     tls:
       - secretName: _defaultTlsSecret_
         hosts:
@@ -53,8 +53,8 @@ Default yaml defined in the product ingress section, followed by definitions for
 | hosts                               | Array of hosts definitions                                                                               |                                  |
 | hosts[].host                        | Full DNS name of host to use for external name. "\_defaultDomain\_" will be replaced with .defaultDomain | {product-name}.\_defaultDomain\_ |
 | hosts[].paths                       | Array of paths to define for host                                                                        |                                  |
-| hosts[].paths[].path                | Path on external ingress                                                                                 | /                                |
-| hosts[].paths[].backend.servicePort | Port on the product service to map to                                                                    | 9999 (for PingFederate)          |
+| hosts[].paths[].path                | Path on external ingress                                                                                 |                                  |
+| hosts[].paths[].backend.serviceName | Name of the service to map to.  This will result in the ingressPort on the server to be used.            |                                  |
 | tls                                 | Array of tls definitions                                                                                 |                                  |
 | tls[].secretName                    | Certificate secret to use                                                                                | \_defaultTlsSecret\_             |
 | tls[].hosts                         | Array of specific hosts                                                                                  |                                  |
@@ -74,7 +74,9 @@ Default yaml defined in the product ingress section, followed by definitions for
 
 ## Example Ingress Manifest
 
-Example product ingress for pingfedeate-admin when deployed by helm with a release-name of acme.  Includes an ingress for port 9999 using the default domain and tls secret, defined in the global section, if set.
+Example product ingress for pingfederate-admin when deployed by helm with a release-name of acme.
+Includes an ingress for admin service (9999) using the default domain and tls secret, defined
+in the global section, if set.
 
 ```yaml
 kind: Ingress
@@ -88,7 +90,7 @@ spec:
       paths:
       - backend:
           serviceName: acme-pingfederate-admin
-          servicePort: 9999
+          serviceName: admin
         path: /
   tls:
   - hosts:

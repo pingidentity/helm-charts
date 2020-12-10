@@ -16,9 +16,11 @@ pingdatasync:
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: simple-sync/pingdatasync
+    USER_BASE_DN: o=sync
 
 pingdirectory:
   enabled: true
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: simple-sync/pingdirectory
+    USER_BASE_DN: o=sync

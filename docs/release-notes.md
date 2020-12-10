@@ -1,5 +1,53 @@
 # Release Notes
 
+## Release 0.3.6
+
+* Cleaning up and making services/ingresses easier to use together.  Incorporating all the ports
+  used in both a service and ingress into the same location of the [services structure](config/service.md).
+
+    The example below shows a container/service/ingress and how to specify the ports at each
+    level.
+
+    * `containerPort` - Replaces `targetPort`
+    * `servicePort` - Replaces `port`
+    * `ingressPort` - New entry
+
+    ```yaml
+      services:
+        api:
+          containerPort: 8443 <--- changed from targetPort
+          servicePort: 1443   <--- changed from port
+          ingressPort: 443    <--- new.  moved from ingress
+          dataService: true
+        data-api:
+          containerPort: 9443 <--- changed from targetPort
+          servicePort: 2443   <--- changed from port
+          ingressPort: 2443   <--- new.  moved from ingress
+          dataService: true
+      ingress:
+        hosts:
+          - host: pingdirectory.example.com
+            paths:
+            - path: /api
+              backend:
+                serviceName: api        <--- changed from servicePort
+            - path: /directory/v1
+              backend:
+                serviceName: data-api   <--- changed from servicePort
+    ```
+
+    Additionally, `global-env-vars` will be created for each of these ports.  If the name
+    of the product is `PROD`, the the following ports would be created:
+
+    ```properties
+      PROD_API_PRIVATE_PORT="1443"          # This is the servicePort
+      PROD_API_PUBLIC_PORT="443"            # This is the ingressPort
+      PROD_DATA_API_PRIVATE_PORT="2443"
+      PROD_DATA_API_PUBLIC_PORT="2443"
+    ```
+
+* Fixed missing `USER_BASE_DN` setting in simple-sync.yaml example.
+
 ## Release 0.3.5
 
 * Allowing config values to determine use of init containers to wait-for other chart products.

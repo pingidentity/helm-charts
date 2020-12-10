@@ -7,54 +7,70 @@
 {{- $v := index . 1 -}}
 data:
   {{/* Remove the pingaccess when we move to an engine/admin */}}
-  {{ include "global.configmap.env.hostname" (list $top $v "PA_ENGINE_PRIVATE_HOSTNAME" "pingaccess") }}
-  {{ include "global.configmap.env.hostname" (list $top $v "PA_ENGINE_PRIVATE_HOSTNAME" "pingaccess-engine") }}
-  {{ include "global.configmap.env.hostname" (list $top $v "PA_ADMIN_PRIVATE_HOSTNAME" "pingaccess-admin") }}
-  {{ include "global.configmap.env.hostname" (list $top $v "PDS_ENGINE_PRIVATE_HOSTNAME" "pingdatasync") }}
-  {{ include "global.configmap.env.hostname" (list $top $v "PDG_ENGINE_PRIVATE_HOSTNAME" "pingdatagovernance") }}
-  {{ include "global.configmap.env.hostname" (list $top $v "PDGP_ENGINE_PRIVATE_HOSTNAME" "pingdatagovernancepap") }}
-  {{ include "global.configmap.env.hostname" (list $top $v "PD_DELEGATOR_PRIVATE_HOSTNAME" "pingdelegator") }}
-  {{ include "global.configmap.env.hostname" (list $top $v "PD_ENGINE_PRIVATE_HOSTNAME" "pingdirectory") }}
-  {{ include "global.configmap.env.hostname" (list $top $v "PDP_ENGINE_PRIVATE_HOSTNAME" "pingdirectoryproxy") }}
-  {{ include "global.configmap.env.hostname" (list $top $v "PF_ENGINE_PRIVATE_HOSTNAME" "pingfederate-engine") }}
-  {{ include "global.configmap.env.hostname" (list $top $v "PF_ADMIN_PRIVATE_HOSTNAME" "pingfederate-admin") }}
+  {{ include "global.private.host.port" (list $top $v "PA_ENGINE" "pingaccess") }}
+  {{ include "global.private.host.port" (list $top $v "PA_ENGINE" "pingaccess-engine") }}
+  {{ include "global.private.host.port" (list $top $v "PA_ADMIN" "pingaccess-admin") }}
+  {{ include "global.private.host.port" (list $top $v "PDS_ENGINE" "pingdatasync") }}
+  {{ include "global.private.host.port" (list $top $v "PDG_ENGINE" "pingdatagovernance") }}
+  {{ include "global.private.host.port" (list $top $v "PDGP_ENGINE" "pingdatagovernancepap") }}
+  {{ include "global.private.host.port" (list $top $v "PD_DELEGATOR" "pingdelegator") }}
+  {{ include "global.private.host.port" (list $top $v "PD_ENGINE" "pingdirectory") }}
+  {{ include "global.private.host.port" (list $top $v "PDP_ENGINE" "pingdirectoryproxy") }}
+  {{ include "global.private.host.port" (list $top $v "PF_ENGINE" "pingfederate-engine") }}
+  {{ include "global.private.host.port" (list $top $v "PF_ADMIN" "pingfederate-admin") }}
 
   {{/* Remove the pingaccess when we move to an engine/admin */}}
-  {{ include "global.configmap.env.ingress.hostname" (list $top $v "PA_ENGINE_PUBLIC_HOSTNAME" "pingaccess") }}
-  {{ include "global.configmap.env.ingress.hostname" (list $top $v "PA_ENGINE_PUBLIC_HOSTNAME" "pingaccess-engine") }}
-  {{ include "global.configmap.env.ingress.hostname" (list $top $v "PA_ADMIN_PUBLIC_HOSTNAME" "pingaccess-admin") }}
-  {{ include "global.configmap.env.ingress.hostname" (list $top $v "PDS_ENGINE_PUBLIC_HOSTNAME" "pingdatasync") }}
-  {{ include "global.configmap.env.ingress.hostname" (list $top $v "PDG_ENGINE_PUBLIC_HOSTNAME" "pingdatagovernance") }}
-  {{ include "global.configmap.env.ingress.hostname" (list $top $v "PDGP_ENGINE_PUBLIC_HOSTNAME" "pingdatagovernancepap") }}
-  {{ include "global.configmap.env.ingress.hostname" (list $top $v "PD_DELEGATOR_PUBLIC_HOSTNAME" "pingdelegator") }}
-  {{ include "global.configmap.env.ingress.hostname" (list $top $v "PD_ENGINE_PUBLIC_HOSTNAME" "pingdirectory") }}
-  {{ include "global.configmap.env.ingress.hostname" (list $top $v "PDP_ENGINE_PUBLIC_HOSTNAME" "pingdirectoryproxy") }}
-  {{ include "global.configmap.env.ingress.hostname" (list $top $v "PF_ENGINE_PUBLIC_HOSTNAME" "pingfederate-engine") }}
-  {{ include "global.configmap.env.ingress.hostname" (list $top $v "PF_ADMIN_PUBLIC_HOSTNAME" "pingfederate-admin") }}
+  {{ include "global.public.host.port" (list $top $v "PA_ENGINE" "pingaccess") }}
+  {{ include "global.public.host.port" (list $top $v "PA_ENGINE" "pingaccess-engine") }}
+  {{ include "global.public.host.port" (list $top $v "PA_ADMIN" "pingaccess-admin") }}
+  {{ include "global.public.host.port" (list $top $v "PDS_ENGINE" "pingdatasync") }}
+  {{ include "global.public.host.port" (list $top $v "PDG_ENGINE" "pingdatagovernance") }}
+  {{ include "global.public.host.port" (list $top $v "PDGP_ENGINE" "pingdatagovernancepap") }}
+  {{ include "global.public.host.port" (list $top $v "PD_DELEGATOR" "pingdelegator") }}
+  {{ include "global.public.host.port" (list $top $v "PD_ENGINE" "pingdirectory") }}
+  {{ include "global.public.host.port" (list $top $v "PDP_ENGINE" "pingdirectoryproxy") }}
+  {{ include "global.public.host.port" (list $top $v "PF_ENGINE" "pingfederate-engine") }}
+  {{ include "global.public.host.port" (list $top $v "PF_ADMIN" "pingfederate-admin") }}
+
 {{- end -}}
 
 
-{{- define "global.configmap.env.hostname" -}}
+{{- define "global.private.host.port" -}}
 {{- $top := index . 0 }}
 {{- $v := index . 1 }}
-{{- $envName := index . 2 }}
+{{- $envPrefix := index . 2 }}
 {{- $prodName := index . 3 }}
 {{- with (index $top.Values $prodName) }}
 {{- if .enabled }}
-  {{ $envName }}: {{ include "pinglib.addreleasename" (list $top $v .name) | quote }}
+  {{ $envPrefix }}_PRIVATE_HOSTNAME: {{ include "pinglib.addreleasename" (list $top $v .name) | quote }}
+  {{- range $serviceName, $val := .services }}
+  {{- if ne $serviceName "clusterExternalDNSHostname" }}
+  {{- if $val.dataService }}
+  {{ $envPrefix }}_{{ $serviceName | replace "-" "_" | upper }}_PRIVATE_PORT: {{ $val.servicePort | quote }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
 {{- end }}
 {{- end }}
 {{- end -}}
 
-{{- define "global.configmap.env.ingress.hostname" -}}
+{{- define "global.public.host.port" -}}
 {{- $top := index . 0 }}
 {{- $v := index . 1 }}
-{{- $envName := index . 2 }}
+{{- $envPrefix := index . 2 }}
 {{- $prodName := index . 3 }}
 {{- with (index $top.Values $prodName) }}
-{{- if and .enabled .ingress.enabled }}
+{{- if and .enabled .ingress }}
+{{- if .ingress.enabled }}
+{{- $services := (index $top.Values $prodName).services }}
 {{- range .ingress.hosts }}
-  {{ $envName }}: {{ include "pinglib.ingress.hostname" (list $top $v .host) | quote }}
+  {{ $envPrefix }}_PUBLIC_HOSTNAME: {{ include "pinglib.ingress.hostname" (list $top $v .host) | quote }}
+
+  {{- range .paths }}
+  {{ $envPrefix }}_{{ .backend.serviceName | replace "-" "_" | upper }}_PUBLIC_PORT: {{ (index $services .backend.serviceName).ingressPort | quote }}
+  {{- end }}
+
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}

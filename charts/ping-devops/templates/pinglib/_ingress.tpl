@@ -29,7 +29,7 @@ spec:
           - path: {{ .path }}
             backend:
               serviceName: {{ $fullName }}
-              servicePort: {{ .backend.servicePort }}
+              servicePort: {{ (index $v.services .backend.serviceName).ingressPort }}
         {{- end }}
   {{- end }}
 {{- end -}}
