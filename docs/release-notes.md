@@ -1,5 +1,10 @@
 # Release Notes
 
+
+## Release 0.3.7
+
+* Fixes issue with service -vs- ingress name on creation of ingress to service mapping.  Resolves issue #57.
+
 ## Release 0.3.6
 
 * Cleaning up and making services/ingresses easier to use together.  Incorporating all the ports
