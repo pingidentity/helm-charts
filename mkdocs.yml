@@ -2,6 +2,7 @@ site_name: Ping Identity DevOps Helm Charts
 repo_name: pingidentity/helm-charts
 repo_url: https://github.com/pingidentity/helm-charts
 site_url: https://helm.pingidentity.com/
+copyright: © Copyright 2020 Ping Identity
 extra_css:
   - mkdocs/overrides/stylesheets/extra.css
 
