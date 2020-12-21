@@ -10,6 +10,7 @@ data:
   {{ include "global.private.host.port" (list $top $v "PA_ENGINE" "pingaccess") }}
   {{ include "global.private.host.port" (list $top $v "PA_ENGINE" "pingaccess-engine") }}
   {{ include "global.private.host.port" (list $top $v "PA_ADMIN" "pingaccess-admin") }}
+  {{ include "global.private.host.port" (list $top $v "PD_CONSOLE" "pingdataconsole") }}
   {{ include "global.private.host.port" (list $top $v "PDS_ENGINE" "pingdatasync") }}
   {{ include "global.private.host.port" (list $top $v "PDG_ENGINE" "pingdatagovernance") }}
   {{ include "global.private.host.port" (list $top $v "PDGP_ENGINE" "pingdatagovernancepap") }}
@@ -23,6 +24,7 @@ data:
   {{ include "global.public.host.port" (list $top $v "PA_ENGINE" "pingaccess") }}
   {{ include "global.public.host.port" (list $top $v "PA_ENGINE" "pingaccess-engine") }}
   {{ include "global.public.host.port" (list $top $v "PA_ADMIN" "pingaccess-admin") }}
+  {{ include "global.public.host.port" (list $top $v "PD_CONSOLE" "pingdataconsole") }}
   {{ include "global.public.host.port" (list $top $v "PDS_ENGINE" "pingdatasync") }}
   {{ include "global.public.host.port" (list $top $v "PDG_ENGINE" "pingdatagovernance") }}
   {{ include "global.public.host.port" (list $top $v "PDGP_ENGINE" "pingdatagovernancepap") }}
@@ -46,7 +48,7 @@ data:
   {{- range $serviceName, $val := .services }}
   {{- if ne $serviceName "clusterExternalDNSHostname" }}
   {{- if $val.dataService }}
-  {{ $envPrefix }}_{{ $serviceName | replace "-" "_" | upper }}_PRIVATE_PORT: {{ $val.servicePort | quote }}
+  {{ $envPrefix }}_PRIVATE_PORT_{{ $serviceName | replace "-" "_" | upper }}: {{ $val.servicePort | quote }}
   {{- end }}
   {{- end }}
   {{- end }}
@@ -67,7 +69,7 @@ data:
   {{ $envPrefix }}_PUBLIC_HOSTNAME: {{ include "pinglib.ingress.hostname" (list $top $v .host) | quote }}
 
   {{- range .paths }}
-  {{ $envPrefix }}_{{ .backend.serviceName | replace "-" "_" | upper }}_PUBLIC_PORT: {{ (index $services .backend.serviceName).ingressPort | quote }}
+  {{ $envPrefix }}_PUBLIC_PORT_{{ .backend.serviceName | replace "-" "_" | upper }}: {{ (index $services .backend.serviceName).ingressPort | quote }}
   {{- end }}
 
 {{- end }}
