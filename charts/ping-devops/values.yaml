@@ -209,12 +209,15 @@ global:
     tolerations: []
     terminationGracePeriodSeconds: 30
 
+    envFrom: []
     # Additional envFrom configmap/secret references can be added
     # envFrom:
-    # - configMapRep:
+    # - configMapRef:
     #     name: my-example-configmap
+    #     optional: true
     # - secretRef:
     #     name: my-example-secrets
+    #     optional: true
 
   ############################################################
   # Probes
@@ -281,7 +284,7 @@ ldap-sdk-tools:
       command: echo
 
 #############################################################
-# pingfederate-admin values
+# erate-admin values
 #############################################################
 pingfederate-admin:
   enabled: false
@@ -307,7 +310,7 @@ pingfederate-admin:
     SERVER_PROFILE_PATH: getting-started/pingfederate
 
   services:
-    admin:
+    https:
       servicePort: 9999
       containerPort: 9999
       ingressPort: 443
@@ -328,7 +331,7 @@ pingfederate-admin:
         paths:
         - path: /
           backend:
-            serviceName: admin
+            serviceName: https
     tls:
       - secretName: _defaultTlsSecret_
         hosts:
@@ -373,7 +376,7 @@ pingfederate-engine:
     #       averageValue: 10000m
 
   services:
-    engine:
+    https:
       servicePort: 9031
       containerPort: 9031
       ingressPort: 443
@@ -394,7 +397,7 @@ pingfederate-engine:
         paths:
         - path: /
           backend:
-            serviceName: engine
+            serviceName: https
     tls:
       - secretName: _defaultTlsSecret_
         hosts:

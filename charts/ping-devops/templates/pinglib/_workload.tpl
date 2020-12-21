@@ -85,10 +85,10 @@ spec:
         {{/*--------------------- Environment -----------------*/}}
         envFrom:
         - configMapRef:
-            name: {{ $top.Release.Name }}-global-env-vars
+            name: {{ include "pinglib.addreleasename" (append . "global-env-vars") }}
             optional: true
         - configMapRef:
-            name: {{ $top.Release.Name }}-env-vars
+            name: {{ include "pinglib.addreleasename" (append . "env-vars") }}
             optional: true
         - configMapRef:
             name: {{ include "pinglib.fullname" . }}-env-vars

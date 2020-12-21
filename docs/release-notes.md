@@ -1,5 +1,36 @@
 # Release Notes
 
+## Release 0.3.8
+
+* [Issue #56](https://github.com/pingidentity/helm-charts/issues/56) - Improved Default Naming on Global vars - PORTs
+
+    In release 0.3.6, global-env-vars were created for PORTS.  The naming structure used was
+    complex and difficult, primarily because a product can have several ports open on a particular
+    private and public host.  The format will be more consistent as defined by the following:
+
+    `{product-short-code with type}_{public or private}_{hostname or port}{_service if port}`
+
+    An example with PD might look like (note the service names of `https` and `data-api`):
+
+    ```yaml
+    PD_ENGINE_PUBLIC_PORT_HTTPS: 443
+    PD_ENGINE_PUBLIC_PORT_DATA_API 1443
+
+    PD_ENGINE_PRIVATE_PORT_HTTPS: 443
+    PD_ENGINE_PRIVATE_PORT_DATA_API 8443
+    ```
+
+* [Issue #62](https://github.com/pingidentity/helm-charts/issues/62) -
+  When creating configMapRef's, take into account the proper release name to include
+
+    ConfigMapRef names in workloads were not consistent with the ConfigMaps created by default
+    when taking into account the `addReleaseNameToResource` setting of prepend, append or none.
+    This fixes that issue ensuring that config maps are consistent.
+
+* Added global-env private/public host/port for PingDataConsole, which was missing.
+* Changed the default pingfederate-admin `admin` service name to `https` to reduce confusion.
+* Changed the default pingfederate-engine `engine` service name to `https` to reduce confusion.
+
 
 ## Release 0.3.7
 
