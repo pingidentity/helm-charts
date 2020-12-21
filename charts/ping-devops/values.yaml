@@ -284,7 +284,7 @@ ldap-sdk-tools:
       command: echo
 
 #############################################################
-# erate-admin values
+# pingfederate-admin values
 #############################################################
 pingfederate-admin:
   enabled: false
@@ -588,11 +588,13 @@ pingaccess:
     SERVER_PROFILE_PATH: getting-started/pingaccess
 
   services:
+    # This will transition to https after PA 6.2 is available
     admin:
       servicePort: 9000
       containerPort: 9000
       ingressPort: 443
       dataService: true
+    # This will transition to https after PA 6.2 is available
     engine:
       servicePort: 3000
       containerPort: 3000
