@@ -1,6 +1,6 @@
 # Service Configuration
 
-[Kuernetes Service resources](https://kubernetes.io/docs/concepts/services-networking/service/)
+[Kubernetes Service resources](https://kubernetes.io/docs/concepts/services-networking/service/)
 are created depending on configuration values.
 
 ## Product Section

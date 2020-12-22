@@ -1,6 +1,6 @@
 # Workload Configuration
 
-Kuernetes Workload resources:
+Kubernetes Workload resources:
 
 * [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
 * [StatefulSets](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)

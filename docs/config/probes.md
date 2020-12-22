@@ -1,6 +1,6 @@
 # Probes Configuration
 
-[Kuernetes Probes resources](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+[Kubernetes Probes resources](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
 to be added to workloads (i.e. Deployments/StatefulSets).
 
 ## Global Section

@@ -1,6 +1,6 @@
 # Container Configuration
 
-[Kuernetes Workload Controller](https://kubernetes.io/docs/concepts/workloads/controllers/) resources:
+[Kubernetes Workload Controller](https://kubernetes.io/docs/concepts/workloads/controllers/) resources:
 
 * [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
 * [StatefulSets](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
