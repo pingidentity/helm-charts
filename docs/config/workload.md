@@ -49,7 +49,7 @@ global:
 | deployment.strategy.rollingUpdate | If type=RollingUpdate                                                                        |
 | statefulSet.partition             | Used for canary testing if n>0                                                               |
 | statefulSet.persistentVolume      | Provides details around creation of PVC/Volumes (see below)                                  |
-| securityCotext                   | Provides security context details for starting container as different user/group (see below) |
+| securityContext                   | Provides security context details for starting container as different user/group (see below) |
 
 !!! note "Persistent Volumes"
     For every volume defined in the volumes list, 3 items will be
