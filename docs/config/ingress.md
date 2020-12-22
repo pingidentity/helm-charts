@@ -16,13 +16,13 @@ global:
     annotations: {}
 ```
 
-| Ingress Parameters   | Description                                                                                  | Options                                | Default Value |
-| -------------------- | -------------------------------------------------------------------------------------------- | -------------------------------------- | ------------- |
-| enabled              | Enables ingress definition.                                                                  |                                        | false         |
-| addReleaseNameToHost | How helm `release-name` should be added to host.                                             | prepend<br>append<br>subdomain<br>none | subdomain     |
-| defaultDomain        | Default DNS domain to use.  Replaces the string "\_defaultDomain\_".                         |                                        | example.com   |
-| defaultTlsSecret     | Default TLS Secret to use.  Replaces the string "\_defaultTlsSecret\_".                      |                                        |               |
-| annotations          | Annotations are used to provide configuaration details to specific ingress controller types. | * see option for nginx ingress         | {}            |
+| Ingress Parameters   | Description                                                                                 | Options                                | Default Value |
+| -------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------- | ------------- |
+| enabled              | Enables ingress definition.                                                                 |                                        | false         |
+| addReleaseNameToHost | How helm `release-name` should be added to host.                                            | prepend<br>append<br>subdomain<br>none | subdomain     |
+| defaultDomain        | Default DNS domain to use.  Replaces the string "\_defaultDomain\_".                        |                                        | example.com   |
+| defaultTlsSecret     | Default TLS Secret to use.  Replaces the string "\_defaultTlsSecret\_".                     |                                        |               |
+| annotations          | Annotations are used to provide configuration details to specific ingress controller types. | * see option for nginx ingress         | {}            |
 
 !!! note "Annotations example for nginx ingress"
     ```yaml
