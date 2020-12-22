@@ -1,6 +1,6 @@
 # Ingress Configuration
 
-[Kuernetes Ingress resources](https://kubernetes.io/docs/concepts/services-networking/ingress/) are created depending on configuration values.
+[Kubernetes Ingress resources](https://kubernetes.io/docs/concepts/services-networking/ingress/) are created depending on configuration values.
 
 ## Global Section
 
