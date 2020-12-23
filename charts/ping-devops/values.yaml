@@ -238,7 +238,7 @@ global:
     readiness:
       command: /opt/liveness.sh
       initialDelaySeconds: 30
-      periodSeconds: 30
+      periodSeconds: 5
       timeoutSeconds: 5
       successThreshold: 1
       failureThreshold: 4
@@ -349,7 +349,7 @@ pingfederate-engine:
   container:
     waitFor:
       pingfederate-admin:
-        service: admin
+        service: https
 
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
@@ -472,7 +472,8 @@ pingdirectory:
     liveness:
       failureThreshold: 120
     readiness:
-      failureThreshold: 120
+      periodSeconds: 30
+      failureThreshold: 4
 
 #############################################################
 # pingdelegator values

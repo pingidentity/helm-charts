@@ -1,6 +1,14 @@
 # Release Notes
 
+## Release 0.3.9
+
+* Fixed the default wait-for service name on pingfederate-engine (admin --> https).
+* Changed default on readiness command to check for readiness every 5 seconds rather than 30.
+  This allows for availability on some services, such as PingFederate which is normally ready in 30 sec.
+
 ## Release 0.3.8
+
+* [Issue #56](https://github.com/pingidentity/helm-charts/issues/56) - Improved Default Naming on Global vars - PORTs
 
 * [Issue #56](https://github.com/pingidentity/helm-charts/issues/56) - Improved Default Naming on Global vars - PORTs
 
