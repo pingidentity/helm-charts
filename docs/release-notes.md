@@ -1,5 +1,19 @@
 # Release Notes
 
+## Release 0.4.0
+
+* Support availability of PingDirectory pods through the cluster headless kubernetes service.
+  Allows for PingDirectory nodes to find one another during the replication enable/init process.
+
+    !!! note "Adds following to pingdirectory-cluster"
+        ```yaml
+        metadata:
+          annotations:
+            service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+        spec:
+          publishNotReadyAddresses: true
+        ```
+
 ## Release 0.3.9
 
 * Fixed the default wait-for service name on pingfederate-engine (admin --> https).
