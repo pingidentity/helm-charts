@@ -124,11 +124,18 @@ spec:
 
         {{/*--------------------- Resources ------------------*/}}
         resources: {{ toYaml $v.container.resources | nindent 10 }}
-        {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
+        {{- if or (and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled) $v.internalCert.generate }}
         volumeMounts:
+        {{- if eq $v.workload.type "StatefulSet" }}
         {{- range $volName, $val := $v.workload.statefulSet.persistentvolume.volumes }}
         - name: {{ $volName }}{{ if eq "none" $v.addReleaseNameToResource }}-{{ $top.Release.Name }}{{ end }}
           mountPath: {{ .mountPath }}
+        {{- end }}
+        {{- end }}
+        {{- if $v.internalCert.generate }}
+        - name: internal-cert
+          mountPath: /run/secrets/internal-cert
+          readOnly: true
         {{- end }}
         {{- end }}
 
@@ -141,12 +148,19 @@ spec:
       securityContext: {{ toYaml $v.workload.securityContext | nindent 8 }}
 
       {{/*--------------------- Volumes ------------------*/}}
-      {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
+      {{- if or (and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled) $v.internalCert.generate }}
       volumes:
+      {{- if eq $v.workload.type "StatefulSet" }}
       {{- range $volName, $val := $v.workload.statefulSet.persistentvolume.volumes }}
       - name: {{ $volName }}{{ if eq "none" $v.addReleaseNameToResource }}-{{ $top.Release.Name }}{{ end }}
         persistentVolumeClaim:
           claimName: {{ $volName }}{{ if eq "none" $v.addReleaseNameToResource }}-{{ $top.Release.Name }}{{ end }}
+      {{- end }}
+      {{- end }}
+      {{- if $v.internalCert.generate }}
+      - name: internal-cert
+        secret:
+          secretName: {{ include "pinglib.fullname" . }}-secret-cert
       {{- end }}
       {{- end }}
 

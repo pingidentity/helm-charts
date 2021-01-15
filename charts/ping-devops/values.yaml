@@ -42,6 +42,16 @@ global:
       # kubernetes.io/ingress.class: "nginx-public"
 
   ############################################################
+  # Internal Certficates
+  #
+  # If set to true, then an intnernal certificate secret will
+  # be created along with mount of the certificate in
+  # /run/secrets/internal-cert (creates a tls.crt and tls.key)
+  ############################################################
+  internalCert:
+    generate: true
+
+  ############################################################
   # Fields used to annotate secret hashicorp vault information
   #
   # https://www.vaultproject.io/docs/platform/k8s/injector/annotations
@@ -74,7 +84,7 @@ global:
   image:
     repository: pingidentity
     name:
-    tag: 2010
+    tag: 2012
     pullPolicy: Always
 
   ############################################################

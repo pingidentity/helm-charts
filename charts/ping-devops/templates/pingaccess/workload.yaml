@@ -1,6 +1,5 @@
 {{- include "pinglib.workload" (list . "pingaccess") -}}
 
 
-
 {{- define "pingaccess.workload" -}}
 {{- end -}}
