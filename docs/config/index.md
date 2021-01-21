@@ -19,7 +19,7 @@ The example below shows how values from the chart, user supplied `myconfig.yaml`
 
 To see the values supplied by the chart, simply use the `helm show values` command to
 print them.  This provides both the data as well as context sensitive comments to each
-secion.
+section.
 
 ```shell
 helm show values pingidentity/ping-devops
@@ -35,8 +35,8 @@ The default values are broken up into 2 major sections:
 
 * global - Represents the base set of values that will be provided to each product
 section unless it's overridden in that section.
-* product - For every image/product, the values will merged with the global seetings,
-and take precedenc.
+* product - For every image/product, the values will merged with the global settings,
+and take precedence.
 
 !!! warning
     Values can only be modified when merged.  They cannot be deleted.  Also, if a values is
@@ -45,7 +45,7 @@ and take precedenc.
 ## global Section
 
 The `global:` section of the values contains configurations that's available to each
-products section.  If a value is set in globals, that will be available to every prorduct.
+products section.  If a value is set in globals, that will be available to every product.
 This is very powerful, as you can turn on the ingress for every product by simply setting:
 
 ```yaml
@@ -76,7 +76,7 @@ product sections.
 ## product Sections
 
 Just like the `global:` values, each product can have the same values as well as many
-more that are specific to that product/image.  Take the following example in pingdirectory
+more that are specific to that product/image.  Take the following example in PingDirectory
 where persistent volume information can be provided:
 
 ```yaml

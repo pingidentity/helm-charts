@@ -3,3 +3,6 @@
 
 # mkdocs files
 site/
+
+# mac
+.DS_Store
