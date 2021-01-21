@@ -18,8 +18,8 @@ global:
 | secret.devops      | Secret containing PING_IDENTITY_DEVOPS_USER/KEY values. | devops-secret |
 
 !!! note "Creating your devops-secret"
-    Assumes use of the [ping-devops command-line](https://pingidentity-devops.gitbook.io/devops/devopsutils/pingdevopsutil#installation) tool to create the `devops-secret` with your
-    [Ping Identity DevOps User & Key](https://pingidentity-devops.gitbook.io/devops/getstarted/devopsregistration).
+    Assumes use of the [ping-devops command-line](https://devops.pingidentity.com/get-started/pingDevopsUtil/#installation-and-upgrades) tool to create the `devops-secret` with your
+    [Ping Identity DevOps User & Key](https://devops.pingidentity.com/get-started/devopsRegistration/).
 
     ```shell
     ping-devops generate devops-secret | kubectl apply -f -

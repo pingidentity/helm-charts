@@ -14,8 +14,8 @@ The charts use a secret called `devops-secret` to obtain an evaluation license f
 
 * Eval License - Use your `PING_IDENTITY_DEVOPS_USER/PING_IDENTITY_DEVOPS_KEY` credentials
   along with your `PING_IDENTITY_ACCEPT_EULA` setting.
-  * For more information on obtaining credentials click [here](https://pingidentity-devops.gitbook.io/devops/getstarted/prod-license#obtaining-a-ping-identity-devops-user-and-key).
-  * For more infomration on using `ping-devops` utility click [here](https://pingidentity-devops.gitbook.io/devops/devopsutils/pingdevopsutil).
+  * For more information on obtaining credentials click [here](https://devops.pingidentity.com/get-started/devopsRegistration/).
+  * For more information on using `ping-devops` utility click [here](https://devops.pingidentity.com/get-started/pingDevopsUtil/).
 
         ping-devops generate devops-secret | kubectl apply -f -
 
