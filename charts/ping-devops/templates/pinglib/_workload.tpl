@@ -124,7 +124,7 @@ spec:
 
         {{/*--------------------- Resources ------------------*/}}
         resources: {{ toYaml $v.container.resources | nindent 10 }}
-        {{- if or (and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled) $v.internalCert.generate }}
+        {{- if or (and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled) $v.privateCert.generate }}
         volumeMounts:
         {{- if eq $v.workload.type "StatefulSet" }}
         {{- range $volName, $val := $v.workload.statefulSet.persistentvolume.volumes }}
@@ -132,9 +132,9 @@ spec:
           mountPath: {{ .mountPath }}
         {{- end }}
         {{- end }}
-        {{- if $v.internalCert.generate }}
-        - name: internal-cert
-          mountPath: /run/secrets/internal-cert
+        {{- if $v.privateCert.generate }}
+        - name: private-cert
+          mountPath: /run/secrets/private-cert
           readOnly: true
         {{- end }}
         {{- end }}
@@ -148,7 +148,7 @@ spec:
       securityContext: {{ toYaml $v.workload.securityContext | nindent 8 }}
 
       {{/*--------------------- Volumes ------------------*/}}
-      {{- if or (and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled) $v.internalCert.generate }}
+      {{- if or (and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled) $v.privateCert.generate }}
       volumes:
       {{- if eq $v.workload.type "StatefulSet" }}
       {{- range $volName, $val := $v.workload.statefulSet.persistentvolume.volumes }}
@@ -157,10 +157,10 @@ spec:
           claimName: {{ $volName }}{{ if eq "none" $v.addReleaseNameToResource }}-{{ $top.Release.Name }}{{ end }}
       {{- end }}
       {{- end }}
-      {{- if $v.internalCert.generate }}
-      - name: internal-cert
+      {{- if $v.privateCert.generate }}
+      - name: private-cert
         secret:
-          secretName: {{ include "pinglib.fullname" . }}-secret-cert
+          secretName: {{ include "pinglib.fullname" . }}-private-cert
       {{- end }}
       {{- end }}
 

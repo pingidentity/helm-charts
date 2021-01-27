@@ -48,8 +48,8 @@ global:
   # be created along with mount of the certificate in
   # /run/secrets/internal-cert (creates a tls.crt and tls.key)
   ############################################################
-  internalCert:
-    generate: true
+  privateCert:
+    generate: false
 
   ############################################################
   # Fields used to annotate secret hashicorp vault information
@@ -84,7 +84,7 @@ global:
   image:
     repository: pingidentity
     name:
-    tag: 2012
+    tag: "2012.1"
     pullPolicy: Always
 
   ############################################################
