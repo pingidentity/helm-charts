@@ -1,0 +1,8 @@
+{{- include "pinglib.configmap" (list . "pingaccess-engine") -}}
+
+
+
+{{- define "pingaccess-engine.configmap" -}}
+data:
+  OPERATIONAL_MODE: CLUSTERED_ENGINE
+{{- end -}}

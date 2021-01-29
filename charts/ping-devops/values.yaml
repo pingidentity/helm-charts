@@ -586,11 +586,11 @@ pingdatagovernance:
           - pingdatagovernance._defaultDomain_
 
 #############################################################
-# pingaccess values
+# pingaccess-admin values
 #############################################################
-pingaccess:
+pingaccess-admin:
   enabled: false
-  name: pingaccess
+  name: pingaccess-admin
   image:
     name: pingaccess
 
@@ -599,40 +599,64 @@ pingaccess:
     SERVER_PROFILE_PATH: getting-started/pingaccess
 
   services:
-    # This will transition to https after PA 6.2 is available
-    admin:
+    https:
       servicePort: 9000
       containerPort: 9000
       ingressPort: 443
       dataService: true
-    # This will transition to https after PA 6.2 is available
-    engine:
-      servicePort: 3000
-      containerPort: 3000
-      ingressPort: 443
-      dataService: true
-    acme:
-      servicePort: 8080
-      containerPort: 8080
+    clusterconfig:
+      servicePort: 9090
+      containerPort: 9090
       dataService: true
 
   ingress:
     hosts:
-      - host: pingaccess._defaultDomain_
-        paths:
-        - path: /
-          backend:
-            serviceName: engine
       - host: pingaccess-admin._defaultDomain_
         paths:
         - path: /
           backend:
-            serviceName: admin
+            serviceName: https
     tls:
       - secretName: _defaultTlsSecret_
         hosts:
-          - pingaccess._defaultDomain_
           - pingaccess-admin._defaultDomain_
+
+#############################################################
+# pingaccess-engine values
+#############################################################
+pingaccess-engine:
+  enabled: false
+  name: pingaccess-engine
+  image:
+    name: pingaccess
+
+  container:
+    waitFor:
+      pingaccess-admin:
+        service: https
+
+  envs:
+    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+    SERVER_PROFILE_PATH: getting-started/pingaccess
+
+  services:
+    https:
+      servicePort: 3000
+      containerPort: 3000
+      ingressPort: 443
+      dataService: true
+
+  ingress:
+    hosts:
+      - host: pingaccess-engine._defaultDomain_
+        paths:
+        - path: /
+          backend:
+            serviceName: https
+    tls:
+      - secretName: _defaultTlsSecret_
+        hosts:
+          - pingaccess-engine._defaultDomain_
 
 #############################################################
 # pingdataconsole values

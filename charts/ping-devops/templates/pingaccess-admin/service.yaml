@@ -1,0 +1,6 @@
+{{- include "pinglib.service" (list . "pingaccess-admin") -}}
+
+
+
+{{- define "pingaccess-admin.service" -}}
+{{- end -}}
