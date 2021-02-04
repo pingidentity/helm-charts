@@ -84,7 +84,7 @@ global:
   image:
     repository: pingidentity
     name:
-    tag: "2012.1"
+    tag: "2101"
     pullPolicy: Always
 
   ############################################################
@@ -593,6 +593,14 @@ pingaccess-admin:
   name: pingaccess-admin
   image:
     name: pingaccess
+
+  # Example: If PingAccess Admin relies on pingfederate-admin for AuthN
+  #          Creates init container wait-for on pingfederate-admin https service
+  #
+  # container:
+  #   waitFor:
+  #     pingfederate-admin:
+  #       service: https
 
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
