@@ -34,6 +34,8 @@
 
 * Added support for PingAccess clustering between pingaccess-admin and multiple
   pingaccess-engine containers.
+      * See [everything.yaml](examples/everything.yaml) for example of deploying
+        a PingAccess cluster using PingFederate/PingDirectory to authenticate
       * It is *required* to either:
           * generate the private cert (see above)
             with the value of `pingaccess-admin.privateCert.generate=true` or
