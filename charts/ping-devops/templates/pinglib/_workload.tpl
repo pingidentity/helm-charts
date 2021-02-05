@@ -48,7 +48,9 @@ spec:
       {{- end }}
       nodeSelector: {{ toYaml $v.container.nodeSelector | nindent 8 }}
       tolerations: {{ toYaml $v.container.tolerations | nindent 8 }}
-      initContainers: {{ include "pinglib.workload.init.waitfor" (append . $v.container.waitFor) | nindent 6 }}
+      initContainers:
+        {{ include "pinglib.workload.init.waitfor" (append . $v.container.waitFor) | nindent 6 }}
+        {{ include "pinglib.workload.init.genPrivateCert" . | nindent 6 }}
       containers:
       - name: {{ $v.name }}
         env: []
@@ -124,11 +126,18 @@ spec:
 
         {{/*--------------------- Resources ------------------*/}}
         resources: {{ toYaml $v.container.resources | nindent 10 }}
-        {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
+        {{- if or (and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled) $v.privateCert.generate }}
         volumeMounts:
+        {{- if eq $v.workload.type "StatefulSet" }}
         {{- range $volName, $val := $v.workload.statefulSet.persistentvolume.volumes }}
         - name: {{ $volName }}{{ if eq "none" $v.addReleaseNameToResource }}-{{ $top.Release.Name }}{{ end }}
           mountPath: {{ .mountPath }}
+        {{- end }}
+        {{- end }}
+        {{- if $v.privateCert.generate }}
+        - name: private-keystore
+          mountPath: /run/secrets/private-keystore
+          readOnly: true
         {{- end }}
         {{- end }}
 
@@ -141,12 +150,22 @@ spec:
       securityContext: {{ toYaml $v.workload.securityContext | nindent 8 }}
 
       {{/*--------------------- Volumes ------------------*/}}
-      {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
+      {{- if or (and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled) $v.privateCert.generate }}
       volumes:
+      {{- if eq $v.workload.type "StatefulSet" }}
       {{- range $volName, $val := $v.workload.statefulSet.persistentvolume.volumes }}
       - name: {{ $volName }}{{ if eq "none" $v.addReleaseNameToResource }}-{{ $top.Release.Name }}{{ end }}
         persistentVolumeClaim:
           claimName: {{ $volName }}{{ if eq "none" $v.addReleaseNameToResource }}-{{ $top.Release.Name }}{{ end }}
+      {{- end }}
+      {{- end }}
+      {{- if $v.privateCert.generate }}
+      volumes:
+      - name: private-keystore
+        emptyDir: {}
+      - name: private-cert
+        secret:
+          secretName: {{ include "pinglib.fullname" . }}-private-cert
       {{- end }}
       {{- end }}
 
@@ -172,7 +191,7 @@ spec:
 {{- $v := index . 1 -}}
 {{- $waitFor := index . 2 -}}
 {{- range $prod, $val := $waitFor }}
-  {{- if (index $top.Values $prod).enabled }}
+  {{- if or $top.Values.enabled (index $top.Values $prod).enabled }}
     {{- $host := include "pinglib.addreleasename" (list $top $v $prod) }}
     {{- $waitForServices := (index $top.Values $prod).services }}
     {{- $port := (index $waitForServices $val.service).servicePort | quote }}
@@ -181,22 +200,63 @@ spec:
   imagePullPolicy: {{ $v.image.pullPolicy }}
   image: {{ $v.externalImage.pingtoolkit }}
   command: ['sh', '-c', 'echo "Waiting for {{ $server }}..." && wait-for {{ $server }} -- echo "{{ $server }} running"']
-  resources:
-    limits:
-      cpu: 500m
-      memory: 128Mi
-    requests:
-      cpu: 250m
-      memory: 64Mi
-  securityContext:
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-      - ALL
-    readOnlyRootFilesystem: true
-    runAsGroup: 1000
-    runAsNonRoot: true
-    runAsUser: 100
+  {{ include "pinglib.workload.init.default.resources" . | nindent 2 }}
+  {{ include "pinglib.workload.init.default.securityContext" . | nindent 2 }}
     {{- end }}
   {{- end }}
+{{- end -}}
+
+
+{{- define "pinglib.workload.init.genPrivateCert" -}}
+{{- $top := index . 0 -}}
+{{- $v := index . 1 -}}
+{{- if $v.privateCert.generate }}
+- name: generate-private-cert-init
+  imagePullPolicy: {{ $v.image.pullPolicy }}
+  image: {{ $v.externalImage.pingtoolkit }}
+  command: ["/bin/sh"]
+  args:
+    - -c
+    - >-
+        _certPath=/run/secrets/private-cert &&
+        _certEnv=/run/secrets/private-keystore/keystore.env &&
+        echo "Generating ${_certEnv}" &&
+        PRIVATE_KEYSTORE_PIN=$(openssl rand -base64 32) &&
+        PRIVATE_KEYSTORE_TYPE=pkcs12 &&
+        PRIVATE_KEYSTORE=$(openssl ${PRIVATE_KEYSTORE_TYPE} -export -inkey ${_certPath}/tls.key -in ${_certPath}/tls.crt -password pass:${PRIVATE_KEYSTORE_PIN} | base64 | tr -d \\n) &&
+        echo "PRIVATE_KEYSTORE_TYPE=${PRIVATE_KEYSTORE_TYPE}">>${_certEnv} &&
+        echo "PRIVATE_KEYSTORE_PIN=${PRIVATE_KEYSTORE_PIN}">>${_certEnv} &&
+        echo "PRIVATE_KEYSTORE=${PRIVATE_KEYSTORE}">>${_certEnv}
+  {{ include "pinglib.workload.init.default.resources" . | nindent 2 }}
+  {{ include "pinglib.workload.init.default.securityContext" . | nindent 2 }}
+  {{/*--------------------- Resources ------------------*/}}
+  volumeMounts:
+  - name: private-cert
+    mountPath: /run/secrets/private-cert
+  - name: private-keystore
+    mountPath: /run/secrets/private-keystore
+{{- end }}
+{{- end -}}
+
+
+{{- define "pinglib.workload.init.default.resources" -}}
+resources:
+  limits:
+    cpu: 500m
+    memory: 128Mi
+  requests:
+    cpu: 250m
+    memory: 64Mi
+{{- end -}}
+
+{{- define "pinglib.workload.init.default.securityContext" -}}
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsGroup: 1000
+  runAsNonRoot: true
+  runAsUser: 100
 {{- end -}}

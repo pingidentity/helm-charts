@@ -1,0 +1,5 @@
+{{- include "pinglib.workload" (list . "pingaccess-engine") -}}
+
+
+{{- define "pingaccess-engine.workload" -}}
+{{- end -}}

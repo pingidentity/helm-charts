@@ -85,3 +85,15 @@ vault.hashicorp.com/agent-inject-template-{{ .name }}.json: |
 {{- end }}
 {{- end -}}
 {{- end -}}
+
+{{/* Generate certificates */}}
+{{- define "pinglib.gen-cert" -}}
+{{- $top := index . 0 -}}
+{{- $v := index . 1 -}}
+{{- $subjectCN := include "pinglib.addreleasename" (append . $v.name) -}}
+{{- $altIPs := list (  "127.0.0.1" ) -}}
+{{- $altNames := list $subjectCN "localhost" -}}
+{{- $cert := genSelfSignedCert $subjectCN $altIPs $altNames 365 -}}
+tls.crt: {{ $cert.Cert | b64enc }}
+tls.key: {{ $cert.Key | b64enc }}
+{{- end -}}

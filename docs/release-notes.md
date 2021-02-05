@@ -1,5 +1,88 @@
 # Release Notes
 
+
+## Release 0.4.1
+
+* Change default image tag to `2101` (January 2021).
+* Create private certs and keystore for use by images, only if the value
+  `{product-name}.privateCert.generate=true`.  Defaults are false.
+    * Helm will generate the a `tls.crt` and `tls.key`, place it into a kubernetes
+      secret called `{release-productname}-private-cert`.
+    * Mount the secret into the image under `/run/secrets/private-cert`
+    * An init container will pull the `tls.crt` and `tls.key` into a pkcs12
+      keystore and place it into a file `/run/secrets/private-keystore/keystore.env`
+      that will be mounted into the running container.
+    * When the container's hooks are running, it will source the environment variables
+      in this `keystore.env`.  The default variables set are:
+          * `PRIVATE_KEYSTORE_PIN={base64 random pin}`
+          * `PRIVATE_KEYSTORE_TYPE=pkcs12`
+          * `PRIVATE_KEYSTORE={pkcs12 keystore}`
+
+    !!! note "yaml to generate a private cert/keystore for pingaccess-admin"
+        ```yaml
+        pingaccess-admin:
+          privateCert:
+            generate: true
+        ```
+
+    !!! note "Example of created /run/secrets/private-keystore/keystore.env"
+        ```properties
+        PRIVATE_KEYSTORE_PIN=nrZmV4XdfK....
+        PRIVATE_KEYSTORE_TYPE=pkcs12
+        PRIVATE_KEYSTORE=MIIJgQIBAzCCCUcGC....
+        ```
+
+* Added support for PingAccess clustering between pingaccess-admin and multiple
+  pingaccess-engine containers.
+      * See [everything.yaml](examples/everything.yaml) for example of deploying
+        a PingAccess cluster using PingFederate/PingDirectory to authenticate
+      * It is *required* to either:
+          * generate the private cert (see above)
+            with the value of `pingaccess-admin.privateCert.generate=true` or
+          * provide your own cert secret called `{release-productname}-private-cert`
+            containing a valid `tls.crt` and `tls.key`.
+      * Enable both the `pingaccess-admin` and `pingaccess-engine` helm chart products
+
+
+    !!! note "Example values to create a clustered pingaccess"
+        ```yaml
+        pingaccess-admin:
+          enabled: true
+          privateCert:
+            generate: true
+          envs:
+            SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+            SERVER_PROFILE_PATH: baseline/pingaccess
+
+        pingaccess-engine:
+          enabled: true
+          envs:
+            SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+            SERVER_PROFILE_PATH: baseline/pingaccess
+
+        pingfederate-admin:
+          enabled: true
+          envs:
+            SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+            SERVER_PROFILE_PATH: baseline/pingfederate
+          container:
+            waitFor:
+              pingdirectory:
+                service: ldaps
+
+        pingfederate-engine:
+          enabled: true
+          envs:
+            SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+            SERVER_PROFILE_PATH: baseline/pingfederate
+
+        pingdirectory:
+          enabled: true
+          envs:
+            SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+            SERVER_PROFILE_PATH: baseline/pingdirectory
+        ```
+
 ## Release 0.4.0
 
 * Support availability of PingDirectory pods through the cluster headless kubernetes service.
