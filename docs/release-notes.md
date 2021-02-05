@@ -3,7 +3,7 @@
 
 ## Release 0.4.1
 
-* Change default image tag to `2012.1`.
+* Change default image tag to `2101` (January 2021).
 * Create private certs and keystore for use by images, only if the value
   `{product-name}.privateCert.generate=true`.  Defaults are false.
     * Helm will generate the a `tls.crt` and `tls.key`, place it into a kubernetes
@@ -34,10 +34,11 @@
 
 * Added support for PingAccess clustering between pingaccess-admin and multiple
   pingaccess-engine containers.
-      * It is *required* to generate the private cert (see above)
-        with the value of `pingaccess-admin.privateCert.generate=true` or provide your
-        own cert secret called `{release-productname}-private-cert` containing a valid
-        `tls.crt` and `tls.key`.
+      * It is *required* to either:
+          * generate the private cert (see above)
+            with the value of `pingaccess-admin.privateCert.generate=true` or
+          * provide your own cert secret called `{release-productname}-private-cert`
+            containing a valid `tls.crt` and `tls.key`.
       * Enable both the `pingaccess-admin` and `pingaccess-engine` helm chart products
 
 
@@ -49,13 +50,35 @@
             generate: true
           envs:
             SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
-            SERVER_PROFILE_PATH: pa-clustering/pingaccess
+            SERVER_PROFILE_PATH: baseline/pingaccess
 
         pingaccess-engine:
           enabled: true
           envs:
             SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
-            SERVER_PROFILE_PATH: pa-clustering/pingaccess
+            SERVER_PROFILE_PATH: baseline/pingaccess
+
+        pingfederate-admin:
+          enabled: true
+          envs:
+            SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+            SERVER_PROFILE_PATH: baseline/pingfederate
+          container:
+            waitFor:
+              pingdirectory:
+                service: ldaps
+
+        pingfederate-engine:
+          enabled: true
+          envs:
+            SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+            SERVER_PROFILE_PATH: baseline/pingfederate
+
+        pingdirectory:
+          enabled: true
+          envs:
+            SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+            SERVER_PROFILE_PATH: baseline/pingdirectory
         ```
 
 ## Release 0.4.0

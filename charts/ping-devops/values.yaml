@@ -42,9 +42,9 @@ global:
       # kubernetes.io/ingress.class: "nginx-public"
 
   ############################################################
-  # Internal Certficates
+  # Internal Certificates
   #
-  # If set to true, then an intnernal certificate secret will
+  # If set to true, then an internal certificate secret will
   # be created along with mount of the certificate in
   # /run/secrets/internal-cert (creates a tls.crt and tls.key)
   ############################################################
@@ -76,7 +76,7 @@ global:
   # By default the images uses will be indicated by these
   # variables.  An example might look like:
   #
-  #   pingidentity/ldap-sdk-tools:2010
+  #   pingidentity/pingdataconsole:2101
   #
   # NOTE: image.name MUST be set in child chart
   #   Example: image.name: pingfederate

@@ -20,7 +20,7 @@ image:
 An example product section specifies the name.
 
 ```yaml
-pingaccess:
+pingaccess-admin:
   image:
     name: pingaccess
 ```

@@ -50,6 +50,7 @@ nav:
       - Ingress: "config/ingress.md"
       - License: "config/license.md"
       - Probes: "config/probes.md"
+      - PrivateCerts: "config/private-cert.md"
       - Service: "config/service.md"
       - Vault: "config/vault.md"
       - Workload: "config/workload.md"
