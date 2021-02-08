@@ -48,6 +48,7 @@ spec:
       {{- end }}
       nodeSelector: {{ toYaml $v.container.nodeSelector | nindent 8 }}
       tolerations: {{ toYaml $v.container.tolerations | nindent 8 }}
+      affinity: {{ toYaml $v.container.affinity | nindent 8 }}
       initContainers:
         {{ include "pinglib.workload.init.waitfor" (append . $v.container.waitFor) | nindent 6 }}
         {{ include "pinglib.workload.init.genPrivateCert" . | nindent 6 }}
