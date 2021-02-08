@@ -3,8 +3,4 @@
 
 
 {{- define "pingdatagovernance.configmap" -}}
-{{- $top := index . 0 -}}
-{{- $v := index . 1 -}}
-data:
-  PD_ENGINE_PRIVATE_HOSTNAME: {{ include "pinglib.addreleasename" (append . $top.Values.pingdirectory.name) | quote }}
 {{- end -}}

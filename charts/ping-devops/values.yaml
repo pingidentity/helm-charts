@@ -217,6 +217,7 @@ global:
         memory: 8Gi
     nodeSelector: {}
     tolerations: []
+    affinity: {}
     terminationGracePeriodSeconds: 30
 
     envFrom: []
@@ -432,6 +433,29 @@ pingdirectory:
         cpu: 8000m
         memory: 8Gi
     terminationGracePeriodSeconds: 300
+    affinity:
+      podAntiAffinity:
+        # Add a hard requirement for each PD pod to be deployed to a different node
+        requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+              - pingdirectory
+          topologyKey: "kubernetes.io/hostname"
+        # Add a soft requirement for each PD pod to be deployed to a different AZ
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                - pingdirectory
+            topologyKey: "failure-domain.beta.kubernetes.io/zone"
+
 
 
   workload:
@@ -584,6 +608,40 @@ pingdatagovernance:
       - secretName: _defaultTlsSecret_
         hosts:
           - pingdatagovernance._defaultDomain_
+
+#############################################################
+# pingdatagovernancepap values
+#############################################################
+pingdatagovernancepap:
+  enabled: false
+  name: pingdatagovernancepap
+  image:
+    name: pingdatagovernancepap
+
+  envs:
+    SERVER_PROFILE_URL: https://www.github.com/pingidentity/pingidentity-server-profiles.git
+    SERVER_PROFILE_PATH: pdg-pap-integration/pingdatagovernancepap
+    PING_EXTERNAL_BASE_URL: localhost
+    HTTPS_PORT: "8443"
+
+  services:
+    https:
+      servicePort: 8443
+      containerPort: 8443
+      ingressPort: 443
+      dataService: true
+
+  ingress:
+    hosts:
+      - host: pingdatagovernancepap._defaultDomain_
+        paths:
+        - path: /
+          backend:
+            serviceName: https
+    tls:
+      - secretName: _defaultTlsSecret_
+        hosts:
+          - pingdatagovernancepap._defaultDomain_
 
 #############################################################
 # pingaccess-admin values
