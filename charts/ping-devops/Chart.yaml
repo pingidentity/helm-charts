@@ -32,8 +32,9 @@ name: ping-devops
 # 0.3.9 - Refer to http://helm.pingidentity.com/release-notes/#release-039
 # 0.4.0 - Refer to http://helm.pingidentity.com/release-notes/#release-040
 # 0.4.1 - Refer to http://helm.pingidentity.com/release-notes/#release-041
+# 0.4.2 - Refer to http://helm.pingidentity.com/release-notes/#release-042
 ########################################################################
-version: 0.4.1
+version: 0.4.2
 description: All Ping Identity product images with integration
 type: application
 home: https://devops.pingidentity.com/

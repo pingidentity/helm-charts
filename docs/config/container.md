@@ -24,6 +24,7 @@ global:
         memory: 8Gi
     nodeSelector: {}
     tolerations: []
+    affinity: {}
     terminationGracePeriodSeconds: 30
     securityContext: {}
 ```

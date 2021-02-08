@@ -1,6 +1,41 @@
 # Release Notes
 
 
+## Release 0.4.2
+
+* [Issue #79](https://github.com/pingidentity/helm-charts/issues/79) - Adding support for product PingDataGovernance PAP
+* [Issue #78](https://github.com/pingidentity/helm-charts/issues/78) - Adding support to provide affinity definition to the workload of a product.
+
+    !!! note "Example values.yaml to add podAntiAffinity to pingdirectory"
+        ```yaml
+        pingdirectory:
+          container:
+            affinity:
+              podAntiAffinity:
+                # Add a hard requirement for each PD pod to be deployed to a different node
+                requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                    - key: app.kubernetes.io/name
+                      operator: In
+                      values:
+                      - pingdirectory
+                  topologyKey: "kubernetes.io/hostname"
+                # Add a soft requirement for each PD pod to be deployed to a different AZ
+                preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 1
+                  podAffinityTerm:
+                    labelSelector:
+                      matchExpressions:
+                      - key: app.kubernetes.io/name
+                        operator: In
+                        values:
+                        - pingdirectory
+                    topologyKey: "failure-domain.beta.kubernetes.io/zone"
+        ```
+
+* [Issue #80](https://github.com/pingidentity/helm-charts/issues/80) - Adding support for importing product license secret into container
+
 ## Release 0.4.1
 
 * Change default image tag to `2101` (January 2021).
