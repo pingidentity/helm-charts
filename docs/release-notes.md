@@ -34,8 +34,6 @@
                     topologyKey: "failure-domain.beta.kubernetes.io/zone"
         ```
 
-* [Issue #80](https://github.com/pingidentity/helm-charts/issues/80) - Adding support for importing product license secret into container
-
 ## Release 0.4.1
 
 * Change default image tag to `2101` (January 2021).

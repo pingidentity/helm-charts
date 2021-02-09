@@ -422,6 +422,29 @@ pingdirectory:
   name: pingdirectory
   image:
     name: pingdirectory
+  secretVolumeMounts:
+    license:
+      file: my-license/pingdirectory-8.1.lic
+      mountPath: /opt/in/pd.profile/server-root/pre-setup/PingDirectory.lic
+    myProps:
+      file: my-props/myPropertyFile.props
+      mountPath: /opt/in/product.properties
+
+  volumeMounts:
+    secrets:
+      license:
+        file: my-license/pingdirectory-8.1.lic
+        mountPath: /opt/in/pd.profile/server-root/pre-setup/PingDirectory.lic
+      myProps:
+        file: my-props/myPropertyFile.props
+        mountPath: /opt/in/product.properties
+    configMaps:
+      myConfig:
+        file: configs/myConfig.txt
+        mountPath: /opt/in/config.txt
+      myProps:
+        file: my-props/myPropertyFile.props
+        mountPath: /opt/in/product.properties
 
   container:
     replicaCount: 2
@@ -433,28 +456,29 @@ pingdirectory:
         cpu: 8000m
         memory: 8Gi
     terminationGracePeriodSeconds: 300
-    affinity:
-      podAntiAffinity:
-        # Add a hard requirement for each PD pod to be deployed to a different node
-        requiredDuringSchedulingIgnoredDuringExecution:
-        - labelSelector:
-            matchExpressions:
-            - key: app.kubernetes.io/name
-              operator: In
-              values:
-              - pingdirectory
-          topologyKey: "kubernetes.io/hostname"
-        # Add a soft requirement for each PD pod to be deployed to a different AZ
-        preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 1
-          podAffinityTerm:
-            labelSelector:
-              matchExpressions:
-              - key: app.kubernetes.io/name
-                operator: In
-                values:
-                - pingdirectory
-            topologyKey: "failure-domain.beta.kubernetes.io/zone"
+    # affinity:
+    #   podAntiAffinity:
+    #     # Add a hard requirement for each PD pod to be deployed to a different node
+    #     requiredDuringSchedulingIgnoredDuringExecution:
+    #     - labelSelector:
+    #         matchExpressions:
+    #         - key: app.kubernetes.io/name
+    #           operator: In
+    #           values:
+    #           - pingdirectory
+    #       topologyKey: "kubernetes.io/hostname"
+    #     # Add a soft requirement for each PD pod to be deployed to a different AZ
+    #     preferredDuringSchedulingIgnoredDuringExecution:
+    #     - weight: 1
+    #       podAffinityTerm:
+    #         labelSelector:
+    #           matchExpressions:
+    #           - key: app.kubernetes.io/name
+    #             operator: In
+    #             values:
+    #             - pingdirectory
+    #         topologyKey: "failure-domain.beta.kubernetes.io/zone"     <--- kubernetes prior to 1.17
+    #         topologyKey: "topology.kubernetes.io/region"              <--- kubernetes 1.17+
 
 
 
