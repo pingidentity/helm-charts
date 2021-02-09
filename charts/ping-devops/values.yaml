@@ -459,8 +459,6 @@ pingdirectory:
     #         topologyKey: "failure-domain.beta.kubernetes.io/zone"     <--- kubernetes prior to 1.17
     #         topologyKey: "topology.kubernetes.io/region"              <--- kubernetes 1.17+
 
-
-
   workload:
     type: StatefulSet
     statefulSet:
