@@ -422,29 +422,6 @@ pingdirectory:
   name: pingdirectory
   image:
     name: pingdirectory
-  secretVolumeMounts:
-    license:
-      file: my-license/pingdirectory-8.1.lic
-      mountPath: /opt/in/pd.profile/server-root/pre-setup/PingDirectory.lic
-    myProps:
-      file: my-props/myPropertyFile.props
-      mountPath: /opt/in/product.properties
-
-  volumeMounts:
-    secrets:
-      license:
-        file: my-license/pingdirectory-8.1.lic
-        mountPath: /opt/in/pd.profile/server-root/pre-setup/PingDirectory.lic
-      myProps:
-        file: my-props/myPropertyFile.props
-        mountPath: /opt/in/product.properties
-    configMaps:
-      myConfig:
-        file: configs/myConfig.txt
-        mountPath: /opt/in/config.txt
-      myProps:
-        file: my-props/myPropertyFile.props
-        mountPath: /opt/in/product.properties
 
   container:
     replicaCount: 2
