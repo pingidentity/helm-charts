@@ -433,6 +433,8 @@ pingdirectory:
         cpu: 8000m
         memory: 8Gi
     terminationGracePeriodSeconds: 300
+    # Example affinity for typical directory installation
+    #
     # affinity:
     #   podAntiAffinity:
     #     # Add a hard requirement for each PD pod to be deployed to a different node
