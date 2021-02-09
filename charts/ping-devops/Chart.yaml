@@ -4,36 +4,11 @@
 apiVersion: v2
 name: ping-devops
 ########################################################################
-# 0.2.0 - Initial ping devops charts (using sprint 2009)
-# 0.2.1 - Removed default storage class on directory pvc.  Blank is default
-# 0.2.2 - Added service-cluster to pingdatasync and pingdatagoverance for
-#         pingdataconsole access.
-#       - Appended '-cluster' to hostname for pingdataconsole.
-# 0.2.3 - Resolved PD_ENGINE_PRIVATE_HOSTNAME issue on pingdataconsole configmap
-# 0.2.4 - Turn off vault for ldap-sdk-tools
-# 0.2.5 - Add ability to use external images (GDO-590, helm-charts/issues/10)
-# 0.2.6 - Fix a regression with the clusterIdentifier on depoyments/statefulsets
-# 0.2.7 - Changing default pullPolicy to Always.  Helps when using changing edge tag
-#         Increasing liveness/readiness probe timeoutSeconds to 5 as 1 is often to short
-# 0.2.8 - Cleanup _ingress template
-# 0.2.9 - Create release env-vars congigmap.  Provides each products PRIVATE_HOSTNAME
-# 0.3.0 - Consolidate deployment/statefulset templates to a workload template
-#         consolidated deployment values into a workload.deployment and
-#         workload.statefulSet values.
-# 0.3.1 - Add back {release}-env-vars configmap ref back as well as supporting
-#         container.envFrom values
-# 0.3.2 - Refer to http://helm.pingidentity.com/release-notes/#release-032
-# 0.3.3 - Refer to http://helm.pingidentity.com/release-notes/#release-033
-# 0.3.4 - Refer to http://helm.pingidentity.com/release-notes/#release-034
-# 0.3.5 - Refer to http://helm.pingidentity.com/release-notes/#release-035
-# 0.3.6 - Refer to http://helm.pingidentity.com/release-notes/#release-036
-# 0.3.7 - Refer to http://helm.pingidentity.com/release-notes/#release-037
-# 0.3.8 - Refer to http://helm.pingidentity.com/release-notes/#release-038
-# 0.3.9 - Refer to http://helm.pingidentity.com/release-notes/#release-039
 # 0.4.0 - Refer to http://helm.pingidentity.com/release-notes/#release-040
 # 0.4.1 - Refer to http://helm.pingidentity.com/release-notes/#release-041
+# 0.4.2 - Refer to http://helm.pingidentity.com/release-notes/#release-042
 ########################################################################
-version: 0.4.1
+version: 0.4.2
 description: All Ping Identity product images with integration
 type: application
 home: https://devops.pingidentity.com/

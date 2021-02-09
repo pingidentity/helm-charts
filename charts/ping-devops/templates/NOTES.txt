@@ -3,7 +3,7 @@
 #
 #  {{ printf $format " " "       Product       " " Workload  " " Ing "}}
 #  {{ printf $format " " "---------------------" "-----------" "-----"}}
-{{- $products := list "pingaccess-admin" "pingaccess-engine" "pingdataconsole" "pingdatagovernance" "pingdatasync" "pingdelegator" "pingdirectory" "pingfederate-admin" "pingfederate-engine" "---" "ldap-sdk-tools" "pd-replication-timing" }}
+{{- $products := list "pingaccess-admin" "pingaccess-engine" "pingdataconsole" "pingdatagovernance" "pingdatagovernancepap" "pingdatasync" "pingdelegator" "pingdirectory" "pingfederate-admin" "pingfederate-engine" "---" "ldap-sdk-tools" "pd-replication-timing" }}
 {{- range $prodName := $products }}
 {{- if eq $prodName "---" }}
 #
