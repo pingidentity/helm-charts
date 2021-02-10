@@ -4,11 +4,9 @@
 {{- define "pingdirectory.service-cluster" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
-{{- if or (eq "edge" ($v.image.tag | toString)) (hasPrefix "2012" ($v.image.tag | toString)) }}
 metadata:
   annotations:
     service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
 spec:
   publishNotReadyAddresses: true
-{{- end -}}
 {{- end -}}
