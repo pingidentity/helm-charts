@@ -3,6 +3,11 @@
 
 ## Release 0.4.2
 
+* [Issue #83](https://github.com/pingidentity/helm-charts/issues/83) - Remove old pingdirectory tag check when creating service-cluster.
+  This caused issues when creating a pingdirectory deployment with most recent tags (tags other than edge or 2012).
+
+## Release 0.4.2
+
 * [Issue #79](https://github.com/pingidentity/helm-charts/issues/79) - Adding support for product PingDataGovernance PAP
 * [Issue #78](https://github.com/pingidentity/helm-charts/issues/78) - Adding support to provide affinity definition to the workload of a product.
 
