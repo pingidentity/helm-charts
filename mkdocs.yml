@@ -53,6 +53,7 @@ nav:
       - PrivateCerts: "config/private-cert.md"
       - Service: "config/service.md"
       - Vault: "config/vault.md"
+      - VolumeMounts: "config/volume-mounts.md"
       - Workload: "config/workload.md"
   - Examples:
       - Introduction: "examples/index.md"

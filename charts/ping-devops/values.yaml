@@ -230,6 +230,38 @@ global:
     #     name: my-example-secrets
     #     optional: true
 
+    ############################################################
+    # volumeMounts
+    #
+    # Provide ability to mount secrets and configMaps into
+    # container as volumes.
+    #
+    # volumeMounts:
+    #   {name for mount}:
+    #     name: {custom-name for secret/configMap}   # OPTIONAL: If set, secret/conficMap will have this name
+    #                                                # DEFAULT : {product w/ rel-name}-{volMount name}-{type}
+    #
+    #     type: <secret|configMap>                   # REQUIRED: secret or configMap
+    #
+    #     localFile: <path to file>                  # OPTIONAL: If set, secret/configMap will be created
+    #                                                # DEFAULT : secret/configMap not created, expected to be available
+    #
+    #     mountPath: <path to mount in container>    # REQUIRED: Path in container to mount secret/configMap
+    volumeMounts:
+      license:
+        name: my-own-secret-name                         # OPTIONAL: If set, secret will have this name otherwise
+                                                        # DEFAULT : {rel-name-product}-license-secret
+        type: secret
+        containerMountPath: /opt/in/pd.profile/server-root/pre-setup/PingDirectory.lic
+      hook-add-something:
+        name: my-own-secret-name                         # OPTIONAL: If set, secret will have this name otherwise
+                                                        # DEFAULT : {rel-name-product}-license-secret
+        type: congigMap
+        localFile: my-license/pingdirectory-8.1.lic      # OPTIONAL: If set, secret will be created by helm
+                                                        # DEFAULT : Secret is expected to be available
+        containerMountPath: /opt/in/pd.profile/server-root/pre-setup/PingDirectory.lic
+
+
   ############################################################
   # Probes
   #
@@ -319,6 +351,22 @@ pingfederate-admin:
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: getting-started/pingfederate
+
+  # Example: Pulling in a secret (called pingfederate-license) into container
+  #          mounting the name (license) value into a file (/opt/in/.../pingfederate.lic)
+  #
+  # secretVolumes:
+  #   pingfederate-license:
+  #     items:
+  #       license: /opt/in/instance/server/default/conf/pingfederate.lic
+
+  # Example: Pulling in a configMap (called pingfederate-props) into container
+  #          mounting the name (pf-props) value into a file (/opt/in/.../pingfederate.properties)
+  #
+  # configMapVolumes:
+  #  pingfederate-props:
+  #     items:
+  #      pf-props: /opt/in/etc/pingfederate.properties
 
   services:
     https:

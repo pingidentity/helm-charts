@@ -141,6 +141,7 @@ spec:
           readOnly: true
         {{- end }}
         {{- end }}
+        {{- include "pinglib.workload.volumeMounts" $v | nindent 8 }}
 
         {{/*---------------- Security Context -------------*/}}
         {{/* Futures: Support for container securityContexts */}}
@@ -169,6 +170,7 @@ spec:
           secretName: {{ include "pinglib.fullname" . }}-private-cert
       {{- end }}
       {{- end }}
+      {{- include "pinglib.workload.volumes" $v | nindent 6 }}
 
   {{/*----------------- VolumeClameTemplates ------------------*/}}
   {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
@@ -260,4 +262,57 @@ securityContext:
   runAsGroup: 1000
   runAsNonRoot: true
   runAsUser: 100
+{{- end -}}
+
+
+{{/*--------------------------------------------------
+  template volumes and volumeMounts expect a struture
+  like:
+
+  secretVolumes:
+    ping-license:
+      type: secret
+      name: pingfederate-license
+      items:
+        license: /opt/in/instance/server/default/conf/pingfederate.lic
+        hello: /opt/in/instance/server/default/hello.txt
+  configMapVolumes:
+------------------------------------------------------*/}}
+{{- define "pinglib.workload.volumes" -}}
+{{ $v := . }}
+volumes:
+{{ range tuple "secretVolumes" "configMapVolumes" }}
+{{ $volType := . }}
+{{- range $volName, $volVal := (index $v .) }}
+- name: {{ $volName }}
+  {{- if eq $volType "secretVolumes" }}
+  secret:
+    secretName: {{ $volName }}
+  {{- else if eq $volType "configMapVolumes" }}
+  configMap:
+    name: {{ $volName }}
+  {{- end }}
+    items:
+    {{- range $keyName, $keyVal := $volVal.items }}
+    - key: {{ $keyName }}
+      path: {{ base $keyVal }}
+    {{- end }}
+{{- end }}
+{{- end }}
+{{- end -}}
+
+{{- define "pinglib.workload.volumeMounts" -}}
+{{ $v := . }}
+volumeMounts:
+{{ range tuple "secretVolumes" "configMapVolumes" }}
+{{ $volType := . }}
+{{- range $volName, $volVal := (index $v .) }}
+{{- range $keyName, $keyVal := $volVal.items }}
+- name: {{ $volName }}
+  mountPath: {{ $keyVal }}
+  subPath: {{ base $keyVal }}
+  readOnly: true
+{{- end }}
+{{- end }}
+{{- end }}
 {{- end -}}
