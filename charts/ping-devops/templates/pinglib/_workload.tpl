@@ -45,7 +45,9 @@ spec:
         checksum/config: {{ print $prodChecksum $globChecksum | sha256sum }}
     spec:
       terminationGracePeriodSeconds: {{ $v.container.terminationGracePeriodSeconds }}
-      {{- if $v.vault.enabled }}
+      {{- if $v.workload.serviceAccount.generate }}
+      serviceAccountName: {{ include "pinglib.fullname" . }}
+      {{- else if $v.vault.enabled }}
       serviceAccountName: {{ $v.vault.hashicorp.serviceAccountName }}
       {{- end }}
       nodeSelector: {{ toYaml $v.container.nodeSelector | nindent 8 }}

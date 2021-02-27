@@ -206,6 +206,14 @@ global:
       # runAsNonRoot: true
       # runAsUser: 100
 
+    ############################################################
+    # Service Account
+    #
+    # https://kubernetes.io/docs/reference/kubernetes-api/authentication-resources/service-account-v1/
+    ############################################################
+    serviceAccount:
+      generate: false
+
   ############################################################
   # Container Information
   #
