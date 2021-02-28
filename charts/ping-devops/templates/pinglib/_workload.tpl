@@ -280,10 +280,10 @@ securityContext:
 ------------------------------------------------------*/}}
 {{- define "pinglib.workload.volumes" -}}
 {{ $v := . }}
-volumes:
 {{ range tuple "secretVolumes" "configMapVolumes" }}
 {{ $volType := . }}
 {{- range $volName, $volVal := (index $v .) }}
+volumes:
 - name: {{ $volName }}
   {{- if eq $volType "secretVolumes" }}
   secret:
