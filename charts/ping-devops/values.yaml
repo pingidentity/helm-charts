@@ -230,38 +230,6 @@ global:
     #     name: my-example-secrets
     #     optional: true
 
-    ############################################################
-    # volumeMounts
-    #
-    # Provide ability to mount secrets and configMaps into
-    # container as volumes.
-    #
-    # volumeMounts:
-    #   {name for mount}:
-    #     name: {custom-name for secret/configMap}   # OPTIONAL: If set, secret/conficMap will have this name
-    #                                                # DEFAULT : {product w/ rel-name}-{volMount name}-{type}
-    #
-    #     type: <secret|configMap>                   # REQUIRED: secret or configMap
-    #
-    #     localFile: <path to file>                  # OPTIONAL: If set, secret/configMap will be created
-    #                                                # DEFAULT : secret/configMap not created, expected to be available
-    #
-    #     mountPath: <path to mount in container>    # REQUIRED: Path in container to mount secret/configMap
-    volumeMounts:
-      license:
-        name: my-own-secret-name                         # OPTIONAL: If set, secret will have this name otherwise
-                                                        # DEFAULT : {rel-name-product}-license-secret
-        type: secret
-        containerMountPath: /opt/in/pd.profile/server-root/pre-setup/PingDirectory.lic
-      hook-add-something:
-        name: my-own-secret-name                         # OPTIONAL: If set, secret will have this name otherwise
-                                                        # DEFAULT : {rel-name-product}-license-secret
-        type: congigMap
-        localFile: my-license/pingdirectory-8.1.lic      # OPTIONAL: If set, secret will be created by helm
-                                                        # DEFAULT : Secret is expected to be available
-        containerMountPath: /opt/in/pd.profile/server-root/pre-setup/PingDirectory.lic
-
-
   ############################################################
   # Probes
   #
