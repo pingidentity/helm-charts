@@ -308,11 +308,11 @@ volumes:
 
 {{- define "pinglib.workload.volumeMounts" -}}
 {{ $v := . }}
-volumeMounts:
 {{ range tuple "secretVolumes" "configMapVolumes" }}
 {{ $volType := . }}
 {{- range $volName, $volVal := (index $v .) }}
 {{- range $keyName, $keyVal := $volVal.items }}
+volumeMounts:
 - name: {{ $volName }}
   mountPath: {{ $keyVal }}
   subPath: {{ base $keyVal }}

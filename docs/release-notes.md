@@ -17,9 +17,9 @@
                 hello: /opt/in/instance/server/default/hello.txt
 
           configMapVolumes:
-          pingfederate-props:
-              items:
-                pf-props: /opt/in/etc/pingfederate.properties
+            pingfederate-props:
+                items:
+                  pf-props: /opt/in/etc/pingfederate.properties
         ```
   In this case, a secret (called pingfederate-license) and configMap (called pingfederate-props) will bring in a
   couple of key values (license, hello) and (pf-props) into the container as specific files. The results will looks like:

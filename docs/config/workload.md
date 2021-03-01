@@ -74,3 +74,23 @@ global:
             runAsUser: 3000
             fsGroup: 2000
     ```
+
+!!! note "WaitFor"
+    For each product, a `waitFor` structure providing the name, service and timeout (in seconds)
+    that should be waited on before the running container con continue.  This
+    will inject an initContainer using the PingToolkit wait-for utility until it
+    can `nc host:port` before continuing.
+
+    Example: PingFederate Admin waiting on pingdirectory ldaps service to be available
+    ```yaml
+    pingfederate-admin:
+      container:
+        waitFor:
+          pingdirectory:
+            service: ldaps
+          pingdatagovernance:
+            service: https
+    ```
+
+    * By default, the `pingfederate-engine` will waitFor `pingfederate-admin` before it starts.
+    * By default, the `pingaccess-engine` will waitFor `pingaccess-admin` before it starts.
