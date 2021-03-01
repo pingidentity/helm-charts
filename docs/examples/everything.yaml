@@ -19,6 +19,7 @@ pingaccess-admin:
     waitFor:
       pingfederate-engine:
         service: https
+        timeoutSeconds: 300
 
 pingaccess-engine:
   enabled: true
