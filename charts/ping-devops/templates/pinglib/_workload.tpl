@@ -198,11 +198,12 @@ spec:
     {{- $host := include "pinglib.addreleasename" (list $top $v $prod) }}
     {{- $waitForServices := (index $top.Values $prod).services }}
     {{- $port := (index $waitForServices $val.service).servicePort | quote }}
+    {{- $timeout := printf "-t %d" (int (default 30 $val.timeoutSeconds )) -}}
     {{- $server := printf "%s:%s" $host $port }}
 - name: wait-for-{{ $prod }}-init
   imagePullPolicy: {{ $v.image.pullPolicy }}
   image: {{ $v.externalImage.pingtoolkit }}
-  command: ['sh', '-c', 'echo "Waiting for {{ $server }}..." && wait-for {{ $server }} -- echo "{{ $server }} running"']
+  command: ['sh', '-c', 'echo "Waiting for {{ $server }}..." && wait-for {{ $server }} {{ $timeout }} -- echo "{{ $server }} running"']
   {{ include "pinglib.workload.init.default.resources" . | nindent 2 }}
   {{ include "pinglib.workload.init.default.securityContext" . | nindent 2 }}
     {{- end }}
@@ -269,14 +270,18 @@ securityContext:
   template volumes and volumeMounts expect a struture
   like:
 
-  secretVolumes:
-    ping-license:
-      type: secret
-      name: pingfederate-license
-      items:
-        license: /opt/in/instance/server/default/conf/pingfederate.lic
-        hello: /opt/in/instance/server/default/hello.txt
+  pingfederate-admin
+    secretVolumes:
+      pingfederate-license:
+        items:
+          license: /opt/in/instance/server/default/conf/pingfederate.lic
+          hello: /opt/in/instance/server/default/hello.txt
+
   configMapVolumes:
+    pingfederate-props:
+        items:
+          pf-props: /opt/in/etc/pingfederate.properties
+
 ------------------------------------------------------*/}}
 {{- define "pinglib.workload.volumes" -}}
 {{ $v := . }}
