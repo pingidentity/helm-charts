@@ -315,6 +315,7 @@ pingfederate-admin:
   #   waitFor:
   #     pingdirectory:
   #       service: ldaps
+  #       timeoutSeconds: 300
 
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
@@ -377,6 +378,7 @@ pingfederate-engine:
     waitFor:
       pingfederate-admin:
         service: https
+        timeoutSeconds: 300
 
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
@@ -674,6 +676,7 @@ pingaccess-admin:
   #   waitFor:
   #     pingfederate-admin:
   #       service: https
+  #       timeoutSeconds: 300
 
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
@@ -715,6 +718,7 @@ pingaccess-engine:
     waitFor:
       pingaccess-admin:
         service: https
+        timeoutSeconds: 300
 
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
