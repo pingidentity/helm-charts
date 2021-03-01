@@ -4,7 +4,7 @@ Provides support for importing a secret containing license into the container.
 
 ## Global/Product Section
 
-Adds ability to add secret and configMap data to a container via a VolumeMount.  A good use of this practice - bringing product
+Adds ability to use secret and configMap data in a container via a VolumeMount.  A common use for this - bringing product
 licenses into the container.
 
 !!! note "Example of creating 3 volume mounts in container from secret and configMap"
@@ -21,6 +21,8 @@ licenses into the container.
             items:
               pf-props: /opt/in/etc/pingfederate.properties
     ```
+
+> [Secrets](https://kubernetes.io/docs/tasks/configmap-secret/managing-secret-using-kubectl) and [ConfigMaps](https://kubernetes.io/docs/concepts/configuration/configmap/) must be created in the cluster prior to deploying the helm chart.
 
 In this case, a secret (called pingfederate-license) and configMap (called pingfederate-props) will bring in a
 couple of key values (license, hello) and (pf-props) into the container as specific files. The results will looks like:
