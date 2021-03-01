@@ -141,6 +141,7 @@ spec:
           readOnly: true
         {{- end }}
         {{- end }}
+        {{- include "pinglib.workload.volumeMounts" $v | nindent 8 }}
 
         {{/*---------------- Security Context -------------*/}}
         {{/* Futures: Support for container securityContexts */}}
@@ -169,6 +170,7 @@ spec:
           secretName: {{ include "pinglib.fullname" . }}-private-cert
       {{- end }}
       {{- end }}
+      {{- include "pinglib.workload.volumes" $v | nindent 6 }}
 
   {{/*----------------- VolumeClameTemplates ------------------*/}}
   {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
@@ -196,11 +198,12 @@ spec:
     {{- $host := include "pinglib.addreleasename" (list $top $v $prod) }}
     {{- $waitForServices := (index $top.Values $prod).services }}
     {{- $port := (index $waitForServices $val.service).servicePort | quote }}
+    {{- $timeout := printf "-t %d" (int (default 300 $val.timeoutSeconds )) -}}
     {{- $server := printf "%s:%s" $host $port }}
 - name: wait-for-{{ $prod }}-init
   imagePullPolicy: {{ $v.image.pullPolicy }}
   image: {{ $v.externalImage.pingtoolkit }}
-  command: ['sh', '-c', 'echo "Waiting for {{ $server }}..." && wait-for {{ $server }} -- echo "{{ $server }} running"']
+  command: ['sh', '-c', 'echo "Waiting for {{ $server }}..." && wait-for {{ $server }} {{ $timeout }} -- echo "{{ $server }} running"']
   {{ include "pinglib.workload.init.default.resources" . | nindent 2 }}
   {{ include "pinglib.workload.init.default.securityContext" . | nindent 2 }}
     {{- end }}
@@ -260,4 +263,61 @@ securityContext:
   runAsGroup: 1000
   runAsNonRoot: true
   runAsUser: 100
+{{- end -}}
+
+
+{{/*--------------------------------------------------
+  template volumes and volumeMounts expect a struture
+  like:
+
+  pingfederate-admin
+    secretVolumes:
+      pingfederate-license:
+        items:
+          license: /opt/in/instance/server/default/conf/pingfederate.lic
+          hello: /opt/in/instance/server/default/hello.txt
+
+  configMapVolumes:
+    pingfederate-props:
+        items:
+          pf-props: /opt/in/etc/pingfederate.properties
+
+------------------------------------------------------*/}}
+{{- define "pinglib.workload.volumes" -}}
+{{ $v := . }}
+{{ range tuple "secretVolumes" "configMapVolumes" }}
+{{ $volType := . }}
+{{- range $volName, $volVal := (index $v .) }}
+volumes:
+- name: {{ $volName }}
+  {{- if eq $volType "secretVolumes" }}
+  secret:
+    secretName: {{ $volName }}
+  {{- else if eq $volType "configMapVolumes" }}
+  configMap:
+    name: {{ $volName }}
+  {{- end }}
+    items:
+    {{- range $keyName, $keyVal := $volVal.items }}
+    - key: {{ $keyName }}
+      path: {{ base $keyVal }}
+    {{- end }}
+{{- end }}
+{{- end }}
+{{- end -}}
+
+{{- define "pinglib.workload.volumeMounts" -}}
+{{ $v := . }}
+{{ range tuple "secretVolumes" "configMapVolumes" }}
+{{ $volType := . }}
+{{- range $volName, $volVal := (index $v .) }}
+{{- range $keyName, $keyVal := $volVal.items }}
+volumeMounts:
+- name: {{ $volName }}
+  mountPath: {{ $keyVal }}
+  subPath: {{ base $keyVal }}
+  readOnly: true
+{{- end }}
+{{- end }}
+{{- end }}
 {{- end -}}

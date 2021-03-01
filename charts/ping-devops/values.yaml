@@ -315,10 +315,27 @@ pingfederate-admin:
   #   waitFor:
   #     pingdirectory:
   #       service: ldaps
+  #       timeoutSeconds: 300
 
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: getting-started/pingfederate
+
+  # Example: Pulling in a secret (called pingfederate-license) into container
+  #          mounting the name (license) value into a file (/opt/in/.../pingfederate.lic)
+  #
+  # secretVolumes:
+  #   pingfederate-license:
+  #     items:
+  #       license: /opt/in/instance/server/default/conf/pingfederate.lic
+
+  # Example: Pulling in a configMap (called pingfederate-props) into container
+  #          mounting the name (pf-props) value into a file (/opt/in/.../pingfederate.properties)
+  #
+  # configMapVolumes:
+  #  pingfederate-props:
+  #     items:
+  #      pf-props: /opt/in/etc/pingfederate.properties
 
   services:
     https:
@@ -361,6 +378,7 @@ pingfederate-engine:
     waitFor:
       pingfederate-admin:
         service: https
+        timeoutSeconds: 300
 
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
@@ -658,6 +676,7 @@ pingaccess-admin:
   #   waitFor:
   #     pingfederate-admin:
   #       service: https
+  #       timeoutSeconds: 300
 
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
@@ -699,6 +718,7 @@ pingaccess-engine:
     waitFor:
       pingaccess-admin:
         service: https
+        timeoutSeconds: 300
 
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
