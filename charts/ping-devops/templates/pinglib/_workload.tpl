@@ -198,7 +198,7 @@ spec:
     {{- $host := include "pinglib.addreleasename" (list $top $v $prod) }}
     {{- $waitForServices := (index $top.Values $prod).services }}
     {{- $port := (index $waitForServices $val.service).servicePort | quote }}
-    {{- $timeout := printf "-t %d" (int (default 30 $val.timeoutSeconds )) -}}
+    {{- $timeout := printf "-t %d" (int (default 300 $val.timeoutSeconds )) -}}
     {{- $server := printf "%s:%s" $host $port }}
 - name: wait-for-{{ $prod }}-init
   imagePullPolicy: {{ $v.image.pullPolicy }}
