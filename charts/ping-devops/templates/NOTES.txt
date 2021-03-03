@@ -1,8 +1,8 @@
 {{ include "pinglib.notes.header" . }}
-{{- $format := "%-1.1s %-21.21s %-11.11s %5.5s" }}
+{{- $format := "%-1.1s %-21.21s %-11.11s %-5.5s %-5.5s %-5.5s %-5.5s %5.5s" }}
 #
-#  {{ printf $format " " "       Product       " " Workload  " " Ing "}}
-#  {{ printf $format " " "---------------------" "-----------" "-----"}}
+#  {{ printf $format " " "       Product       " " Workload  " "cpu-R" "cpu-L" "mem-R" "mem-L" " Ing "}}
+#  {{ printf $format " " "---------------------" "-----------" "-----"  "-----"  "-----"  "-----" "-----"}}
 {{- $products := list "pingaccess-admin" "pingaccess-engine" "pingdataconsole" "pingdatagovernance" "pingdatagovernancepap" "pingdatasync" "pingdelegator" "pingdirectory" "pingfederate-admin" "pingfederate-engine" "---" "ldap-sdk-tools" "pd-replication-timing" }}
 {{- range $prodName := $products }}
 {{- if eq $prodName "---" }}
@@ -10,9 +10,9 @@
 {{- end }}
 {{- with (index $.Values $prodName)}}
     {{- if .enabled }}
-#  {{ printf $format "√" $prodName (.workload.type | lower) (toString .ingress.enabled) }}
+#  {{ printf $format "√" $prodName (.workload.type | lower) (toString .container.resources.requests.cpu) (toString .container.resources.limits.cpu) (toString .container.resources.requests.memory) (toString .container.resources.limits.memory) (toString .ingress.enabled) }}
     {{- else }}
-#  {{ printf $format "" $prodName "" "" }}
+#  {{ printf $format "" $prodName "" "" "" "" "" "" }}
     {{- end }}
 {{- end }}
 {{- end }}

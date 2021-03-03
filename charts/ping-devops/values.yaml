@@ -206,15 +206,15 @@ global:
     # replicaCount - Instructs Deployment/StatefulSet now many containers to run
     replicaCount: 1
 
-    # resources - Reqeust  0.5 cpu/0.5 GB
-    #             Limit    4.0 cpu/8.0 GB
+    # resources - Reqeust  0 cpu/0 GB
+    #             Limit    4 cpu/0 GB
     resources:
       requests:
-        cpu: 500m
-        memory: 500Mi
+        cpu: 0
+        memory: 0
       limits:
-        cpu: 4
-        memory: 8Gi
+        cpu: 0
+        memory: 0
     nodeSelector: {}
     tolerations: []
     affinity: {}
@@ -303,6 +303,15 @@ pingfederate-admin:
   image:
     name: pingfederate
 
+  container:
+    resources:
+      requests:
+        cpu: 0
+        memory: 1Gi
+      limits:
+        cpu: 2
+        memory: 4Gi
+
   workload:
     deployment:
       strategy:
@@ -375,6 +384,13 @@ pingfederate-engine:
     name: pingfederate
 
   container:
+    resources:
+      requests:
+        cpu: 0
+        memory: 1Gi
+      limits:
+        cpu: 2
+        memory: 4Gi
     waitFor:
       pingfederate-admin:
         service: https
@@ -445,11 +461,12 @@ pingdirectory:
     replicaCount: 2
     resources:
       requests:
-        cpu: 500m
+        cpu: 0
         memory: 2Gi
       limits:
-        cpu: 8000m
+        cpu: 2
         memory: 8Gi
+
     terminationGracePeriodSeconds: 300
     # Example affinity for typical directory installation
     #
@@ -537,6 +554,15 @@ pingdelegator:
   image:
     name: pingdelegator
 
+  container:
+    resources:
+      requests:
+        cpu: 0
+        memory: 32Mi
+      limits:
+        cpu: 500m
+        memory: 64Mi
+
   publicPort: 443
 
   tokenProvider:
@@ -578,6 +604,15 @@ pingdatasync:
   image:
     name: pingdatasync
 
+  container:
+    resources:
+      requests:
+        cpu: 0
+        memory: .75Gi
+      limits:
+        cpu: 2
+        memory: 2Gi
+
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: simple-sync/pingdatasync
@@ -600,6 +635,15 @@ pingdatagovernance:
   name: pingdatagovernance
   image:
     name: pingdatagovernance
+
+  container:
+    resources:
+      requests:
+        cpu: 0
+        memory: 1.5Gi
+      limits:
+        cpu: 2
+        memory: 4Gi
 
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
@@ -637,6 +681,15 @@ pingdatagovernancepap:
   image:
     name: pingdatagovernancepap
 
+  container:
+    resources:
+      requests:
+        cpu: 0
+        memory: .75Gi
+      limits:
+        cpu: 2
+        memory: 2Gi
+
   envs:
     SERVER_PROFILE_URL: https://www.github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: pdg-pap-integration/pingdatagovernancepap
@@ -668,6 +721,15 @@ pingaccess-admin:
   name: pingaccess-admin
   image:
     name: pingaccess
+
+  container:
+    resources:
+      requests:
+        cpu: 0
+        memory: 1Gi
+      limits:
+        cpu: 2
+        memory: 4Gi
 
   # Example: If PingAccess Admin relies on pingfederate-admin for AuthN
   #          Creates init container wait-for on pingfederate-admin https service
@@ -715,6 +777,13 @@ pingaccess-engine:
     name: pingaccess
 
   container:
+    resources:
+      requests:
+        cpu: 0
+        memory: 1Gi
+      limits:
+        cpu: 2
+        memory: 4Gi
     waitFor:
       pingaccess-admin:
         service: https
@@ -751,6 +820,15 @@ pingdataconsole:
   name: pingdataconsole
   image:
     name: pingdataconsole
+
+  container:
+    resources:
+      requests:
+        cpu: 0
+        memory: .5Gi
+      limits:
+        cpu: 2
+        memory: 2Gi
 
   defaultLogin:
     server:
