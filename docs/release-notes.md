@@ -1,6 +1,11 @@
 # Release Notes
 
 
+## Release 0.4.6
+
+* Minor follow on update to cpu/memory request/limit sizes for init containers.
+
+
 ## Release 0.4.5
 
 * [Issue #89](https://github.com/pingidentity/helm-charts/issues/89) - Update default workload resource cpu/memory request sizes.

@@ -246,10 +246,10 @@ spec:
 {{- define "pinglib.workload.init.default.resources" -}}
 resources:
   limits:
-    cpu: 500m
+    cpu: 0
     memory: 128Mi
   requests:
-    cpu: 250m
+    cpu: 0
     memory: 64Mi
 {{- end -}}
 
