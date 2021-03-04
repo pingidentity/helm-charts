@@ -1,6 +1,22 @@
 # Release Notes
 
 
+## Release 0.4.7
+
+* [Issue #97](https://github.com/pingidentity/helm-charts/issues/97) - Add the ability to add annotations to all resources generated
+  similar to current support for Labels.  This will allow deployers to specify additional annotations at either the global and/or product level.
+  An example of the values yaml would look like:
+
+  ```
+  global:
+    annotations:
+      app.ping-devops.com/test: test-name
+
+  pingaccess-admin:
+    annotations:
+      app.pingaccess/version: v1234
+  ```
+
 ## Release 0.4.6
 
 * Minor follow on update to cpu/memory request/limit sizes for init containers.

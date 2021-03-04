@@ -3,7 +3,9 @@
 {{- $v := index . 1 -}}
 apiVersion: v1
 kind: Secret
-metadata: {{ include "pinglib.metadata.labels" .  | nindent 2  }}
+metadata:
+  {{ include "pinglib.metadata.labels" .  | nindent 2  }}
+  {{ include "pinglib.metadata.annotations" .  | nindent 2  }}
   labels:
     alt-names: {{ include "pinglib.addreleasename" (append . $v.name) }}
   name: {{ include "pinglib.fullname" . }}-private-cert

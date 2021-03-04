@@ -3,7 +3,9 @@
 {{- $v := index . 1 -}}
 apiVersion: v1
 kind: Service
-metadata: {{ include "pinglib.metadata.labels" . | nindent 2  }}
+metadata:
+  {{ include "pinglib.metadata.labels" .  | nindent 2  }}
+  {{ include "pinglib.metadata.annotations" .  | nindent 2  }}
 {{- if $v.services.clusterExternalDNSHostname }}
   annotations:
     external-dns.alpha.kubernetes.io/hostname: {{ $v.services.clusterExternalDNSHostname }}

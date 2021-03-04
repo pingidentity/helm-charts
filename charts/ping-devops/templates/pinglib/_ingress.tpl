@@ -6,7 +6,9 @@
 {{- $defaultDomain := $v.ingress.defaultDomain -}}
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
-metadata: {{ include "pinglib.metadata.labels" .  | nindent 2  }}
+metadata:
+  {{ include "pinglib.metadata.labels" .  | nindent 2  }}
+  {{ include "pinglib.metadata.annotations" .  | nindent 2  }}
   name: {{ include "pinglib.fullname" . }}
   annotations: {{ toYaml $v.ingress.annotations  | nindent 4 }}
 spec:

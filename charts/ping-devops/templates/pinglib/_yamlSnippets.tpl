@@ -25,30 +25,15 @@ app.kubernetes.io/instance: {{ $top.Release.Name }}
 {{- end -}}
 
 {{/**********************************************************************
-   ** confgmap env snippets
+   ** metadata.annotations snippet
    **********************************************************************/}}
-{{- define "pinglib.configMapEnvs" -}}
-#####
-# .envs values
-#####
-{{ toYaml .Values.envs }}
-{{- if .Values.global }}
-{{- if .Values.global.envs }}
-#####
-# global.envs values
-#####
-{{ toYaml .Values.global.envs }}
-{{- end -}}
-{{- end -}}
-{{- end -}}
-
-{{/**********************************************************************
-   ** deployment/statefulset licenseSecret snippets
-   **********************************************************************/}}
-{{- define "pinglib.licenseSecretVolume" -}}
-- name: license
-  secret:
-    secretName: {{ .Values.licenseSecretName }}
+{{- define "pinglib.metadata.annotations" -}}
+{{- $top := index . 0 -}}
+{{- $v := index . 1 -}}
+  {{- if $v.annotations }}
+annotations:
+  {{- toYaml $v.annotations | nindent 2 }}
+  {{- end }}
 {{- end -}}
 
 {{/**********************************************************************
