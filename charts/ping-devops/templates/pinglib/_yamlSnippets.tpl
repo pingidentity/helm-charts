@@ -82,6 +82,12 @@ vault.hashicorp.com/agent-inject-template-{{ .name }}.json: |
   {{ printf "{{- end }}" }}
 #------------------------------------------------
 {{- end -}}
+#----------------------------------------------------
+# Additional Vault configuration annotations
+{{- range $annotation, $val := .annotations }}
+vault.hashicorp.com/{{ $annotation }}: {{ $val | quote }}
+{{- end -}}
+#----------------------------------------------------
 {{- end }}
 {{- end -}}
 {{- end -}}

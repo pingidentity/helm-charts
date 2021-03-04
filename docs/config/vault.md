@@ -22,6 +22,9 @@ global:
       # secrets:
       # - name: secret-name
       #   secret: secret-name
+      # annotations:
+      #   auth-path: auth/kubernetes2
+      #   tls-secret: vault-tls
 ```
 
 The definition of parameters can be found at
@@ -37,8 +40,10 @@ The definition of parameters can be found at
               {{ .Data.data | toJSONPretty }}
               {{- end }}
             vault.hashicorp.com/agent-pre-populate-only: "true"
+            vault.hashicorp.com/auth-path: auth/kubernetes2
             vault.hashicorp.com/log-level: info
             vault.hashicorp.com/preserve-secret-case: "true"
             vault.hashicorp.com/role: k8s-default
             vault.hashicorp.com/secret-volume-path: /run/secrets
+            vault.hashicorp.com/tls-secret: vault-tls
     ```
