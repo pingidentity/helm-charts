@@ -43,7 +43,7 @@ annotations:
 {{- if .enabled }}
 {{- with .hashicorp -}}
 #----------------------------------------------------
-# Annotation secretes prepared for hashicorp vault secrets
+# Annotation secrets prepared for hashicorp vault secrets
 # for use in Deployment, StatefulSet, Pod resources.
 #
 # https://www.vaultproject.io/docs/platform/k8s/injector/annotations
@@ -56,6 +56,11 @@ vault.hashicorp.com/log-level:  {{ ( index . "log-level" ) | quote }}
 vault.hashicorp.com/preserve-secret-case:  {{ ( index . "preserve-secret-case" ) | quote }}
 vault.hashicorp.com/secret-volume-path:  {{ ( index . "secret-volume-path" ) | quote }}
 #----------------------------------------------------
+# Additional Vault configuration annotations
+{{- range $annotation, $val := .annotations }}
+vault.hashicorp.com/{{ $annotation }}: {{ $val | quote }}
+{{- end -}}
+#----------------------------------------------------
 {{- $secretPrefix := .secretPrefix }}
 {{- range .secrets }}
 {{- $fullSecret := printf "%s%s" $secretPrefix .secret }}
@@ -66,9 +71,10 @@ vault.hashicorp.com/agent-inject-template-{{ .name }}.json: |
   {{ printf "{{ .Data.data | toJSONPretty }}" }}
   {{ printf "{{- end }}" }}
 #------------------------------------------------
-{{- end -}}
 {{- end }}
-{{- end -}}
+{{- end }}
+{{- toYaml .annotations }}
+{{- end }}
 {{- end -}}
 
 {{/* Generate certificates */}}
