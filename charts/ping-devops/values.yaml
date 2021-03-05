@@ -15,6 +15,9 @@
 # Global values
 ############################################################
 global:
+  annotations: {}
+  envs: {}
+
   ############################################################
   #  addReleaseNameToResource: Provides global ability to add
   #                            names to kubernetes resources
@@ -54,17 +57,23 @@ global:
   ############################################################
   # Fields used to annotate secret hashicorp vault information
   #
+  # Theese annotations names will be automatically be
+  # appended to the 'vault.hashicorp.com/'
+  #
   # https://www.vaultproject.io/docs/platform/k8s/injector/annotations
   ############################################################
   vault:
     enabled: false
     hashicorp:
-      role: k8s-default
-      log-level: info
-      preserve-secret-case: true
-      secret-volume-path: /run/secrets
-      pre-populate-only: true
-      serviceAccountName: vault-auth
+      annotations:
+        agent-inject: true
+        agent-init-first: true
+        agent-pre-populate-only: true
+        log-level: info
+        preserve-secret-case: true
+        role: k8s-default
+        secret-volume-path: /run/secrets
+        serviceAccountName: vault-auth
       # secretPrefix: path/to/secrets
       # secrets:
       # - name: secret-name
@@ -873,3 +882,11 @@ pd-replication-timing:
     SERVER_PROFILE_PATH: dsreplication-timing
     STARTUP_COMMAND: /opt/out/instance/bin/start-server
     STARTUP_BACKGROUND_OPTS: ""
+
+
+#############################################################
+# test framework
+#
+# Future
+#############################################################
+testFramework: {}

@@ -7,7 +7,9 @@
 {{- $waitFor := $test.waitFor -}}
 apiVersion: v1
 kind: Pod
-metadata: {{ include "pinglib.metadata.labels" .  | nindent 2 }}
+metadata:
+  {{ include "pinglib.metadata.labels" .  | nindent 2  }}
+  {{ include "pinglib.metadata.annotations" .  | nindent 2  }}
   annotations:
     "helm.sh/hook": test
   name: {{ include "pinglib.addreleasename" (list $top $v $containerName) }}

@@ -4,7 +4,8 @@
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
-{{ include "pinglib.metadata.labels" . | indent 2  }}
+  {{ include "pinglib.metadata.labels" . | nindent 2  }}
+  {{ include "pinglib.metadata.annotations" .  | nindent 2  }}
   name: {{ include "pinglib.fullname" . }}
 spec:
   scaleTargetRef:

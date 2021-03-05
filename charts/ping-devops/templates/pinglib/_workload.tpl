@@ -4,7 +4,9 @@
 apiVersion: apps/v1
 {{/*--------------- Deployment | StatefulSet ---------------*/}}
 kind: {{ $v.workload.type }}
-metadata: {{ include "pinglib.metadata.labels" .  | nindent 2 }}
+metadata:
+  {{ include "pinglib.metadata.labels" .  | nindent 2  }}
+  {{ include "pinglib.metadata.annotations" .  | nindent 2  }}
   name: {{ include "pinglib.fullname" . }}
 spec:
   replicas: {{ $v.container.replicaCount }}

@@ -1,6 +1,33 @@
 # Release Notes
 
 
+## Release 0.4.7
+
+
+* [Issue #95](https://github.com/pingidentity/helm-charts/issues/97) - Unable to set numerous Vault configuration options
+
+    Updated ability to add any hashicorp.vault annotation to the workload.  As part of this effort, the ***existing
+    name/values have been deprecated***, however will continue to work for a period of time.
+
+    Updated details can be found in the [Vault Config](config/vault.md) docs.
+
+
+* [Issue #97](https://github.com/pingidentity/helm-charts/issues/97) - Add the ability to add annotations to all resources generated
+  similar to current support for Labels.  This will allow deployers to specify additional annotations at either the global and/or product level.
+  An example of the values yaml would look like:
+
+    ```
+    global:
+      annotations:
+        app.ping-devops.com/test: test-name
+
+    pingaccess-admin:
+      annotations:
+        app.pingaccess/version: v1234
+    ```
+
+* Additional cleanup of Notes.txt outputting detail of deployment.
+
 ## Release 0.4.6
 
 * Minor follow on update to cpu/memory request/limit sizes for init containers.
@@ -10,37 +37,37 @@
 
 * [Issue #89](https://github.com/pingidentity/helm-charts/issues/89) - Update default workload resource cpu/memory request sizes.
 
-  Updating defaults to create a usage better reflecting actual memory usage by product. And minimizing amount of CPU needed
-  as testing generally utilizes very little.  Of course, it is definitely recommended that production deployments specify amount of
-  cpu and memory required and limited to.
+    Updating defaults to create a usage better reflecting actual memory usage by product. And minimizing amount of CPU needed
+    as testing generally utilizes very little.  Of course, it is definitely recommended that production deployments specify amount of
+    cpu and memory required and limited to.
 
-  Current defaults are set to:
+    Current defaults are set to:
 
-  ```
-  #-------------------------------------------------------------------------------------
-  # Ping DevOps
-  #
-  # Description: All Ping Identity product images with integration
-  #-------------------------------------------------------------------------------------
-  #
-  #           Product         Workload   cpu-R cpu-L mem-R mem-L  Ing
-  #    --------------------- ----------- ----- ----- ----- ----- -----
-  #  √ pingaccess-admin      deployment  0     2     1Gi   4Gi   false
-  #  √ pingaccess-engine     deployment  0     2     1Gi   4Gi   false
-  #  √ pingdataconsole       deployment  0     2     .5Gi  2Gi   false
-  #  √ pingdatagovernance    deployment  0     2     1.5Gi 4Gi   false
-  #  √ pingdatagovernancepap deployment  0     2     .75Gi 2Gi   false
-  #  √ pingdatasync          deployment  0     2     .75Gi 2Gi   false
-  #  √ pingdelegator         deployment  0     500m  32Mi  64Mi  false
-  #  √ pingdirectory         statefulset 0     2     2Gi   8Gi   false
-  #  √ pingfederate-admin    deployment  0     2     1Gi   4Gi   false
-  #  √ pingfederate-engine   deployment  0     2     1Gi   4Gi   false
-  #
-  #  √ ldap-sdk-tools        deployment  0     0     0     0     false
-  #  √ pd-replication-timing deployment  0     0     0     0     false
-  #
-  #-------------------------------------------------------------------------------------
-  ```
+    ```
+    #-------------------------------------------------------------------------------------
+    # Ping DevOps
+    #
+    # Description: All Ping Identity product images with integration
+    #-------------------------------------------------------------------------------------
+    #
+    #           Product         Workload   cpu-R cpu-L mem-R mem-L  Ing
+    #    --------------------- ----------- ----- ----- ----- ----- -----
+    #  √ pingaccess-admin      deployment  0     2     1Gi   4Gi   false
+    #  √ pingaccess-engine     deployment  0     2     1Gi   4Gi   false
+    #  √ pingdataconsole       deployment  0     2     .5Gi  2Gi   false
+    #  √ pingdatagovernance    deployment  0     2     1.5Gi 4Gi   false
+    #  √ pingdatagovernancepap deployment  0     2     .75Gi 2Gi   false
+    #  √ pingdatasync          deployment  0     2     .75Gi 2Gi   false
+    #  √ pingdelegator         deployment  0     500m  32Mi  64Mi  false
+    #  √ pingdirectory         statefulset 0     2     2Gi   8Gi   false
+    #  √ pingfederate-admin    deployment  0     2     1Gi   4Gi   false
+    #  √ pingfederate-engine   deployment  0     2     1Gi   4Gi   false
+    #
+    #  √ ldap-sdk-tools        deployment  0     0     0     0     false
+    #  √ pd-replication-timing deployment  0     0     0     0     false
+    #
+    #-------------------------------------------------------------------------------------
+    ```
 ## Release 0.4.4
 
 * [Issue #80](https://github.com/pingidentity/helm-charts/issues/80) - Add support for importing a secret containing license into the container.

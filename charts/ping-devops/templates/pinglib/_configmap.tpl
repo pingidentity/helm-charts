@@ -3,7 +3,8 @@
 {{- $v := index . 1 -}}
 apiVersion: v1
 kind: ConfigMap
-metadata: {{ include "pinglib.metadata.labels" .  | nindent 2  }}
+metadata:
+  {{ include "pinglib.metadata.labels" .  | nindent 2  }}
   name: {{ include "pinglib.fullname" . }}-env-vars
 data:
   {{- if $v.envs }}
