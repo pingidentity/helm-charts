@@ -40,6 +40,9 @@ global:
                   storage: 4Gi
 
     securityContext: {}
+
+    serviceAccount:
+      generate: false
 ```
 
 | Workload Parameters               | Description                                                                                  |
@@ -50,6 +53,7 @@ global:
 | statefulSet.partition             | Used for canary testing if n>0                                                               |
 | statefulSet.persistentVolume      | Provides details around creation of PVC/Volumes (see below)                                  |
 | securityContext                   | Provides security context details for starting container as different user/group (see below) |
+| serviceAccount.generate           | Enables service account definition and usage                                                          |
 
 !!! note "Persistent Volumes"
     For every volume defined in the volumes list, 3 items will be
@@ -74,6 +78,11 @@ global:
             runAsUser: 3000
             fsGroup: 2000
     ```
+
+!!! note "Service Account"
+    To generate and run with a unique service account per workload, enable this
+    option. The generated service account will be used over any other
+    `serviceAccountName` configuration.
 
 !!! note "WaitFor"
     For each product, a `waitFor` structure providing the name, service and timeout, in seconds,
