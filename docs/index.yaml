@@ -3,6 +3,17 @@ entries:
   ping-devops:
   - apiVersion: v2
     appVersion: "2101"
+    created: "2021-03-16T13:52:43.647197-05:00"
+    description: All Ping Identity product images with integration
+    digest: 3cb24e0e4aa5f66906640a764e874d62d10d239913e2515931ab3fefe426b95a
+    home: https://devops.pingidentity.com/
+    name: ping-devops
+    type: application
+    urls:
+    - https://github.com/pingidentity/helm-charts/releases/download/ping-devops-0.4.8/ping-devops-0.4.8.tgz
+    version: 0.4.8
+  - apiVersion: v2
+    appVersion: "2101"
     created: "2021-03-05T15:50:27.247979-06:00"
     description: All Ping Identity product images with integration
     digest: 569c618bb52e4910e9ffc32161706e5d3c9f880e89e772d03f785d03f9a5b886
