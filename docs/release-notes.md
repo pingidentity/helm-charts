@@ -1,5 +1,11 @@
 # Release Notes
 
+## Release 0.4.8
+
+* [Issue #100](https://github.com/pingidentity/helm-charts/issues/100) - Change pingfederate-engine HPA to a default of disabled
+
+    Changing the default value `pingfederate-engine.clustering.autoscaling.enabled=false`, since the default
+    CPU Request is set to 0.
 
 ## Release 0.4.7
 

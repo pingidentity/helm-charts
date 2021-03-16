@@ -410,9 +410,18 @@ pingfederate-engine:
     SERVER_PROFILE_PATH: getting-started/pingfederate
     PF_ADMIN_PORT: "9999"
 
+  #############################################################
+  # Horizontal Pod Autoscaling
+  # By defult this is disabled, since there dependencies to the containers
+  # CPU and/or Memory limites.
+  #
+  # If enabled, ensure that a proper container.resource.request.cpu limit is set
+  # and coordinated with the a targetCPUUtilizationPercentage or
+  # targetMemoryUtilizationPercentage
+  #############################################################
   clustering:
     autoscaling:
-      enabled: true
+      enabled: false
       minReplicas: 1
       maxReplicas: 4
       targetCPUUtilizationPercentage: 75
