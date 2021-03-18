@@ -3,11 +3,6 @@
 #
 ############################################################
 
-
-global:
-  image:
-    tag: "edge"  # Uses images with the "edge" tag
-
 pingdataconsole:
   enabled: true
 

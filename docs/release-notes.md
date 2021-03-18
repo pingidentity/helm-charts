@@ -1,5 +1,13 @@
 # Release Notes
 
+
+## Release 0.4.9
+
+* [Issue #104](https://github.com/pingidentity/helm-charts/issues/104) - Update default global image tag to 2102 (Feb 2021)
+
+    Update the default global image tag in base values.yaml and remove edge from example yamls.
+
+
 ## Release 0.4.8
 
 * [Issue #100](https://github.com/pingidentity/helm-charts/issues/100) - Change pingfederate-engine HPA to a default of disabled

@@ -50,6 +50,8 @@ global:
   # If set to true, then an internal certificate secret will
   # be created along with mount of the certificate in
   # /run/secrets/internal-cert (creates a tls.crt and tls.key)
+  #
+  #      privateCert.generate: {true | false}
   ############################################################
   privateCert:
     generate: false
@@ -93,7 +95,7 @@ global:
   image:
     repository: pingidentity
     name:
-    tag: "2101"
+    tag: "2102"
     pullPolicy: Always
 
   ############################################################
