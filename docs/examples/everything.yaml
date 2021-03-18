@@ -3,11 +3,6 @@
 #
 ############################################################
 
-
-global:
-  image:
-    tag: "edge"  # Uses images with the "edge" tag
-
 pingaccess-admin:
   enabled: true
   privateCert:
