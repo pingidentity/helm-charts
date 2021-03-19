@@ -1,6 +1,39 @@
 # Release Notes
 
 
+## Release 0.5.0
+
+* [Issue #103](https://github.com/pingidentity/helm-charts/issues/103) - Provide ability to add additional alt-names/alt-ips to private cert generation
+
+    Allow for a privateCert structure to contain optional arrays `additionalHosts` and `additionalIPs`:
+
+    ```
+    pingaccess-admin:
+      privateCert:
+        generate: true
+        additionalHosts:
+        - pingaccess-admin.west-cluster.example.com
+        - pa-admin.west-cluster.example.com
+        additionalIPs:
+        - 123.45.67.8
+    ```
+
+    In addition, if the ingress for the product is enabled, the host(s) created for that ingress will also be added to the alt-names.
+
+    The above example (with an ingress) will create a cert used by pingaccess-admin containing:
+
+    ```
+    Certificate:
+        Data:
+            ...
+        Signature Algorithm: sha256WithRSAEncryption
+            Issuer: CN=pingaccess-admin
+            ...
+            X509v3 extensions:
+                ...
+                X509v3 Subject Alternative Name:
+                    DNS:rel050-pa-pingaccess-admin.ping-devops.com. pingaccess-admin.west-cluster.example.com, DNS:pa-admin.west-cluster.example.com, IP Address:123.45.67.8
+    ```
 ## Release 0.4.9
 
 * [Issue #104](https://github.com/pingidentity/helm-charts/issues/104) - Update default global image tag to 2102 (Feb 2021)

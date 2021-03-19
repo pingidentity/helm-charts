@@ -1,9 +1,9 @@
 {{ include "pinglib.notes.header" . }}
-{{- $format := "%-1.1s %-21.21s %-11.11s %5.5s %5.5s %5.5s %5.5s %3.3s" }}
+{{- $format := "%-1.1s %-21.21s %-7.7s %-3.3s %2.2s %4.4s%1s%-4.4s %4.4s%1s%-4.4s %3.3s" }}
 #
-#  {{ printf $format " " "       Product       " " Workload  " "cpu-R" "cpu-L" "mem-R" "mem-L" "Ing"}}
-#  {{ printf $format " " "---------------------" "-----------" "-----"  "-----"  "-----"  "-----" "-----"}}
-#  {{ printf $format " " "global" "" (toString $.Values.global.container.resources.requests.cpu) (toString $.Values.global.container.resources.limits.cpu) (toString $.Values.global.container.resources.requests.memory) (toString $.Values.global.container.resources.limits.memory) (ternary " √ " "" $.Values.global.ingress.enabled) }}
+#  {{ printf $format " " "       Product       " "  tag  " "typ" " #" " cpu" " " "R/L " " mem" " " "R/L " "Ing"}}
+#  {{ printf $format " " "---------------------" "-------" "---" "--" "----" "-" "----" "----" "-" "----" "---"}}
+#  {{ printf $format " " "global" (toString $.Values.global.image.tag) "" "" (toString $.Values.global.container.resources.requests.cpu) "/" (toString $.Values.global.container.resources.limits.cpu) (toString $.Values.global.container.resources.requests.memory) "/" (toString $.Values.global.container.resources.limits.memory) (ternary " √ " "" $.Values.global.ingress.enabled) }}
 #
 {{- $products := list "pingaccess-admin" "pingaccess-engine" "pingdataconsole" "pingdatagovernance" "pingdatagovernancepap" "pingdatasync" "pingdelegator" "pingdirectory" "pingfederate-admin" "pingfederate-engine" "---" "ldap-sdk-tools" "pd-replication-timing" }}
 {{- range $prodName := $products }}
@@ -12,13 +12,16 @@
 {{- end }}
 {{- with (index $.Values $prodName)}}
     {{- $prodEnabled := ternary "√" "" .enabled }}
-    {{- $workload := ternary (.workload.type | lower) "" .enabled }}
+    {{- $tag := ternary (toString .image.tag) "" .enabled }}
+    {{- $workload := ternary (ternary "dep" "sts" (eq .workload.type "Deployment")) "" .enabled }}
+    {{- $numReplica := ternary (toString .container.replicaCount) "" .enabled }}
+    {{- $slash := ternary "/" "" .enabled }}
     {{- $cpur := ternary (toString .container.resources.requests.cpu) "" .enabled }}
     {{- $cpul := ternary (toString .container.resources.limits.cpu) "" .enabled }}
     {{- $memr := ternary (toString .container.resources.requests.memory) "" .enabled }}
     {{- $meml := ternary (toString .container.resources.limits.memory) "" .enabled }}
     {{- $ingEnabled := .enabled | ternary (ternary " √ " "" .ingress.enabled) "" }}
-#  {{ printf $format $prodEnabled $prodName $workload $cpur $cpul $memr $meml $ingEnabled  }}
+#  {{ printf $format $prodEnabled $prodName $tag $workload $numReplica $cpur $slash $cpul $memr $slash $meml $ingEnabled  }}
 {{- end }}
 {{- end }}
 #

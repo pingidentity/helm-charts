@@ -82,9 +82,19 @@ vault.hashicorp.com/agent-inject-template-{{ .name }}.json: |
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
 {{- $subjectCN := include "pinglib.addreleasename" (append . $v.name) -}}
-{{- $altIPs := list (  "127.0.0.1" ) -}}
-{{- $altNames := list $subjectCN "localhost" -}}
-{{- $cert := genSelfSignedCert $subjectCN $altIPs $altNames 365 -}}
+{{- $alt := dict "ips" (list) "names" (list) -}}
+{{- if $v.ingress.enabled }}
+    {{- range $v.ingress.hosts }}
+        {{- $noop := set $alt "names" (list (include "pinglib.ingress.hostname" (list $top $v .host))) }}
+    {{- end }}
+{{- end }}
+{{- if $v.privateCert.additionalIPs }}
+    {{- $noop := set $alt "ips" $v.privateCert.additionalIPs  }}
+{{- end }}
+{{- if $v.privateCert.additionalHosts }}
+    {{- $noop := concat $alt.names $v.privateCert.additionalHosts | set $alt "names" }}
+{{- end }}
+{{- $cert := genSelfSignedCert $subjectCN $alt.ips $alt.names 365 -}}
 tls.crt: {{ $cert.Cert | b64enc }}
 tls.key: {{ $cert.Key | b64enc }}
 {{- end -}}
