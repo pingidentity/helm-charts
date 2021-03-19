@@ -52,9 +52,13 @@ global:
   # /run/secrets/internal-cert (creates a tls.crt and tls.key)
   #
   #      privateCert.generate: {true | false}
+  #      privateCert.additionalHosts: {optioanl array of hosts}
+  #      privateCert.additionalIPs: {optioanl array of IP Addresses}
   ############################################################
   privateCert:
     generate: false
+    additionalHosts: []
+    additioanlIPs: []
 
   ############################################################
   # Fields used to annotate secret hashicorp vault information

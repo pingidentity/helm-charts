@@ -16,9 +16,22 @@ global:
   # If set to true, then an internal certificate secret will
   # be created along with mount of the certificate in
   # /run/secrets/internal-cert (creates a tls.crt and tls.key)
+  #
+  # By default the Issuer of the cert will be the service name
+  # created by the Helm Chart.  Additionally, the ingress hosts,
+  # if enabled, will be added to the list of X509v3 Subject Alternative Name
+  #
+  # Use the additionalHosts and additionalIPs if additional custom
+  # names and ips are needed.
+  #
+  #      privateCert.generate: {true | false}
+  #      privateCert.additionalHosts: {optional array of hosts}
+  #      privateCert.additionalIPs: {optional array of IP Addresses}
   ############################################################
   privateCert:
     generate: false
+    additionalHosts: []
+    additioanlIPs: []
 ```
 
 ## Product Section
@@ -30,11 +43,15 @@ Generating an internal certificate is as simple setting the `privateCert.generat
 ```yaml
 pingaccess-admin:
   privateCert:
-    generate:false
+    generate:true
 ```
 
 This will ultimately create a secret named `{release-productname}-private-cert`
 containing a valid `tls.crt` and `tls.key`.
+
+By default the Issuer of the cert will be the service name
+created by the Helm Chart.  Additionally, the ingress hosts,
+if enabled, will be added to the list of `X509v3 Subject Alternative Name`
 
 The product image will then create an init container to generate a pkcs12 file that will
 be placed in `/run/secrets/private-keystore/keystore.env` that will be mounted into the
