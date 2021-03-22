@@ -1,6 +1,14 @@
 # Release Notes
 
 
+## Release 0.5.1
+
+* Added back in the service name by default to the private cert generation pulled out of the previous release by accident.
+
+    If the product was `pingaccess-admin` and release was `acme`, then the service name might be `acme-ping-access-admin`.
+    This name by default will be added to the alternative hosts of the private certificate generation by default.  Without this
+    the pingaccess clustering will fail during setup.
+
 ## Release 0.5.0
 
 * [Issue #103](https://github.com/pingidentity/helm-charts/issues/103) - Provide ability to add additional alt-names/alt-ips to private cert generation
