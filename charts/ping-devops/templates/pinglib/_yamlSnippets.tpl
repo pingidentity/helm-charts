@@ -82,10 +82,10 @@ vault.hashicorp.com/agent-inject-template-{{ .name }}.json: |
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
 {{- $subjectCN := include "pinglib.addreleasename" (append . $v.name) -}}
-{{- $alt := dict "ips" (list) "names" (list) -}}
+{{- $alt := dict "ips" (list) "names" (list $subjectCN ) -}}
 {{- if $v.ingress.enabled }}
     {{- range $v.ingress.hosts }}
-        {{- $noop := set $alt "names" (list (include "pinglib.ingress.hostname" (list $top $v .host))) }}
+        {{- $noop := concat $alt.names (list (include "pinglib.ingress.hostname" (list $top $v .host))) | set $alt "names" }}
     {{- end }}
 {{- end }}
 {{- if $v.privateCert.additionalIPs }}
