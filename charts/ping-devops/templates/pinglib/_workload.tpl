@@ -38,7 +38,7 @@ spec:
     metadata:
       {{ include "pinglib.metadata.labels" .  | nindent 6  }}
         {{ include "pinglib.selector.labels" . | nindent 8 }}
-        clusterIdentifier: {{ include "pinglib.fullimagename" . }}
+        clusterIdentifier: {{ include "pinglib.fullname" . }}
       annotations: {{ include "pinglib.annotations.vault" $v.vault | nindent 8 }}
         {{ $prodChecksum := include (print $top.Template.BasePath "/" $v.name "/configmap.yaml") $top | sha256sum }}
         {{ $globChecksum := include (print $top.Template.BasePath "/global/configmap.yaml") $top | sha256sum }}

@@ -26,7 +26,7 @@ spec:
   {{- end }}
   {{- end }}
   selector:
-    clusterIdentifier: {{ include "pinglib.selector.labels" . }}
+    clusterIdentifier: {{ include "pinglib.fullname" . }}
 {{- end -}}
 
 
