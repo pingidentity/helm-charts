@@ -39,6 +39,7 @@ spec:
       {{ include "pinglib.metadata.labels" .  | nindent 6  }}
         {{ include "pinglib.selector.labels" . | nindent 8 }}
         clusterIdentifier: {{ include "pinglib.fullimagename" . }}
+      {{ include "pinglib.metadata.workload.annotations" .  | nindent 6  }}
       annotations: {{ include "pinglib.annotations.vault" $v.vault | nindent 8 }}
         {{ $prodChecksum := include (print $top.Template.BasePath "/" $v.name "/configmap.yaml") $top | sha256sum }}
         {{ $globChecksum := include (print $top.Template.BasePath "/global/configmap.yaml") $top | sha256sum }}
@@ -46,7 +47,7 @@ spec:
     spec:
       terminationGracePeriodSeconds: {{ $v.container.terminationGracePeriodSeconds }}
       {{- if $v.vault.enabled }}
-      serviceAccountName: {{ $v.vault.hashicorp.serviceAccountName }}
+      serviceAccountName: {{ $v.vault.hashicorp.annotations.serviceAccountName }}
       {{- end }}
       nodeSelector: {{ toYaml $v.container.nodeSelector | nindent 8 }}
       tolerations: {{ toYaml $v.container.tolerations | nindent 8 }}
