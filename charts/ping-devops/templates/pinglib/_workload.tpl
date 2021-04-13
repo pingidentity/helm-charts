@@ -38,7 +38,6 @@ spec:
     metadata:
       {{ include "pinglib.metadata.labels" .  | nindent 6  }}
         {{ include "pinglib.selector.labels" . | nindent 8 }}
-        clusterIdentifier: {{ include "pinglib.fullimagename" . }}
       {{ include "pinglib.metadata.workload.annotations" .  | nindent 6  }}
       annotations: {{ include "pinglib.annotations.vault" $v.vault | nindent 8 }}
         {{ $prodChecksum := include (print $top.Template.BasePath "/" $v.name "/configmap.yaml") $top | sha256sum }}
@@ -132,7 +131,7 @@ spec:
         resources: {{ toYaml $v.container.resources | nindent 10 }}
         {{- if or (and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled) $v.privateCert.generate }}
         volumeMounts:
-        {{- if eq $v.workload.type "StatefulSet" }}
+        {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
         {{- range $volName, $val := $v.workload.statefulSet.persistentvolume.volumes }}
         - name: {{ $volName }}{{ if eq "none" $v.addReleaseNameToResource }}-{{ $top.Release.Name }}{{ end }}
           mountPath: {{ .mountPath }}
@@ -157,7 +156,7 @@ spec:
       {{/*--------------------- Volumes ------------------*/}}
       {{- if or (and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled) $v.privateCert.generate }}
       volumes:
-      {{- if eq $v.workload.type "StatefulSet" }}
+      {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
       {{- range $volName, $val := $v.workload.statefulSet.persistentvolume.volumes }}
       - name: {{ $volName }}{{ if eq "none" $v.addReleaseNameToResource }}-{{ $top.Release.Name }}{{ end }}
         persistentVolumeClaim:

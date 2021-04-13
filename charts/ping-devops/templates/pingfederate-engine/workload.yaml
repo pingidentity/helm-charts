@@ -6,7 +6,7 @@ spec:
   template:
     metadata:
       labels:
-        clusterIdentifier: {{ include "pinglib.fullimagename" . }}
+        clusterIdentifier: {{ include "pinglib.addreleasename" (append . "pingfederate") }}
 {{- end -}}
 
 

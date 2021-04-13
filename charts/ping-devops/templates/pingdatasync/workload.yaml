@@ -3,4 +3,9 @@
 
 
 {{- define "pingdatasync.workload" -}}
+spec:
+  template:
+    metadata:
+      labels:
+        clusterIdentifier: {{ include "pinglib.addreleasename" (append . "pingdatasync") }}
 {{- end -}}

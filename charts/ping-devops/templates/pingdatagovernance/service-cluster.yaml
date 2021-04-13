@@ -2,4 +2,11 @@
 
 
 {{- define "pingdatagovernance.service-cluster" -}}
+metadata:
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+spec:
+  publishNotReadyAddresses: true
+  selector:
+    clusterIdentifier: {{ include "pinglib.addreleasename" (append . "pingdatagovernance") }}
 {{- end -}}
