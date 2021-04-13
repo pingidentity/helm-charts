@@ -43,7 +43,9 @@ spec:
         {{ $prodChecksum := include (print $top.Template.BasePath "/" $v.name "/configmap.yaml") $top | sha256sum }}
         {{ $globChecksum := include (print $top.Template.BasePath "/global/configmap.yaml") $top | sha256sum }}
         checksum/config: {{ print $prodChecksum $globChecksum | sha256sum }}
+        {{- if $v.workload.annotations }}
         {{- toYaml $v.workload.annotations | nindent 8 }}
+        {{- end }}
     spec:
       terminationGracePeriodSeconds: {{ $v.container.terminationGracePeriodSeconds }}
       {{- if $v.vault.enabled }}
