@@ -7,4 +7,6 @@ metadata:
     service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
 spec:
   publishNotReadyAddresses: true
+  selector:
+    clusterIdentifier: {{ include "pinglib.addreleasename" (append . "pingfederate") }}
 {{- end }}

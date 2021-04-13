@@ -10,7 +10,7 @@ metadata:
   annotations:
     external-dns.alpha.kubernetes.io/hostname: {{ $v.services.clusterExternalDNSHostname }}
 {{- end }}
-  name: {{ include "pinglib.fullimagename" . }}-cluster
+  name: {{ include "pinglib.fullname" . }}-cluster
 spec:
   type: ClusterIP
   clusterIP: None
@@ -25,8 +25,6 @@ spec:
   {{- end }}
   {{- end }}
   {{- end }}
-  selector:
-    clusterIdentifier: {{ include "pinglib.fullimagename" . }}
 {{- end -}}
 
 

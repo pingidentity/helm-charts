@@ -38,15 +38,18 @@ spec:
     metadata:
       {{ include "pinglib.metadata.labels" .  | nindent 6  }}
         {{ include "pinglib.selector.labels" . | nindent 8 }}
-        clusterIdentifier: {{ include "pinglib.fullimagename" . }}
-      annotations: {{ include "pinglib.annotations.vault" $v.vault | nindent 8 }}
+      annotations:
+        {{ include "pinglib.annotations.vault" $v.vault | nindent 8 }}
         {{ $prodChecksum := include (print $top.Template.BasePath "/" $v.name "/configmap.yaml") $top | sha256sum }}
         {{ $globChecksum := include (print $top.Template.BasePath "/global/configmap.yaml") $top | sha256sum }}
         checksum/config: {{ print $prodChecksum $globChecksum | sha256sum }}
+        {{- if $v.workload.annotations }}
+        {{- toYaml $v.workload.annotations | nindent 8 }}
+        {{- end }}
     spec:
       terminationGracePeriodSeconds: {{ $v.container.terminationGracePeriodSeconds }}
       {{- if $v.vault.enabled }}
-      serviceAccountName: {{ $v.vault.hashicorp.serviceAccountName }}
+      serviceAccountName: {{ $v.vault.hashicorp.annotations.serviceAccountName }}
       {{- end }}
       nodeSelector: {{ toYaml $v.container.nodeSelector | nindent 8 }}
       tolerations: {{ toYaml $v.container.tolerations | nindent 8 }}
@@ -131,7 +134,7 @@ spec:
         resources: {{ toYaml $v.container.resources | nindent 10 }}
         {{- if or (and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled) $v.privateCert.generate }}
         volumeMounts:
-        {{- if eq $v.workload.type "StatefulSet" }}
+        {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
         {{- range $volName, $val := $v.workload.statefulSet.persistentvolume.volumes }}
         - name: {{ $volName }}{{ if eq "none" $v.addReleaseNameToResource }}-{{ $top.Release.Name }}{{ end }}
           mountPath: {{ .mountPath }}
@@ -156,7 +159,7 @@ spec:
       {{/*--------------------- Volumes ------------------*/}}
       {{- if or (and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled) $v.privateCert.generate }}
       volumes:
-      {{- if eq $v.workload.type "StatefulSet" }}
+      {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
       {{- range $volName, $val := $v.workload.statefulSet.persistentvolume.volumes }}
       - name: {{ $volName }}{{ if eq "none" $v.addReleaseNameToResource }}-{{ $top.Release.Name }}{{ end }}
         persistentVolumeClaim:
