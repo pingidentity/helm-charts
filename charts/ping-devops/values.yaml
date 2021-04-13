@@ -51,9 +51,16 @@ global:
   # be created along with mount of the certificate in
   # /run/secrets/internal-cert (creates a tls.crt and tls.key)
   #
+  # By default the Issuer of the cert will be the service name
+  # created by the Helm Chart.  Additionally, the ingress hosts,
+  # if enabled, will be added to the list of X509v3 Subject Alternative Name
+  #
+  # Use the additionalHosts and additionalIPs if additional custom
+  # names and ips are needed.
+  #
   #      privateCert.generate: {true | false}
-  #      privateCert.additionalHosts: {optioanl array of hosts}
-  #      privateCert.additionalIPs: {optioanl array of IP Addresses}
+  #      privateCert.additionalHosts: {optional array of hosts}
+  #      privateCert.additionalIPs: {optional array of IP Addresses}
   ############################################################
   privateCert:
     generate: false
@@ -80,10 +87,11 @@ global:
         role: k8s-default
         secret-volume-path: /run/secrets
         serviceAccountName: vault-auth
-      # secretPrefix: path/to/secrets
-      # secrets:
-      # - name: secret-name
-      #   secret: secret-name
+  #   secrets:
+  #     {secret-name}:
+  #       {secret-key | to-json}:
+  #         path: /opt/in/some/location/secrets
+  #         file: devops-secret.env
 
   ############################################################
   # Image
@@ -160,6 +168,8 @@ global:
   workload:
     # Can be Deployment or StatefulSet (see warning above)
     type: Deployment
+
+    annotations: {}
 
     deployment:
       strategy:
@@ -745,6 +755,9 @@ pingaccess-admin:
   name: pingaccess-admin
   image:
     name: pingaccess
+
+  workload:
+    type: StatefulSet
 
   container:
     resources:

@@ -36,47 +36,6 @@ annotations:
   {{- end }}
 {{- end -}}
 
-{{/**********************************************************************
-   ** metadata.vault.headers snippet
-   **********************************************************************/}}
-{{- define "pinglib.annotations.vault" -}}
-{{- if .enabled }}
-{{- with .hashicorp -}}
-#----------------------------------------------------
-# Annotation secrets prepared for hashicorp vault secrets
-# for use in Deployment, StatefulSet, Pod resources.
-#
-# https://www.vaultproject.io/docs/platform/k8s/injector/annotations
-#
-vault.hashicorp.com/agent-pre-populate-only: {{ ( index . "pre-populate-only" ) | quote }}
-vault.hashicorp.com/agent-inject: "true"
-vault.hashicorp.com/agent-init-first: "true"
-vault.hashicorp.com/role: {{ ( index . "role" ) | quote }}
-vault.hashicorp.com/log-level:  {{ ( index . "log-level" ) | quote }}
-vault.hashicorp.com/preserve-secret-case:  {{ ( index . "preserve-secret-case" ) | quote }}
-vault.hashicorp.com/secret-volume-path:  {{ ( index . "secret-volume-path" ) | quote }}
-#----------------------------------------------------
-# Additional Vault configuration annotations
-{{- range $annotation, $val := .annotations }}
-vault.hashicorp.com/{{ $annotation }}: {{ $val | quote }}
-{{- end -}}
-#----------------------------------------------------
-{{- $secretPrefix := .secretPrefix }}
-{{- range .secrets }}
-{{- $fullSecret := printf "%s%s" $secretPrefix .secret }}
-#------------ secret: {{ .name }}
-vault.hashicorp.com/agent-inject-secret-{{ .name }}.json: {{ $fullSecret | quote }}
-vault.hashicorp.com/agent-inject-template-{{ .name }}.json: |
-  {{ printf "{{ with secret %s -}}" ($fullSecret | quote) }}
-  {{ printf "{{ .Data.data | toJSONPretty }}" }}
-  {{ printf "{{- end }}" }}
-#------------------------------------------------
-{{- end }}
-{{- end }}
-{{- toYaml .annotations }}
-{{- end }}
-{{- end -}}
-
 {{/* Generate certificates */}}
 {{- define "pinglib.gen-cert" -}}
 {{- $top := index . 0 -}}

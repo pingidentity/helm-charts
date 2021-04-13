@@ -1,6 +1,83 @@
 # Release Notes
 
 
+
+## Release 0.5.2
+
+* [Issue #113](https://github.com/pingidentity/helm-charts/issues/113) - Default pingaccess-admin
+  to StatefulSet
+
+    In order to provide HA with a PingAccess cluster between admin/engine nodes, it is required that the
+    PingAccess Admin deploy as a StatefulSet with persistence. Otherwise if the PingAccess Admin goes down,
+    the engines would lose connectivity to that node and be unable to get further config updates and
+    subsequently have to bounce and lose their web-session information.
+
+    !!! note "The new default yaml"
+        ```yaml
+        pingaccess-admin:
+          workload:
+            type: StatefulSet
+        ```
+
+* [Issue #95](https://github.com/pingidentity/helm-charts/issues/95) - Fix default
+  serviceAccount in workload for vault
+
+    Fixed issue that was created in Issue 95 (using annotations to provide vault details) to pull serviceAccountName
+    from the proper location in annotations.
+
+    ```
+      vault:
+        hashicorp:
+          annotations:
+            serviceAccountName: vault-auth
+    ```
+
+* [Issue #116](https://github.com/pingidentity/helm-charts/issues/116) - Support Annotations
+  at Workload Level.
+
+    Support annotations at the workload level. For workloads, adding `.spec.template.metadata`.
+
+    !!! note "Example telegraf annotation"
+        ```
+        pingfederate-engine:
+          workload:
+            annotations:
+              telegraf.influxdata.com/class: app
+        ```
+        would lead to:
+        ```
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          labels:
+            app.kubernetes.io/instance: samir
+            app.kubernetes.io/managed-by: Helm
+            app.kubernetes.io/name: pingfederate-engine
+            helm.sh/chart: ping-devops-0.5.1
+          name: samir-pingfederate-engine
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app.kubernetes.io/instance: samir
+              app.kubernetes.io/name: pingfederate-engine
+          strategy:
+            rollingUpdate:
+              maxSurge: 1
+              maxUnavailable: 0
+            type: RollingUpdate
+          template:
+            metadata:
+              annotations:
+                telegraf.influxdata.com/class: app
+        ```
+
+* [Issue #117](https://github.com/pingidentity/helm-charts/issues/117) - Bug - cluster service
+  shouldn't use image name for service name.
+
+* [Issue #114](https://github.com/pingidentity/helm-charts/issues/114) - Revamp vault.hashicorp.secrets value .yaml and support per path secret
+  Detailed documentation on this can be found the [Vault Config](config/vault.md) docs
+
 ## Release 0.5.1
 
 * Added back in the service name by default to the private cert generation pulled out of the previous release by accident.
