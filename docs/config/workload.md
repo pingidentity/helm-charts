@@ -39,6 +39,8 @@ global:
                 requests:
                   storage: 4Gi
 
+    securityContext:
+      fsGroup: 9999
     securityContext: {}
 ```
 
@@ -50,6 +52,7 @@ global:
 | statefulSet.partition             | Used for canary testing if n>0                                                               |
 | statefulSet.persistentVolume      | Provides details around creation of PVC/Volumes (see below)                                  |
 | securityContext                   | Provides security context details for starting container as different user/group (see below) |
+| securityContext.fsGroup           | Sets the group id on fileSystem writes.  This is needed especially for mounted volumes (pvs) |
 
 !!! note "Persistent Volumes"
     For every volume defined in the volumes list, 3 items will be
@@ -70,9 +73,9 @@ global:
       workload:
         container:
           securityContext:
-            runAsGroup: 1000
-            runAsUser: 3000
-            fsGroup: 2000
+            runAsGroup: 9999
+            runAsUser: 9031
+            fsGroup: 9999
     ```
 
 !!! note "WaitFor"

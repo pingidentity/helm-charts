@@ -4,10 +4,10 @@
 apiVersion: v2
 name: ping-devops
 ########################################################################
-# 0.5.2 - Refer to http://helm.pingidentity.com/release-notes/#release-052
+# 0.5.3 - Refer to http://helm.pingidentity.com/release-notes/#release-053
 ########################################################################
-version: 0.5.2
+version: 0.5.3
 description: All Ping Identity product images with integration
 type: application
 home: https://devops.pingidentity.com/
-appVersion: "2101"
+appVersion: "2103"

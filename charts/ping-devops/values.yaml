@@ -99,7 +99,7 @@ global:
   # By default the images uses will be indicated by these
   # variables.  An example might look like:
   #
-  #   pingidentity/pingdataconsole:2101
+  #   pingidentity/pingdataconsole:2103 (March, 2021)
   #
   # NOTE: image.name MUST be set in child chart
   #   Example: image.name: pingfederate
@@ -107,7 +107,7 @@ global:
   image:
     repository: pingidentity
     name:
-    tag: "2102"
+    tag: "2103"
     pullPolicy: Always
 
   ############################################################
@@ -209,18 +209,20 @@ global:
 
     # securityContext
     #
-    # Note: the majority of images will have issues when running with a
-    #       security context set by k8s, due to expecations of file system
-    #       permissions and ports.  Use with caution
-    # Currently unable to use - readOnlyRootFilesystem: true
-    securityContext: {}
+    # Note: The user (9031) and group (9999) represent the current user
+    #       and group used with PingIdentity images (except PingDelegator).
+    #       The fsGroup is set to same as group, however, it can be set to
+    #       any gid number.
+    #       The fsGroup is required for any wordloads that volumeMount
+    #       a pvc (i.e. StatefulSets)
+    securityContext:
+      fsGroup: 9999
+      # runAsUser: 9031
+      # runAsGroup: 9999
       # allowPrivilegeEscalation: false
       # capabilities:
       #   drop:
       #   - ALL
-      # runAsGroup: 1000
-      # runAsNonRoot: true
-      # runAsUser: 100
 
   ############################################################
   # Container Information
@@ -547,16 +549,16 @@ pingdirectory:
   services:
     ldap:
       servicePort: 389
-      containerPort: 389
+      containerPort: 1389
       dataService: true
     ldaps:
       servicePort: 636
-      containerPort: 636
+      containerPort: 1636
       dataService: true
       clusterService: true
     https:
       servicePort: 443
-      containerPort: 443
+      containerPort: 1443
       ingressPort: 443
       dataService: true
 
@@ -654,11 +656,11 @@ pingdatasync:
   services:
     ldaps:
       servicePort: 636
-      containerPort: 636
+      containerPort: 1636
       clusterService: true
     https:
       servicePort: 443
-      containerPort: 443
+      containerPort: 1443
       dataService: true
 
 #############################################################
@@ -686,12 +688,12 @@ pingdatagovernance:
   services:
     https:
       servicePort: 443
-      containerPort: 443
+      containerPort: 1443
       ingressPort: 443
       dataService: true
     ldaps:
       servicePort: 636
-      containerPort: 636
+      containerPort: 1636
       clusterService: true
 
   ingress:
