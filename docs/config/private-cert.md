@@ -38,8 +38,8 @@ global:
 
 Generating an internal certificate is as simple setting the `privateCert.generate` to `true`.
 
-
 !!! note "Example of generating an internal certificate for pingaccess-engine"
+
 ```yaml
 pingaccess-admin:
   privateCert:

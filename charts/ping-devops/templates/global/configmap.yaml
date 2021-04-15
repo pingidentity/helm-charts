@@ -1,7 +1,5 @@
 {{- include "pinglib.configmap" (list . "global") -}}
 
-
-
 {{- define "global.configmap" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
@@ -29,47 +27,4 @@ data:
   {{ include "global.public.host.port" (list $top $v "PDP_ENGINE" "pingdirectoryproxy") }}
   {{ include "global.public.host.port" (list $top $v "PF_ENGINE" "pingfederate-engine") }}
   {{ include "global.public.host.port" (list $top $v "PF_ADMIN" "pingfederate-admin") }}
-
-{{- end -}}
-
-
-{{- define "global.private.host.port" -}}
-{{- $top := index . 0 }}
-{{- $v := index . 1 }}
-{{- $envPrefix := index . 2 }}
-{{- $prodName := index . 3 }}
-{{- with (index $top.Values $prodName) }}
-{{- if .enabled }}
-  {{ $envPrefix }}_PRIVATE_HOSTNAME: {{ include "pinglib.addreleasename" (list $top $v .name) | quote }}
-  {{- range $serviceName, $val := .services }}
-  {{- if ne $serviceName "clusterExternalDNSHostname" }}
-  {{- if $val.dataService }}
-  {{ $envPrefix }}_PRIVATE_PORT_{{ $serviceName | replace "-" "_" | upper }}: {{ $val.servicePort | quote }}
-  {{- end }}
-  {{- end }}
-  {{- end }}
-{{- end }}
-{{- end }}
-{{- end -}}
-
-{{- define "global.public.host.port" -}}
-{{- $top := index . 0 }}
-{{- $v := index . 1 }}
-{{- $envPrefix := index . 2 }}
-{{- $prodName := index . 3 }}
-{{- with (index $top.Values $prodName) }}
-{{- if and .enabled .ingress }}
-{{- if .ingress.enabled }}
-{{- $services := (index $top.Values $prodName).services }}
-{{- range .ingress.hosts }}
-  {{ $envPrefix }}_PUBLIC_HOSTNAME: {{ include "pinglib.ingress.hostname" (list $top $v .host) | quote }}
-
-  {{- range .paths }}
-  {{ $envPrefix }}_PUBLIC_PORT_{{ .backend.serviceName | replace "-" "_" | upper }}: {{ (index $services .backend.serviceName).ingressPort | quote }}
-  {{- end }}
-
-{{- end }}
-{{- end }}
-{{- end }}
-{{- end }}
 {{- end -}}

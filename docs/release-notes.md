@@ -1,6 +1,19 @@
 # Release Notes
 
+## Release 0.5.3
 
+* [Issue #121](https://github.com/pingidentity/helm-charts/issues/121) - Create global-env-vars hosts/ports
+  for all products regardless if enabled
+
+    The status of this config map is used to form the checksum for the products. This will ensure that a simple
+    addition/deletion of a product from the deployed mix won't cause all products to be restarted.
+
+* [Issue #122](https://github.com/pingidentity/helm-charts/issues/122) - Update image.tag to 2103 (March 2021)
+
+    The image tag is modified to 2103. This includes:
+
+    * Security Context on StatefulSets to include a fsGroup=9999 (same as gid)
+    * Update the services ContainerPort to unprivileged ports (i..e. 636 --> 1636)
 
 ## Release 0.5.2
 

@@ -41,13 +41,14 @@ container as it's json representation with all the secret key names/values.
 If dropped into the `SECRETS_DIR` (defaults to `/run/secrets`) directory, these files will
 be processed as:
 
-  * PROPERTY_FILE if the file ends in `.env` or
-  * Multiple files will be created for each key=value pair.
+* PROPERTY_FILE if the file ends in `.env` or
+* Multiple files will be created for each key=value pair.
 
 See the example below in this document for the
 transformation that occurs with the `devops-secret.env`.
 
 ## Vault Annotations
+
 Default yaml defined in the global vault section.  The options of annotation names/values
 can be found at
 [vault definitions](https://www.vaultproject.io/docs/platform/k8s/injector/annotations)
@@ -78,6 +79,7 @@ make use of the secrets and an example of where secrets will be placed into cont
 
 !!! note "Example: Hashicorp Vault secrets"
     SECRET:secrets/jsmith@example.com/jsmith-namespace/licenses
+
     ```
     {
       "pingaccess-6.2": "Product=PingAccess\nVersion=6.2...",
@@ -102,7 +104,6 @@ make use of the secrets and an example of where secrets will be placed into cont
       "tls.key": "LS0tLS1CRUdJ...38sj"
     }
     ```
-
 
 !!! note "Example: Vault secrets .yaml"
     ```yaml
