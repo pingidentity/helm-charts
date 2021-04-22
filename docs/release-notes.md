@@ -1,5 +1,15 @@
 # Release Notes
 
+
+## Release 0.5.4
+
+* [Issue #126](https://github.com/pingidentity/helm-charts/issues/126) - Unable to mount secretVolume and configMapVolumes simultaneously
+
+    Due to the fact that volumes: is an array of items volumes: usage with secret or configMap volumes exosed
+    the issue that multiple volumes: entries were used, and only kept the last one.  Fix included only using
+    volumes: once.  Note that the template will end up with a `volumes: null` if none are
+    set (i.e. deployment with no Secret/ConfigMap volumes), but that is ok.
+
 ## Release 0.5.3
 
 * [Issue #121](https://github.com/pingidentity/helm-charts/issues/121) - Create global-env-vars hosts/ports

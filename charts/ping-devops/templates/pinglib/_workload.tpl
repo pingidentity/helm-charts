@@ -157,7 +157,6 @@ spec:
       securityContext: {{ toYaml $v.workload.securityContext | nindent 8 }}
 
       {{/*--------------------- Volumes ------------------*/}}
-      {{- if or (and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled) $v.privateCert.generate }}
       volumes:
       {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
       {{- range $volName, $val := $v.workload.statefulSet.persistentvolume.volumes }}
@@ -167,13 +166,11 @@ spec:
       {{- end }}
       {{- end }}
       {{- if $v.privateCert.generate }}
-      volumes:
       - name: private-keystore
         emptyDir: {}
       - name: private-cert
         secret:
           secretName: {{ include "pinglib.fullname" . }}-private-cert
-      {{- end }}
       {{- end }}
       {{- include "pinglib.workload.volumes" $v | nindent 6 }}
 
@@ -293,7 +290,6 @@ securityContext:
 {{ range tuple "secretVolumes" "configMapVolumes" }}
 {{ $volType := . }}
 {{- range $volName, $volVal := (index $v .) }}
-volumes:
 - name: {{ $volName }}
   {{- if eq $volType "secretVolumes" }}
   secret:
