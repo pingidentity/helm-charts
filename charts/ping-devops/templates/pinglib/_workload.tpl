@@ -132,7 +132,8 @@ spec:
 
         {{/*--------------------- Resources ------------------*/}}
         resources: {{ toYaml $v.container.resources | nindent 10 }}
-        {{- if or (and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled) $v.privateCert.generate }}
+
+        {{/*------------------- Volume Mounts ----------------*/}}
         volumeMounts:
         {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
         {{- range $volName, $val := $v.workload.statefulSet.persistentvolume.volumes }}
@@ -144,7 +145,6 @@ spec:
         - name: private-keystore
           mountPath: /run/secrets/private-keystore
           readOnly: true
-        {{- end }}
         {{- end }}
         {{- include "pinglib.workload.volumeMounts" $v | nindent 8 }}
 
@@ -313,7 +313,6 @@ securityContext:
 {{ $volType := . }}
 {{- range $volName, $volVal := (index $v .) }}
 {{- range $keyName, $keyVal := $volVal.items }}
-volumeMounts:
 - name: {{ $volName }}
   mountPath: {{ $keyVal }}
   subPath: {{ base $keyVal }}

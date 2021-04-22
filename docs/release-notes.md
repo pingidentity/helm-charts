@@ -1,6 +1,13 @@
 # Release Notes
 
 
+## Release 0.5.5
+
+* [Issue #126](https://github.com/pingidentity/helm-charts/issues/126) - Unable to mount secretVolume and configMapVolumes simultaneously
+
+    This is one additional fix to the the same thing fixed in 0.5.4.  `volumeMounts:` had the same issue as `volumes:`.  This
+    completes and resolves issue #126.
+
 ## Release 0.5.4
 
 * [Issue #126](https://github.com/pingidentity/helm-charts/issues/126) - Unable to mount secretVolume and configMapVolumes simultaneously
