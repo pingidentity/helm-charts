@@ -1,6 +1,20 @@
 # Release Notes
 
 
+
+## Release 0.5.5 (April 29, 2021)
+
+* [Issue #133](https://github.com/pingidentity/helm-charts/issues/133) - Change default pingdirectory values
+  (container.resources.requests.cpu=50m and container.replicaCount=1)
+
+    Setting the cpu request to 50m, will provide at last some reservation of CPU, so that if there are multiple nodes,
+    it will better even out the load.
+
+    Additionally, setting the replicaCount to 1 by default, as many cases in development, there isn't a great need to
+    have multiple replicas. If this is the case, simply set pingdirectory.container.replicaCount=2 or any number of replica's.
+
+* [Issue #132](https://github.com/pingidentity/helm-charts/issues/132) - Adding PingDirectoryProxy to mix of products
+
 ## Release 0.5.5
 
 * [Issue #126](https://github.com/pingidentity/helm-charts/issues/126) - Unable to mount secretVolume and configMapVolumes simultaneously
