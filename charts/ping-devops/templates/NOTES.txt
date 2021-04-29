@@ -5,7 +5,7 @@
 #  {{ printf $format " " "---------------------" "-------" "---" "--" "----" "-" "----" "----" "-" "----" "---"}}
 #  {{ printf $format " " "global" (toString $.Values.global.image.tag) "" "" (toString $.Values.global.container.resources.requests.cpu) "/" (toString $.Values.global.container.resources.limits.cpu) (toString $.Values.global.container.resources.requests.memory) "/" (toString $.Values.global.container.resources.limits.memory) (ternary " √ " "" $.Values.global.ingress.enabled) }}
 #
-{{- $products := list "pingaccess-admin" "pingaccess-engine" "pingdataconsole" "pingdatagovernance" "pingdatagovernancepap" "pingdatasync" "pingdelegator" "pingdirectory" "pingfederate-admin" "pingfederate-engine" "---" "ldap-sdk-tools" "pd-replication-timing" }}
+{{- $products := list "pingaccess-admin" "pingaccess-engine" "pingdataconsole" "pingdatagovernance" "pingdatagovernancepap" "pingdatasync" "pingdelegator" "pingdirectory" "pingdirectoryproxy" "pingfederate-admin" "pingfederate-engine" "---" "ldap-sdk-tools" "pd-replication-timing" }}
 {{- range $prodName := $products }}
 {{- if eq $prodName "---" }}
 #

@@ -1,0 +1,6 @@
+{{- include "pinglib.configmap" (list . "pingdirectoryproxy") -}}
+
+
+{{- define "pingdirectoryproxy.configmap" -}}
+data:
+{{- end -}}

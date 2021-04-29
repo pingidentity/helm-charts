@@ -494,10 +494,10 @@ pingdirectory:
     name: pingdirectory
 
   container:
-    replicaCount: 2
+    replicaCount: 1
     resources:
       requests:
-        cpu: 0
+        cpu: 50m
         memory: 2Gi
       limits:
         cpu: 2
@@ -580,6 +580,39 @@ pingdirectory:
     readiness:
       periodSeconds: 30
       failureThreshold: 4
+
+
+#############################################################
+# pingdirectoryproxy values
+#############################################################
+pingdirectoryproxy:
+  enabled: false
+  name: pingdirectoryproxy
+  image:
+    name: pingdirectoryproxy
+
+  container:
+    resources:
+      requests:
+        cpu: 0
+        memory: .75Gi
+      limits:
+        cpu: 2
+        memory: 2Gi
+
+  envs:
+    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+    SERVER_PROFILE_PATH: baseline/pingdirectoryproxy
+
+  services:
+    ldaps:
+      servicePort: 636
+      containerPort: 1636
+      clusterService: true
+    https:
+      servicePort: 443
+      containerPort: 1443
+      dataService: true
 
 #############################################################
 # pingdelegator values
