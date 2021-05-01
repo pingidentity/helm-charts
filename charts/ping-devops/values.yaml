@@ -548,16 +548,16 @@ pingdirectory:
 
   services:
     ldap:
-      servicePort: 389
+      servicePort: 1389
       containerPort: 1389
       dataService: true
     ldaps:
-      servicePort: 636
+      servicePort: 1636
       containerPort: 1636
       dataService: true
       clusterService: true
     https:
-      servicePort: 443
+      servicePort: 1443
       containerPort: 1443
       ingressPort: 443
       dataService: true
@@ -606,11 +606,11 @@ pingdirectoryproxy:
 
   services:
     ldaps:
-      servicePort: 636
+      servicePort: 1636
       containerPort: 1636
       clusterService: true
     https:
-      servicePort: 443
+      servicePort: 1443
       containerPort: 1443
       dataService: true
 
@@ -688,11 +688,11 @@ pingdatasync:
 
   services:
     ldaps:
-      servicePort: 636
+      servicePort: 1636
       containerPort: 1636
       clusterService: true
     https:
-      servicePort: 443
+      servicePort: 1443
       containerPort: 1443
       dataService: true
 
@@ -720,12 +720,12 @@ pingdatagovernance:
 
   services:
     https:
-      servicePort: 443
+      servicePort: 1443
       containerPort: 1443
       ingressPort: 443
       dataService: true
     ldaps:
-      servicePort: 636
+      servicePort: 1636
       containerPort: 1636
       clusterService: true
 

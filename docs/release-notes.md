@@ -1,8 +1,14 @@
 # Release Notes
 
 
+## Release 0.5.7 (May 3, 2021)
 
-## Release 0.5.5 (April 29, 2021)
+[Issue #136](https://github.com/pingidentity/helm-charts/issues/136) Service Ports should match container ports.
+
+Sets defaults values.yaml to have servicePort match containerPort. This helps cluster/data services present the appropriate port for networking and discovery.
+
+
+## Release 0.5.6 (April 29, 2021)
 
 * [Issue #133](https://github.com/pingidentity/helm-charts/issues/133) - Change default pingdirectory values
   (container.resources.requests.cpu=50m and container.replicaCount=1)
