@@ -99,7 +99,7 @@ global:
   # By default the images uses will be indicated by these
   # variables.  An example might look like:
   #
-  #   pingidentity/pingdataconsole:2103 (March, 2021)
+  #   pingidentity/pingdataconsole:2104 (April, 2021)
   #
   # NOTE: image.name MUST be set in child chart
   #   Example: image.name: pingfederate
@@ -107,7 +107,7 @@ global:
   image:
     repository: pingidentity
     name:
-    tag: "2103"
+    tag: "2104"
     pullPolicy: Always
 
   ############################################################

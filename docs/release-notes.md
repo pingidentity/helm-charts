@@ -1,6 +1,17 @@
 # Release Notes
 
 
+## Release 0.5.7 (May 3, 2021)
+
+* [Issue #136](https://github.com/pingidentity/helm-charts/issues/136) ClusterIP Services
+  port/targetPort be set to the containerPort
+
+    Since the ClusterIP Services (aka Headless services) only provide access to the underlying container
+    IP and port.  The port, and by default targetPort, will be set to the containerPort value.  The helm
+    charts will start requiring the containerPort for any service where clusterService:true is set, otherwise
+    it will fail with an error message.
+
+* [Issue #138](https://github.com/pingidentity/helm-charts/issues/138) Update image.tag to 2104 (April 2021)
 
 ## Release 0.5.5 (April 29, 2021)
 
