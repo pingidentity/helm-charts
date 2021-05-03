@@ -19,8 +19,10 @@ spec:
   {{- if ne $serviceName "clusterExternalDNSHostname" }}
   {{- if $val.clusterService }}
     - name: {{ $serviceName }}
-      port: {{ $val.servicePort }}
-      targetPort: {{ default $val.servicePort $val.containerPort }}
+      port: {{ required "containerPort is required for services with clusterService:true" $val.containerPort }}
+      # targetPort isn't provided as it will ALWAYS be the same as the
+      # port of the service,since it's a type:ClusterIP or headless
+      # service
       protocol: {{ default "TCP" $val.protocol }}
   {{- end }}
   {{- end }}
