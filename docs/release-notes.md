@@ -1,6 +1,12 @@
 # Release Notes
 
 
+## Release 0.5.8 (May 6, 2021)
+
+* [Issue #141](https://github.com/pingidentity/helm-charts/issues/141) Fix DNS_QUERY_LOCATION on pingfederate-engine configmap.yaml
+
+    Resolves an issue with the DNS_QUERY_LOCATION when pingfederate clustering is used for >1 pingfederate-engines
+
 ## Release 0.5.7 (May 3, 2021)
 
 * [Issue #136](https://github.com/pingidentity/helm-charts/issues/136) ClusterIP Services
