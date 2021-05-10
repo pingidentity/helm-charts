@@ -1,7 +1,2 @@
 
-{{- range $testName, $test := .Values.testFramework }}
-    {{- if eq $test.type "postman" }}
-{{ include "pinglib.test.postman" (list $ $.Values.global $testName) }}
----
-    {{- end -}}
-{{- end -}}
+{{ include "pinglib.test.job" (list $ $.Values.global $.Values.testFramework) }}

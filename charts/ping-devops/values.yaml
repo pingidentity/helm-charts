@@ -948,8 +948,58 @@ pd-replication-timing:
 
 
 #############################################################
-# test framework
+# testFramework
 #
-# Future
+# Beta
 #############################################################
-testFramework: {}
+testFramework:
+  name: ping-devops-test
+  sharedMountPath: /var/run/shared
+
+  testConfigMaps:
+    prefix: ping-devops-test-
+    volumeMountPath: /var/run/
+    #########################################################
+    # Array of configmap names (prefixed with prefix above)
+    # Example includes:
+    #########################################################
+    # files:
+    #   - init-test.sh
+    #   - check-pingfederate.postman-collection.json
+    #   - generated.postman-environment.json
+
+  testSteps: []
+    #########################################################
+    # Array of steps.
+    # Example includes:
+    #########################################################
+    # - name: 01-wait-for-pingfederate-engine
+    #   waitFor:
+    #     pingfederate-engine:
+    #       service: https
+
+    # - name: 02-init-test
+    #   image: busybox
+    #   command:
+    #     - /bin/sh
+    #     - /var/run/init-test.sh
+
+    # - name: 03-check-pingfederate
+    #   image: postman/newman:5-alpine
+    #   command:
+    #     - newman
+    #     - run
+    #     - /var/run/check-pingfederate.postman-collection.json
+    #     - --environment
+    #     - /var/run/generated.postman-environment.json
+    #     - --insecure
+    #     - --ignore-redirects
+
+  finalStep:
+    name: 99-completion
+    image: pingidentity/pingtoolkit:2104
+    command:
+      - /bin/sh
+      - -c
+      - echo "*************************************"; echo "Testing Complete"; date; echo "*************************************";
+      - exit 0

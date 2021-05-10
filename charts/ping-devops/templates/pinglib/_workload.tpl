@@ -55,7 +55,7 @@ spec:
       tolerations: {{ toYaml $v.container.tolerations | nindent 8 }}
       affinity: {{ toYaml $v.container.affinity | nindent 8 }}
       initContainers:
-        {{ include "pinglib.workload.init.waitfor" (append . $v.container.waitFor) | nindent 6 }}
+        {{ include "pinglib.workload.init.waitfor" (concat . (list $v.container.waitFor "")) | nindent 6 }}
         {{ include "pinglib.workload.init.genPrivateCert" . | nindent 6 }}
       containers:
       - name: {{ $v.name }}
@@ -195,6 +195,7 @@ spec:
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
 {{- $waitFor := index . 2 -}}
+{{- $containerName := index . 3 -}}
 {{- range $prod, $val := $waitFor }}
   {{- if or $top.Values.enabled (index $top.Values $prod).enabled }}
     {{- $host := include "pinglib.addreleasename" (list $top $v $prod) }}
@@ -202,7 +203,7 @@ spec:
     {{- $port := (index $waitForServices $val.service).servicePort | quote }}
     {{- $timeout := printf "-t %d" (int (default 300 $val.timeoutSeconds )) -}}
     {{- $server := printf "%s:%s" $host $port }}
-- name: wait-for-{{ $prod }}-init
+- name: {{ default (print "wait-for" $prod "-init") $containerName }}
   imagePullPolicy: {{ $v.image.pullPolicy }}
   image: {{ $v.externalImage.pingtoolkit }}
   command: ['sh', '-c', 'echo "Waiting for {{ $server }}..." && wait-for {{ $server }} {{ $timeout }} -- echo "{{ $server }} running"']

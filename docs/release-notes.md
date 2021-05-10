@@ -1,5 +1,12 @@
 # Release Notes
 
+## Release 0.5.9 (May 10, 2021)
+
+* BETA - Testing Framework supporting `helm test` command and associated `testFramework` values.
+
+    A testing framework is being created to allow for testing Ping Identity helm chart deployments using
+    a `testFramework` set of values.  This is currently in beta, with documentation to available soon.
+    Expect that changes will be made to this work, until it's fully released with documentation.
 
 ## Release 0.5.8 (May 6, 2021)
 

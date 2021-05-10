@@ -1,10 +1,14 @@
-{{- define "pinglib.test.postman" -}}
+{{- define "pinglib.test.job" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
-{{- $testName := index . 2 -}}
-{{- $test := index $top.Values.testFramework $testName -}}
-{{- $containerName := print "test-" $testName -}}
-{{- $waitFor := $test.waitFor -}}
+{{- $testFramework := index . 2 -}}
+
+{{- $containerName := $testFramework.name -}}
+{{- $sharedMountPath := $testFramework.sharedMountPath -}}
+{{- $configMaps := $testFramework.testConfigMaps -}}
+{{- $cmMountLocation := $configMaps.volumeMountPath -}}
+{{- $cmPrefix := $configMaps.prefix -}}
+
 apiVersion: v1
 kind: Pod
 metadata:
@@ -15,33 +19,57 @@ metadata:
   name: {{ include "pinglib.addreleasename" (list $top $v $containerName) }}
 spec:
   restartPolicy: Never
-  initContainers: {{ include "pinglib.workload.init.waitfor" (list $top $v $waitFor) | nindent 4 }}
-  containers:
-  - name: {{ $containerName }}
+  initContainers:
+
+  {{- range $testFramework.testSteps }}
+  {{- $stepName := .name }}
+  {{- if .waitFor }}
+    {{ include "pinglib.workload.init.waitfor" (list $top $v .waitFor $stepName) | nindent 2 }}
+  {{- else }}
+
+
+  - name: {{ $stepName }}
     env: []
-
     {{/*--------------------- Image -------------------------*/}}
-    image: "postman/newman:5-alpine"
+    image: {{ default .image (index $v.externalImage .image) }}
     imagePullPolicy: IfNotPresent
-
-
     {{/*--------------------- Command -----------------------*/}}
     command:
-      - newman
-      - run
-      - {{ $test.collection }}
-      - --insecure
-      - --ignore-redirects
-
+      {{ toYaml .command | nindent 6 }}
+  {{- end }}
     {{/*--------------------- Environment -----------------*/}}
     envFrom:
     - configMapRef:
         name: {{ $top.Release.Name }}-global-env-vars
         optional: true
     - configMapRef:
-        name: {{ $top.Release.Name }}-{{ $testName }}-env-vars
+        name: {{ $top.Release.Name }}-{{ $containerName }}-env-vars
         optional: true
 
+    {{/*--------------------- VolumeMounts -----------------*/}}
+    volumeMounts:
+    - name: shared-data
+      mountPath: {{ $sharedMountPath }}
+
+    {{- range $configMaps.files }}
+    {{- $volumeName := print $cmPrefix (sha1sum .)  }}
+    {{- $volumeMountPath := print $cmMountLocation . }}
+    - name: {{ $volumeName }}
+      mountPath: {{ $volumeMountPath }}
+      subPath: {{ . }}
+      readOnly: true
+
+    {{- end }}
+    {{- end }}
+  containers:
+  {{- with $testFramework.finalStep }}
+  - name: {{ .name }}
+    image: {{ default .image (index $v.externalImage .image) }}
+    command:
+      {{ toYaml .command | nindent 6 }}
+    volumeMounts:
+    - name: shared-data
+      mountPath: {{ $sharedMountPath }}
     resources:
       limits:
         cpu: 500m
@@ -58,4 +86,22 @@ spec:
       runAsGroup: 1000
       runAsNonRoot: true
       runAsUser: 100
-{{- end }}
+  {{- end }}
+
+  {{/*--------------------- Volumes -----------------*/}}
+  volumes:
+  # Use a shared volume between containers
+  - name: shared-data
+    emptyDir: {}
+
+  {{- range $configMaps.files }}
+  {{- $volumeName := print $cmPrefix (sha1sum .)  }}
+  {{- $configMapName := print $cmPrefix .  }}
+  - name: {{ $volumeName }}
+    configMap:
+      name: {{ $configMapName }}
+      items:
+      - key: file
+        path: {{ . }}
+  {{- end }}
+{{- end -}}
