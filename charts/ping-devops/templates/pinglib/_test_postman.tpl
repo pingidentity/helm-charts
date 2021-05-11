@@ -30,23 +30,23 @@ spec:
 
   - name: {{ $stepName }}
     env: []
-    {{/*--------------------- Image -------------------------*/}}
+    #--------------------- Image -------------------------
     image: {{ default .image (index $v.externalImage .image) }}
     imagePullPolicy: IfNotPresent
-    {{/*--------------------- Command -----------------------*/}}
+    #--------------------- Command -----------------------
     command:
       {{ toYaml .command | nindent 6 }}
   {{- end }}
-    {{/*--------------------- Environment -----------------*/}}
+    #--------------------- Environment -----------------
     envFrom:
     - configMapRef:
-        name: {{ $top.Release.Name }}-global-env-vars
+        name: {{ include "pinglib.addreleasename" (list $top $v "global-env-vars") }}
         optional: true
     - configMapRef:
-        name: {{ $top.Release.Name }}-{{ $containerName }}-env-vars
+        name: {{ include "pinglib.addreleasename" (list $top $v (print $containerName "-env-vars")) }}
         optional: true
 
-    {{/*--------------------- VolumeMounts -----------------*/}}
+    #--------------------- VolumeMounts -----------------
     volumeMounts:
     - name: shared-data
       mountPath: {{ $sharedMountPath }}
@@ -88,18 +88,19 @@ spec:
       runAsUser: 100
   {{- end }}
 
-  {{/*--------------------- Volumes -----------------*/}}
+  #--------------------- VolumeMounts -----------------
+  # Setup a volume for each file in the configMaps.files
   volumes:
   # Use a shared volume between containers
   - name: shared-data
     emptyDir: {}
 
+  # Setup a volume for each file in the configMaps.files
   {{- range $configMaps.files }}
   {{- $volumeName := print $cmPrefix (sha1sum .)  }}
-  {{- $configMapName := print $cmPrefix .  }}
   - name: {{ $volumeName }}
     configMap:
-      name: {{ $configMapName }}
+      name: {{ include "pinglib.addreleasename" (list $top $v .) }}
       items:
       - key: file
         path: {{ . }}
