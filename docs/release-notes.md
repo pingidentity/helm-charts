@@ -2,6 +2,14 @@
 
 ## Release 0.6.0 (May 11, 2021)
 
+* Changed default `global.image.pullPolicy` from `Always` to `IfNotPresent`.
+
+    This is due to the fact that the `global.image.tag` is a non-floating tag. Once it is downloaded
+    and present, it will not change.  This small change will increase performance at startup as images
+    are typically present when installing/updating releases.
+
+    Simply set `global.image.pullPolicy=Always` to pull every time if needed.
+
 * BETA 2 - Testing Framework supporting `helm test` command and associated `testFramework` values.
 
     Cleaned up the generation of resources honoring the addReleaseNameToResource setting.
