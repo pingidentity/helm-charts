@@ -108,7 +108,7 @@ global:
     repository: pingidentity
     name:
     tag: "2104"
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
 
   ############################################################
   # External Images
@@ -953,7 +953,7 @@ pd-replication-timing:
 # Beta
 #############################################################
 testFramework:
-  name: ping-devops-test
+  name: testframework
   sharedMountPath: /var/run/shared
 
   testConfigMaps:
