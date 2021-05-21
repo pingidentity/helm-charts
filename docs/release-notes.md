@@ -1,5 +1,15 @@
 # Release Notes
 
+
+## Release 0.6.1 (May 21, 2021)
+
+* [Issue #148](https://github.com/pingidentity/helm-charts/issues/148) Calculate checksum of ConfigMaps based
+  on the data rather than entire ConfigMap file
+
+    This will only use the ConfigMap.data when creating checksums in workload rather than using the
+    entire file.  It will result in no checksum change when labels/annotations are the only thing changing.
+    A good example is the helm chart version, which changes the label, but not data.
+
 ## Release 0.6.0 (May 11, 2021)
 
 * Changed default `global.image.pullPolicy` from `Always` to `IfNotPresent`.
