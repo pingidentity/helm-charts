@@ -1,6 +1,34 @@
 # Release Notes
 
 
+## Release 0.6.2 (May 24, 2021)
+
+* [Issue #151](https://github.com/pingidentity/helm-charts/issues/151) Add support for Container LifeCycle Event Hooks
+
+    Adding following to values.yaml
+
+    !!! note "Adding lifecycle hooks to container"
+        ```yaml
+        global:
+          ############################################################
+          # container life handlers, allowing for lifecycle events such
+          # as postStart and preStop events
+          #
+          # https://kubernetes.io/docs/tasks/configure-pod-container/attach-handler-lifecycle-event
+          ############################################################
+          lifecyle: {}
+          # Example
+          # lifecyle:
+          #   postStart:
+          #     exec:
+          #       command: ["/bin/sh", "-c", "echo Start Complete > /tmp/message"]
+        ```
+
+* General cleanup of values.yaml comments
+
+* Setting default `externalImages.pingtoolkit` tag to 2104, and removing `edge` tag from `ldap-sdk-tools` image
+  which will now default to same `global.image.tag` setting (currently 2104)
+
 ## Release 0.6.1 (May 21, 2021)
 
 * [Issue #148](https://github.com/pingidentity/helm-charts/issues/148) Calculate checksum of ConfigMaps based
