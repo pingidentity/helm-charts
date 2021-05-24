@@ -15,7 +15,20 @@
 # Global values
 ############################################################
 global:
+  ############################################################
+  # annotations - Annotations listed, will be added to the
+  #               kubernetes resource
+  ############################################################
   annotations: {}
+
+  ############################################################
+  # envs - Environment variables listed will be added to the
+  #        global-env-vars configmap.
+  #
+  # NOTE: Environment variables listed at the global: level
+  #       will actually end up being listed twice in the
+  #       configmaps (i.e. global-env-vars and product-env-vars)
+  ############################################################
   envs: {}
 
   ############################################################
@@ -26,6 +39,7 @@ global:
   #                   prepend: Prepends the Release.Name ** DEFAULT **
   ############################################################
   addReleaseNameToResource: prepend
+
   ############################################################
   # Ingress
   #
@@ -70,7 +84,7 @@ global:
   ############################################################
   # Fields used to annotate secret hashicorp vault information
   #
-  # Theese annotations names will be automatically be
+  # These annotations names will be automatically be
   # appended to the 'vault.hashicorp.com/'
   #
   # https://www.vaultproject.io/docs/platform/k8s/injector/annotations
@@ -118,7 +132,7 @@ global:
   ############################################################
   externalImage:
     # pingtoolkit - based on alpine
-    pingtoolkit: pingidentity/pingtoolkit:latest
+    pingtoolkit: pingidentity/pingtoolkit:2104
 
   ############################################################
   # Services
@@ -136,6 +150,16 @@ global:
   #                  clusterIP.  DNS requests to this service
   #                  will provide one of the IPs of the backend
   #                  containers.
+  #
+  # containerPort  - Port that is used on the kubernetes container.
+  #
+  # servicePort    - Port that is available from the kubernetes service
+  #                  Note: if clusterService=true this port on the
+  #                        cluster service is not really
+  #                        used as headless service always maps through
+  #                        to the container port
+  #
+  # ingressPort    - Port that is available from the kubernetes ingress
   #
   # https://kubernetes.io/docs/concepts/services-networking/service/
   ############################################################
@@ -162,15 +186,21 @@ global:
   # Two workloads supported:
   #  - Deployment
   #  - StatefulSet
-  #
-  # https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
   ############################################################
   workload:
-    # Can be Deployment or StatefulSet (see warning above)
+    # Can be Deployment or StatefulSet
     type: Deployment
 
     annotations: {}
 
+    ############################################################
+    # Deployments
+    #
+    # Detailed information used to create a deployment speicific
+    # workload.
+    #
+    # https://kubernetes.io/docs/concepts/workloads/controllers/deployment
+    ############################################################
     deployment:
       strategy:
         # Can be RollingUpdate or Recreate
@@ -179,6 +209,14 @@ global:
           maxSurge: 1
           maxUnavailable: 0
 
+    ############################################################
+    # StatefulSets
+    #
+    # Detailed information used to create a statefulset speicific
+    # workload.
+    #
+    # https://kubernetes.io/docs/concepts/workloads/controllers/statefulset
+    ############################################################
     statefulSet:
       # Used for canary testing if n>0
       partition: 0
@@ -207,6 +245,7 @@ global:
                 requests:
                   storage: 4Gi
 
+    ############################################################
     # securityContext
     #
     # Note: The user (9031) and group (9999) represent the current user
@@ -215,6 +254,7 @@ global:
     #       any gid number.
     #       The fsGroup is required for any wordloads that volumeMount
     #       a pvc (i.e. StatefulSets)
+    ############################################################
     securityContext:
       fsGroup: 9999
       # runAsUser: 9031
@@ -257,6 +297,19 @@ global:
     #     name: my-example-secrets
     #     optional: true
 
+    ############################################################
+    # container life handlers, allowing for lifecycle events such
+    # as postStart and preStop events
+    #
+    # https://kubernetes.io/docs/tasks/configure-pod-container/attach-handler-lifecycle-event
+    ############################################################
+    lifecyle: {}
+    # Example
+    # lifecyle:
+    #   postStart:
+    #     exec:
+    #       command: ["/bin/sh", "-c", "echo Start Complete > /tmp/message"]
+
   ############################################################
   # Probes
   #
@@ -290,8 +343,8 @@ global:
   # NOTE: licenseSecretName can be set in deploying chart values to specify a secret
   #       with actual product license.  This would override the DevOps secret.
   #
-  # Using ping-devops utility:
-  #    ping-devops generate devops-secret | kubectl apply -f -
+  # Using pingctl utility (brew install pingctl):
+  #    pingctl k8s generate devops-secret | kubectl apply -f -
   ############################################################
   license:
     secret:
@@ -309,8 +362,7 @@ ldap-sdk-tools:
   enabled: false
   name: ldap-sdk-tools
   image:
-    name: "ldap-sdk-tools"
-    tag: edge
+    name: ldap-sdk-tools
 
   container:
     command: "tail -f /dev/null"
