@@ -153,6 +153,9 @@ spec:
         {{/*securityContext: {{ toYaml $v.container.securityContext | nindent 10 }}*/}}
 
 
+        {{/*---------------- Lifecycle --------------------*/}}
+        lifecycle: {{ toYaml $v.container.lifecycle | nindent 10 }}
+
       {{/*---------------- Security Context -------------*/}}
       securityContext: {{ toYaml $v.workload.securityContext | nindent 8 }}
 

@@ -23,15 +23,12 @@ vault.hashicorp.com/secret-volume-path:  {{ index . "secret-volume-path" | quote
 vault.hashicorp.com/{{ $annotation }}: {{ $val | quote }}
 {{- end -}}
 #----------------------------------------------------
-marker.hello.1: world2
 {{- $defaultSecretVolumePath := index .annotations "secret-volume-path" }}
 {{- $secretPrefix := .secretPrefix }}
 {{- range $secretName, $secretVal := .secrets }}
 #------------ Processing Secret
   {{- $fullSecret := printf "%s%s" $secretPrefix $secretName }}
-debug.json.{{ $secretName }}: {{ $secretVal }}
   {{- range $keyName, $keyVal := $secretVal }}
-marker.hello.{{ $keyName }}: {{ $keyVal }}
     {{- $keyPath := default $defaultSecretVolumePath $keyVal.path }}
     {{- $keyFile := default $keyName (required "A 'vault.hashicorp.secrets.{secret-name}.file' is required for each secret" $keyVal.file) }}
     {{- $keyFile := ternary (printf "%s.json" $keyFile) $keyFile (eq $keyName "to-json") }}
