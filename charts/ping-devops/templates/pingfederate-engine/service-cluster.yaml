@@ -1,0 +1,15 @@
+# Only create pingfederate-cluster if admin is disabled (ie. we are in a region without an admin)
+{{if not (index $.Values "pingfederate-admin").enabled }}
+  {{- include "pinglib.service-cluster" (list . "pingfederate-engine") -}}
+{{- end }}
+
+
+{{- define "pingfederate-engine.service-cluster" -}}
+metadata:
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+spec:
+  publishNotReadyAddresses: true
+  selector:
+    clusterIdentifier: {{ include "pinglib.addreleasename" (append . "pingfederate") }}
+{{- end }}

@@ -1,5 +1,10 @@
 # Release Notes
 
+## Release 0.6.3 (June 21, 2021)
+
+* [Issue #154](https://github.com/pingidentity/helm-charts/issues/154) Increment default tag to 2105
+*
+* [Issue #155](https://github.com/pingidentity/helm-charts/issues/155) Add clusterServiceName to product services with service clusters
 
 ## Release 0.6.2 (May 24, 2021)
 

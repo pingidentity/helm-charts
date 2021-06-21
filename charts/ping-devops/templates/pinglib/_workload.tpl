@@ -25,7 +25,7 @@ spec:
 
   {{- else if eq $v.workload.type "StatefulSet" }}
   {{/*--------------------- StatefulSet ---------------------*/}}
-  serviceName: {{ include "pinglib.fullname" . }}-cluster
+  serviceName: {{ include "pinglib.fullclusterservicename" . }}
   updateStrategy:
     type: RollingUpdate
     rollingUpdate:
@@ -82,7 +82,7 @@ spec:
         {{- with $v.services }}
         ports:
         {{- range $serviceName, $val := . }}
-        {{- if ne $serviceName "clusterExternalDNSHostname" }}
+        {{- if kindIs "map" $val }}
         - containerPort: {{ $val.containerPort }}
           name: {{ $serviceName }}
         {{- end }}
@@ -211,7 +211,7 @@ spec:
   image: {{ $v.externalImage.pingtoolkit }}
   command: ['sh', '-c', 'echo "Waiting for {{ $server }}..." && wait-for {{ $server }} {{ $timeout }} -- echo "{{ $server }} running"']
   {{ include "pinglib.workload.init.default.resources" . | nindent 2 }}
-  {{ include "pinglib.workload.init.default.securityContext" . | nindent 2 }}
+  {{ include "pinglib.workload.init.default.securityContext" $v.workload.securityContext | nindent 2 }}
     {{- end }}
   {{- end }}
 {{- end -}}
@@ -238,7 +238,7 @@ spec:
         echo "PRIVATE_KEYSTORE_PIN=${PRIVATE_KEYSTORE_PIN}">>${_certEnv} &&
         echo "PRIVATE_KEYSTORE=${PRIVATE_KEYSTORE}">>${_certEnv}
   {{ include "pinglib.workload.init.default.resources" . | nindent 2 }}
-  {{ include "pinglib.workload.init.default.securityContext" . | nindent 2 }}
+  {{ include "pinglib.workload.init.default.securityContext" $v.workload.securityContext | nindent 2 }}
   {{/*--------------------- Resources ------------------*/}}
   volumeMounts:
   - name: private-cert
@@ -266,9 +266,9 @@ securityContext:
     drop:
     - ALL
   readOnlyRootFilesystem: true
-  runAsGroup: 1000
+  runAsGroup: {{ .runAsGroup}}
   runAsNonRoot: true
-  runAsUser: 100
+  runAsUser: {{ .runAsUser}}
 {{- end -}}
 
 
