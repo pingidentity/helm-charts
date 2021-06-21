@@ -7,6 +7,5 @@ spec:
   template:
     metadata:
       labels:
-        foo: bar
         clusterIdentifier: {{ include "pinglib.addreleasename" (append . "pingdirectory") }}
 {{- end -}}

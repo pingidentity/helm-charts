@@ -3,8 +3,10 @@
 
 
 {{- define "pingdirectory.configmap" -}}
+{{- $top := index . 0 -}}
+{{- $v := index . 1 -}}
 data:
   ORCHESTRATION_TYPE: KUBERNETES
   K8S_STATEFUL_SET_NAME: {{ include "pinglib.fullname" . }}
-  K8S_STATEFUL_SET_SERVICE_NAME: {{ include "pinglib.fullname" . }}-cluster
+  K8S_STATEFUL_SET_SERVICE_NAME: {{ include "pinglib.fullclusterservicename" . }}
 {{- end -}}

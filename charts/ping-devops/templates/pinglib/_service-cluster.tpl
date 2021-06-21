@@ -10,13 +10,13 @@ metadata:
   annotations:
     external-dns.alpha.kubernetes.io/hostname: {{ $v.services.clusterExternalDNSHostname }}
 {{- end }}
-  name: {{ include "pinglib.fullname" . }}-cluster
+  name: {{ include "pinglib.fullclusterservicename" . }}
 spec:
   type: ClusterIP
   clusterIP: None
   ports:
   {{- range $serviceName, $val := $v.services }}
-  {{- if ne $serviceName "clusterExternalDNSHostname" }}
+  {{- if kindIs "map" $val }}
   {{- if $val.clusterService }}
     - name: {{ $serviceName }}
       port: {{ required "containerPort is required for services with clusterService:true" $val.containerPort }}
