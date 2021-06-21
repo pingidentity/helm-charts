@@ -113,7 +113,7 @@ global:
   # By default the images uses will be indicated by these
   # variables.  An example might look like:
   #
-  #   pingidentity/pingdataconsole:2104 (April, 2021)
+  #   pingidentity/pingdataconsole:2105 (May, 2021)
   #
   # NOTE: image.name MUST be set in child chart
   #   Example: image.name: pingfederate
@@ -121,7 +121,7 @@ global:
   image:
     repository: pingidentity
     name:
-    tag: "2104"
+    tag: "2105"
     pullPolicy: IfNotPresent
 
   ############################################################
@@ -132,7 +132,7 @@ global:
   ############################################################
   externalImage:
     # pingtoolkit - based on alpine
-    pingtoolkit: pingidentity/pingtoolkit:2104
+    pingtoolkit: pingidentity/pingtoolkit:2105
 
   ############################################################
   # Services
@@ -161,6 +161,9 @@ global:
   #
   # ingressPort    - Port that is available from the kubernetes ingress
   #
+  # clusterServiceName - If set, then this name will be used as the cluster
+  #                      service name (i.e clusterService == true).
+  #
   # https://kubernetes.io/docs/concepts/services-networking/service/
   ############################################################
   services: {}
@@ -178,6 +181,7 @@ global:
   #    servicePort: 7700
   #    clusterService: true
   #  clusterExternalDNSHostname:
+  #  clusterServiceName:
 
 
   ############################################################
@@ -257,8 +261,8 @@ global:
     ############################################################
     securityContext:
       fsGroup: 9999
-      # runAsUser: 9031
-      # runAsGroup: 9999
+      runAsUser: 9031
+      runAsGroup: 9999
       # allowPrivilegeEscalation: false
       # capabilities:
       #   drop:
@@ -439,7 +443,7 @@ pingfederate-admin:
       servicePort: 7700
       containerPort: 7700
       clusterService: true
-    clusterExternalDNSHostname:
+    clusterServiceName: pingfederate-cluster
 
   ingress:
     hosts:
@@ -482,8 +486,8 @@ pingfederate-engine:
 
   #############################################################
   # Horizontal Pod Autoscaling
-  # By defult this is disabled, since there dependencies to the containers
-  # CPU and/or Memory limites.
+  # By default this is disabled, since there dependencies to the containers
+  # CPU and/or Memory limits.
   #
   # If enabled, ensure that a proper container.resource.request.cpu limit is set
   # and coordinated with the a targetCPUUtilizationPercentage or
@@ -522,7 +526,7 @@ pingfederate-engine:
       servicePort: 7700
       containerPort: 7700
       clusterService: true
-    clusterExternalDNSHostname:
+    clusterServiceName: pingfederate-cluster
 
   ingress:
     hosts:
@@ -613,6 +617,7 @@ pingdirectory:
       containerPort: 1443
       ingressPort: 443
       dataService: true
+    clusterServiceName: pingdirectory-cluster
 
   ingress:
     hosts:
@@ -665,6 +670,7 @@ pingdirectoryproxy:
       servicePort: 443
       containerPort: 1443
       dataService: true
+    clusterServiceName: pingdirectoryproxy-cluster
 
 #############################################################
 # pingdelegator values
@@ -747,6 +753,7 @@ pingdatasync:
       servicePort: 443
       containerPort: 1443
       dataService: true
+    clusterServiceName: pingdatasync-cluster
 
 #############################################################
 # pingdatagovernance values
@@ -780,6 +787,7 @@ pingdatagovernance:
       servicePort: 636
       containerPort: 1636
       clusterService: true
+    clusterServiceName: pingdatagovernance-cluster
 
   ingress:
     hosts:
@@ -956,7 +964,7 @@ pingdataconsole:
 
   defaultLogin:
     server:
-      host: pingdirectory
+      host: pingdirectory-cluster
       port: 636
     username: administrator
 
@@ -1049,7 +1057,7 @@ testFramework:
 
   finalStep:
     name: 99-completion
-    image: pingidentity/pingtoolkit:2104
+    image: pingidentity/pingtoolkit:2105
     command:
       - /bin/sh
       - -c
