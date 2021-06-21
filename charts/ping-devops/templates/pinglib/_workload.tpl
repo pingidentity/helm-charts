@@ -82,7 +82,7 @@ spec:
         {{- with $v.services }}
         ports:
         {{- range $serviceName, $val := . }}
-        {{- if kindIs "dict" $val }}
+        {{- if kindIs "map" $val }}
         - containerPort: {{ $val.containerPort }}
           name: {{ $serviceName }}
         {{- end }}
