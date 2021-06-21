@@ -29,6 +29,14 @@
     {{- include "pinglib.addreleasename" (append . $v.image.name) -}}
 {{- end -}}
 
+{{/**********************************************************************
+   ** Create a cluster service name. Used with StatefulSets
+   **********************************************************************/}}
+{{- define "pinglib.fullclusterservicename" -}}
+{{- $top := index . 0 -}}
+{{- $v := index . 1 -}}
+    {{- include "pinglib.addreleasename" (append . (default (printf "%s-cluster" $v.name) $v.services.clusterServiceName)) -}}
+{{- end -}}
 
 {{/**********************************************************************
    ** Create chart name and version as used by the chart label.
