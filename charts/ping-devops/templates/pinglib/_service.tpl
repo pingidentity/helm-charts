@@ -10,7 +10,7 @@ metadata:
 spec:
   ports:
   {{- range $serviceName, $val := $v.services }}
-  {{- if ne $serviceName "clusterExternalDNSHostname" }}
+  {{- if kindIs "map" $val }}
   {{- if $val.dataService }}
     - name: {{ $serviceName }}
       port: {{ $val.servicePort }}
