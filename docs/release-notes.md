@@ -1,9 +1,85 @@
 # Release Notes
 
+## Release 0.6.4 (July 1, 2021)
+
+* [Issue #158](https://github.com/pingidentity/helm-charts/issues/158) Increment default tag to 2105
+    Sidecars and initContainers are valuable for a multitude of reasons - log forwarding, metric exporting, backup jobs. Because of this they can also have many ways of being configured.
+
+    Allow for defining three top level maps to provide details for:
+
+    * sidecars - Defines sidecar containers to be run alongside product containers.
+    * initContainers - Defines initContainers to be run before product containers.
+    * volumes - Defines volumes used by sidecars, initContainers and product containers.
+
+    !!! note "Example definitions"
+        ```yaml
+        sidecars:
+          pd-access-logger:
+            name: pd-access-log-container
+            image: pingidentity/pingtoolkit:2105
+            volumeMounts:
+              - mountPath: /tmp/pd-access-logs/
+                name: pd-access-logs
+                readOnly: false
+          statsd-exporter:
+            name: statsd-exporter
+            image: prom/statsd-exporter:v0.14.1
+            args:
+            - "--statsd.mapping-config=/tmp/mapping/statsd-mapping.yml"
+            - "--statsd.listen-udp=:8125"
+            - "--web.listen-address=:9102"
+            ports:
+              - containerPort: 9102
+                protocol: TCP
+              - containerPort: 8125
+                protocol: UDP
+
+        initContainers:
+          init-1:
+            name: 01-init
+            image: pingidentity/pingtoolkit:2105
+            command: ['sh', '-c', 'echo "Initing 1" && touch /tmp/pd-access-logs/init-1']
+            volumeMounts:
+              - mountPath: /tmp/pd-access-logs/
+                name: pd-access-logs
+                readOnly: false
+
+        volumes:
+          pd-access-logs:
+            emptyDir: {}
+          statsd-mapping:
+            configMap:
+              name: statsd-config
+              items:
+                - key: config
+                  path: statsd-mapping.yml
+        ```
+
+    And within the product (or global) definition, allow for inclusion of sidecars, initContainers and volumes.  These must be available in the top-level `sidecars:`, `initContainers:` and `volumes:`
+
+    * includeSidecars
+    * includeInitContainers - Run in order as listed in array
+    * includeVolumes
+
+    !!! note "Example usages"
+        ```yaml
+        pingdirectory:
+          ...
+          includeSidecars:
+            - pd-access-logger
+          includeInitContainers:
+            - init-1
+          includeVolumes:
+            - pd-access-logs
+
+          volumeMounts:
+            - mountPath: /opt/access-logs/
+              name: pd-access-logs
+        ```
+
 ## Release 0.6.3 (June 21, 2021)
 
 * [Issue #154](https://github.com/pingidentity/helm-charts/issues/154) Increment default tag to 2105
-*
 * [Issue #155](https://github.com/pingidentity/helm-charts/issues/155) Add clusterServiceName to product services with service clusters
 
 ## Release 0.6.2 (May 24, 2021)

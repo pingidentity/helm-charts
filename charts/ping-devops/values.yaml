@@ -354,6 +354,57 @@ global:
     secret:
       devOps: devops-secret
 
+  #############################################################
+  # Includes for sidecars, initContainers and volumes
+  #
+  # At both global and product level, includes of sidecars,
+  # initContainers and volumes can be provided.  By default,
+  # none are included.
+  #############################################################
+  includeSidecars: []
+  includeInitContainers: []
+  includeVolumes: []
+
+#############################################################
+# Sidecar Definitions
+#
+# Available sidecar definitions available to product
+#############################################################
+sidecars: {}
+# Example:
+# sidecars:
+#   logger:
+#     name: log-container
+#     image: pingidentity/pingtoolkit:2105
+#     volumeMounts:
+#       - mountPath: /tmp/logs/
+#         name: logger
+#         readOnly: false
+
+#############################################################
+# InitContainer Definitions
+#
+# Available initContainer definitions available to product
+#############################################################
+initContainers: {}
+# Example:
+# initContainers:
+#   init-example:
+#     name: 01-init
+#     image: pingidentity/pingtoolkit:2105
+#     command: ['sh', '-c', 'echo "InitContainer 1"']
+
+#############################################################
+# Volume Definitions
+#
+# Available volume definitions available to be used within
+# sidecars, initContainers or main product containers
+#############################################################
+volumes: {}
+# Examples:
+# volumes:
+#   logger:
+#     emptyDir: {}
 
 #############################################################
 # Image/Product values

@@ -1,5 +1,7 @@
 {{ include "pinglib.notes.header" . }}
 {{- $format := "%-1.1s %-21.21s %-7.7s %-3.3s %2.2s %4.4s%1s%-4.4s %4.4s%1s%-4.4s %3.3s" }}
+{{- $initconFormat := "    init    - %s" }}
+{{- $sidecarFormat := "    sidecar - %s" }}
 #
 #  {{ printf $format " " "       Product       " "  tag  " "typ" " #" " cpu" " " "R/L " " mem" " " "R/L " "Ing"}}
 #  {{ printf $format " " "---------------------" "-------" "---" "--" "----" "-" "----" "----" "-" "----" "---"}}
@@ -22,6 +24,14 @@
     {{- $meml := ternary (toString .container.resources.limits.memory) "" .enabled }}
     {{- $ingEnabled := .enabled | ternary (ternary " √ " "" .ingress.enabled) "" }}
 #  {{ printf $format $prodEnabled $prodName $tag $workload $numReplica $cpur $slash $cpul $memr $slash $meml $ingEnabled  }}
+{{- if .enabled }}
+{{- range .includeInitContainers }}
+#  {{ printf $initconFormat . }}
+{{- end }}
+{{- range .includeSidecars }}
+#  {{ printf $sidecarFormat . }}
+{{- end }}
+{{- end }}
 {{- end }}
 {{- end }}
 #
