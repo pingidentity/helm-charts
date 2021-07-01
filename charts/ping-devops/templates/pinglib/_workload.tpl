@@ -57,6 +57,10 @@ spec:
       initContainers:
         {{ include "pinglib.workload.init.waitfor" (concat . (list $v.container.waitFor "")) | nindent 6 }}
         {{ include "pinglib.workload.init.genPrivateCert" . | nindent 6 }}
+      {{- range $v.includeInitContainers }}
+      - name: {{ . }}
+        {{ index $top.Values.initContainers . | toYaml | nindent 8 }}
+      {{- end }}
       containers:
       - name: {{ $v.name }}
         env: []
@@ -135,6 +139,9 @@ spec:
 
         {{/*------------------- Volume Mounts ----------------*/}}
         volumeMounts:
+        {{- if $v.volumeMounts }}
+          {{ toYaml $v.volumeMounts | nindent 8 }}
+        {{- end }}
         {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
         {{- range $volName, $val := $v.workload.statefulSet.persistentvolume.volumes }}
         - name: {{ $volName }}{{ if eq "none" $v.addReleaseNameToResource }}-{{ $top.Release.Name }}{{ end }}
@@ -156,11 +163,31 @@ spec:
         {{/*---------------- Lifecycle --------------------*/}}
         lifecycle: {{ toYaml $v.container.lifecycle | nindent 10 }}
 
+      {{/*---------------- Sidecars  --------------------*/}}
+      {{- range $v.includeSidecars }}
+      - name: {{ . }}
+        {{ index $top.Values.sidecars . | toYaml | nindent 8 }}
+      {{- end }}
+
       {{/*---------------- Security Context -------------*/}}
       securityContext: {{ toYaml $v.workload.securityContext | nindent 8 }}
 
       {{/*--------------------- Volumes ------------------*/}}
       volumes:
+
+      {{/*--------------------- Include Volumes ------------------*/}}
+
+      {{- range $v.includeVolumes }}
+      - name: {{ . }}
+        {{ index $top.Values.volumes . | toYaml | nindent 8 }}
+      {{- end }}
+
+      {{/*--------------------- Volumes (defined in product) ------------------*/}}
+      {{- if $v.volumes }}
+        {{ toYaml $v.volumes | nindent 6 }}
+      {{- end }}
+
+      {{/*--------------------- Volumes (defined in workload.statefulSet.persistentvolume.volumes) ------------------*/}}
       {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
       {{- range $volName, $val := $v.workload.statefulSet.persistentvolume.volumes }}
       - name: {{ $volName }}{{ if eq "none" $v.addReleaseNameToResource }}-{{ $top.Release.Name }}{{ end }}
@@ -168,6 +195,8 @@ spec:
           claimName: {{ $volName }}{{ if eq "none" $v.addReleaseNameToResource }}-{{ $top.Release.Name }}{{ end }}
       {{- end }}
       {{- end }}
+
+      {{/*--------------------- Volumes (when private-keystore is defined) ------------------*/}}
       {{- if $v.privateCert.generate }}
       - name: private-keystore
         emptyDir: {}
@@ -175,6 +204,8 @@ spec:
         secret:
           secretName: {{ include "pinglib.fullname" . }}-private-cert
       {{- end }}
+
+      {{/*--------------------- Volumes (defined in product.workload.volumes) ------------------*/}}
       {{- include "pinglib.workload.volumes" $v | nindent 6 }}
 
   {{/*----------------- VolumeClameTemplates ------------------*/}}
