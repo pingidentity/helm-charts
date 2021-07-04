@@ -12,6 +12,23 @@
         few days) PingAuthorize will be default for use over PingDataGoverance.  This will be tracked in
         a ticket released 2105.
 
+    !!! note "Example yaml to test PingAuthoize/PAP"
+        ```yaml
+        pingdataconsole:
+          enabled: true
+
+        pingdirectory:
+          enabled: true
+
+        pingauthorize:
+          image:
+            tag: 8.3.0.0-edge
+          enabled: true
+
+        pingauthorizepap:
+          enabled: true
+        ```
+
 ## Release 0.6.4 (July 1, 2021)
 
 * [Issue #158](https://github.com/pingidentity/helm-charts/issues/158) Increment default tag to 2105
