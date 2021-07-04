@@ -3,9 +3,12 @@
 {{- define "global.configmap" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
+
 data:
   {{ include "global.private.host.port" (list $top $v "PA_ADMIN" "pingaccess-admin") }}
   {{ include "global.private.host.port" (list $top $v "PA_ENGINE" "pingaccess-engine") }}
+  {{ include "global.private.host.port" (list $top $v "PAZ_ENGINE" "pingauthorize") }}
+  {{ include "global.private.host.port" (list $top $v "PAZP_ENGINE" "pingauthorizepap") }}
   {{ include "global.private.host.port" (list $top $v "PD_CONSOLE" "pingdataconsole") }}
   {{ include "global.private.host.port" (list $top $v "PDS_ENGINE" "pingdatasync") }}
   {{ include "global.private.host.port" (list $top $v "PDG_ENGINE" "pingdatagovernance") }}
@@ -18,6 +21,8 @@ data:
 
   {{ include "global.public.host.port" (list $top $v "PA_ADMIN" "pingaccess-admin") }}
   {{ include "global.public.host.port" (list $top $v "PA_ENGINE" "pingaccess-engine") }}
+  {{ include "global.public.host.port" (list $top $v "PAZ_ENGINE" "pingauthorize") }}
+  {{ include "global.public.host.port" (list $top $v "PAZP_ENGINE" "pingauthorizepap") }}
   {{ include "global.public.host.port" (list $top $v "PD_CONSOLE" "pingdataconsole") }}
   {{ include "global.public.host.port" (list $top $v "PDS_ENGINE" "pingdatasync") }}
   {{ include "global.public.host.port" (list $top $v "PDG_ENGINE" "pingdatagovernance") }}

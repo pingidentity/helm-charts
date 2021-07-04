@@ -1,0 +1,6 @@
+{{- include "pinglib.service" (list . "pingauthorizepap") -}}
+
+
+
+{{- define "pingauthorizepap.service" -}}
+{{- end -}}

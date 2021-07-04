@@ -1,0 +1,11 @@
+{{- include "pinglib.workload" (list . "pingauthorize") -}}
+
+
+
+{{- define "pingauthorize.workload" -}}
+spec:
+  template:
+    metadata:
+      labels:
+        clusterIdentifier: {{ include "pinglib.addreleasename" (append . "pingauthorize") }}
+{{- end -}}

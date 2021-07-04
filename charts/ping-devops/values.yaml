@@ -807,6 +807,96 @@ pingdatasync:
     clusterServiceName: pingdatasync-cluster
 
 #############################################################
+# pingauthorize values
+#############################################################
+pingauthorize:
+  enabled: false
+  name: pingauthorize
+  image:
+    name: pingauthorize
+
+  container:
+    resources:
+      requests:
+        cpu: 0
+        memory: 1.5Gi
+      limits:
+        cpu: 2
+        memory: 4Gi
+
+  envs:
+    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+    SERVER_PROFILE_PATH: paz-pap-integration/pingauthorize
+    SERVER_PROFILE_PARENT: PAZ
+    SERVER_PROFILE_PAZ_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+    SERVER_PROFILE_PAZ_PATH: baseline/pingauthorize
+
+  services:
+    https:
+      servicePort: 443
+      containerPort: 1443
+      ingressPort: 443
+      dataService: true
+    ldaps:
+      servicePort: 636
+      containerPort: 1636
+      clusterService: true
+    clusterServiceName: pingauthorize-cluster
+
+  ingress:
+    hosts:
+      - host: pingauthorize._defaultDomain_
+        paths:
+        - path: /
+          backend:
+            serviceName: https
+    tls:
+      - secretName: _defaultTlsSecret_
+        hosts:
+          - pingauthorize._defaultDomain_
+
+#############################################################
+# pingauthorizepap values
+#############################################################
+pingauthorizepap:
+  enabled: false
+  name: pingauthorizepap
+  image:
+    name: pingauthorizepap
+
+  container:
+    resources:
+      requests:
+        cpu: 0
+        memory: .75Gi
+      limits:
+        cpu: 2
+        memory: 2Gi
+
+  envs:
+    SERVER_PROFILE_URL: https://www.github.com/pingidentity/pingidentity-server-profiles.git
+    SERVER_PROFILE_PATH: paz-pap-integration/pingauthorizepap
+    HTTPS_PORT: "8443"
+  services:
+    https:
+      servicePort: 8443
+      containerPort: 8443
+      ingressPort: 443
+      dataService: true
+
+  ingress:
+    hosts:
+      - host: pingauthorizepap._defaultDomain_
+        paths:
+        - path: /
+          backend:
+            serviceName: https
+    tls:
+      - secretName: _defaultTlsSecret_
+        hosts:
+          - pingauthorizepap._defaultDomain_
+
+#############################################################
 # pingdatagovernance values
 #############################################################
 pingdatagovernance:

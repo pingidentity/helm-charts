@@ -1,0 +1,6 @@
+{{- include "pinglib.workload" (list . "pingauthorizepap") -}}
+
+
+
+{{- define "pingauthorizepap.workload" -}}
+{{- end -}}

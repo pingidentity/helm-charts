@@ -1,5 +1,17 @@
 # Release Notes
 
+## Release 0.6.5 (July 4, 2021)
+
+* [Issue #163](https://github.com/pingidentity/helm-charts/issues/163) Add PingAuthorize and
+    PingAuthorizePAP to helm charts.
+
+    !!! note "Includes pre-release to PingAuthorize 8.3"
+        This includes the necessary config for PingAuthorize and PingAuthorizePAP even though
+        there isn't a release for 2105.  The current edge release is required to use the default
+        server-profiles provided in the values.yaml.  Once the global tag is changed to 2106 (over next
+        few days) PingAuthorize will be default for use over PingDataGoverance.  This will be tracked in
+        a ticket released 2105.
+
 ## Release 0.6.4 (July 1, 2021)
 
 * [Issue #158](https://github.com/pingidentity/helm-charts/issues/158) Increment default tag to 2105
