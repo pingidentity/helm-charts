@@ -1,0 +1,18 @@
+{{- include "pinglib.configmap" (list . "pingauthorizepap") -}}
+
+
+
+{{- define "pingauthorizepap.configmap" -}}
+{{- $top := index . 0 -}}
+{{- $v := index . 1 -}}
+data:
+  {{- if $v.ingress.enabled }}
+  PING_EXTERNAL_BASE_URL: {{ printf "%s:%s" (include "pinglib.ingress.hostname" (list $top $v (index $v.ingress.hosts 0).host)) (toString $v.services.https.ingressPort) }}
+  {{- else }}
+  PING_EXTERNAL_BASE_URL: localhost:8443
+  {{- end -}}
+{{- end -}}
+
+
+{{- define "pingauthorizepap.configmap" -}}
+{{- end -}}

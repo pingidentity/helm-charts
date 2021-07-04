@@ -1,0 +1,6 @@
+{{- include "pinglib.configmap" (list . "pingauthorize") -}}
+
+
+
+{{- define "pingauthorize.configmap" -}}
+{{- end -}}
