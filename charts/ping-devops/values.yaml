@@ -113,7 +113,7 @@ global:
   # By default the images uses will be indicated by these
   # variables.  An example might look like:
   #
-  #   pingidentity/pingdataconsole:2105 (May, 2021)
+  #   pingidentity/pingdataconsole:2106 (June, 2021)
   #
   # NOTE: image.name MUST be set in child chart
   #   Example: image.name: pingfederate
@@ -121,7 +121,7 @@ global:
   image:
     repository: pingidentity
     name:
-    tag: "2105"
+    tag: "2106"
     pullPolicy: IfNotPresent
 
   ############################################################
@@ -132,7 +132,7 @@ global:
   ############################################################
   externalImage:
     # pingtoolkit - based on alpine
-    pingtoolkit: pingidentity/pingtoolkit:2105
+    pingtoolkit: pingidentity/pingtoolkit:2106
 
   ############################################################
   # Services
@@ -375,7 +375,7 @@ sidecars: {}
 # sidecars:
 #   logger:
 #     name: log-container
-#     image: pingidentity/pingtoolkit:2105
+#     image: pingidentity/pingtoolkit:2106
 #     volumeMounts:
 #       - mountPath: /tmp/logs/
 #         name: logger
@@ -391,7 +391,7 @@ initContainers: {}
 # initContainers:
 #   init-example:
 #     name: 01-init
-#     image: pingidentity/pingtoolkit:2105
+#     image: pingidentity/pingtoolkit:2106
 #     command: ['sh', '-c', 'echo "InitContainer 1"']
 
 #############################################################
@@ -1150,10 +1150,10 @@ pd-replication-timing:
 
 #############################################################
 # testFramework
-#
-# Beta
 #############################################################
 testFramework:
+  # Disabled by default
+  enabled: false
   name: testframework
   sharedMountPath: /var/run/shared
 
@@ -1198,9 +1198,16 @@ testFramework:
 
   finalStep:
     name: 99-completion
-    image: pingidentity/pingtoolkit:2105
+    image: busybox
     command:
       - /bin/sh
       - -c
       - echo "*************************************"; echo "Testing Complete"; date; echo "*************************************";
       - exit 0
+
+  #########################################################
+  # SecurityContext for all containers
+  #########################################################
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 2000
