@@ -36,6 +36,7 @@ spec:
     #--------------------- Command -----------------------
     command:
       {{ toYaml .command | nindent 6 }}
+    securityContext: {{ toYaml .securityContext | nindent 6 }}
   {{- end }}
     #--------------------- Environment -----------------
     envFrom:
@@ -67,6 +68,7 @@ spec:
     image: {{ default .image (index $v.externalImage .image) }}
     command:
       {{ toYaml .command | nindent 6 }}
+    securityContext: {{ toYaml .securityContext | nindent 6 }}
     volumeMounts:
     - name: shared-data
       mountPath: {{ $sharedMountPath }}
@@ -75,17 +77,9 @@ spec:
         cpu: 500m
         memory: 128Mi
       requests:
-        cpu: 250m
+        cpu: 0m
         memory: 64Mi
-    securityContext:
-      allowPrivilegeEscalation: false
-      capabilities:
-        drop:
-        - ALL
-      readOnlyRootFilesystem: true
-      runAsGroup: 1000
-      runAsNonRoot: true
-      runAsUser: 100
+  securityContext: {{ toYaml $testFramework.securityContext | nindent 4 }}
   {{- end }}
 
   #--------------------- VolumeMounts -----------------

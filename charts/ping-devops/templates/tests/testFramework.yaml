@@ -1,2 +1,3 @@
-
+{{- if .Values.testFramework.enabled }}
 {{ include "pinglib.test.job" (list $ $.Values.global $.Values.testFramework) }}
+{{- end -}}

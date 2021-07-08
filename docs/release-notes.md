@@ -1,5 +1,42 @@
 # Release Notes
 
+## Release 0.6.6 (July 7, 2021)
+
+* [Issue #160](https://github.com/pingidentity/helm-charts/issues/160) Change default image tag to 2106
+* [Issue #166](https://github.com/pingidentity/helm-charts/issues/166) Add securityContexts to testFramework containers
+    * Adding ability to provide a securityContext at the following levels:
+    * Changing the default finalStep image to busybox
+
+        ```
+        testFramework:
+          ...
+          #########################################################
+          # SecurityContext for all containers
+          #########################################################
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 2000
+            ...
+            testSteps:
+            - name: 01-init-example
+              ...
+              securityContext:
+                runAsUser: ...
+            ...
+            finalStep:
+              securityContext:
+                runAsUser: ...
+        ```
+
+* [Issue #167](https://github.com/pingidentity/helm-charts/issues/167) Disable testFramework by default
+    To enable, simply:
+
+    ```yaml
+    testFramework:
+      enabled: true
+      ...
+    ```
+
 ## Release 0.6.5 (July 4, 2021)
 
 * [Issue #163](https://github.com/pingidentity/helm-charts/issues/163) Add PingAuthorize and
