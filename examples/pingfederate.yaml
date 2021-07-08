@@ -1,0 +1,25 @@
+############################################################
+# Ping Identity
+#
+############################################################
+
+############################################################
+# Ping DevOps Service Customizations
+#
+# This provides:
+#  - PingFederate Administrative Console with native authentication
+#  - PingFederate Engines clustered with console
+############################################################
+pingfederate-admin:
+  enabled: true
+  envs:
+    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+    SERVER_PROFILE_PATH: getting-started/pingfederate
+
+pingfederate-engine:
+  enabled: true
+  envs:
+    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+    SERVER_PROFILE_PATH: getting-started/pingfederate
+
+
