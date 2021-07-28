@@ -314,29 +314,39 @@ global:
     #     exec:
     #       command: ["/bin/sh", "-c", "echo Start Complete > /tmp/message"]
 
-  ############################################################
-  # Probes
-  #
-  # Probes have a number of fields that you can use to more precisely control the
-  # behavior of liveness and readiness checks.
-  #
-  # https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
-  ############################################################
-  probes:
-    liveness:
-      command: /opt/liveness.sh
-      initialDelaySeconds: 30
-      periodSeconds: 30
-      timeoutSeconds: 5
-      successThreshold: 1
-      failureThreshold: 4
-    readiness:
-      command: /opt/liveness.sh
-      initialDelaySeconds: 30
-      periodSeconds: 5
-      timeoutSeconds: 5
-      successThreshold: 1
-      failureThreshold: 4
+    ############################################################
+    # Probes
+    #
+    # Probes have a number of fields that you can use to more precisely control the
+    # behavior of liveness and readiness checks.
+    #
+    # https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+    ############################################################
+    probes:
+      livenessProbe:
+        exec:
+          command:
+            - /opt/liveness.sh
+        initialDelaySeconds: 30
+        periodSeconds: 30
+        timeoutSeconds: 5
+        successThreshold: 1
+        failureThreshold: 4
+      readinessProbe:
+        exec:
+          command:
+            - /opt/readiness.sh
+        initialDelaySeconds: 30
+        periodSeconds: 5
+        timeoutSeconds: 5
+        successThreshold: 1
+        failureThreshold: 4
+      startupProbe:
+        exec:
+          command:
+            - /opt/liveness.sh
+        periodSeconds: 10
+        failureThreshold: 90
 
   ############################################################
   # Licensing
@@ -422,11 +432,13 @@ ldap-sdk-tools:
   container:
     command: "tail -f /dev/null"
 
-  probes:
-    liveness:
-      command: echo
-    readiness:
-      command: echo
+    probes:
+      livenessProbe:
+        exec:
+          command: echo
+      readinessProbe:
+        exec:
+          command: echo
 
 #############################################################
 # pingfederate-admin values
@@ -611,6 +623,15 @@ pingdirectory:
         memory: 8Gi
 
     terminationGracePeriodSeconds: 300
+
+    probes:
+      readinessProbe:
+        periodSeconds: 30
+        failureThreshold: 4
+      startupProbe:
+        periodSeconds: 10
+        failureThreshold: 180
+
     # Example affinity for typical directory installation
     #
     # affinity:
@@ -681,13 +702,6 @@ pingdirectory:
       - secretName: _defaultTlsSecret_
         hosts:
           - pingdirectory._defaultDomain_
-
-  probes:
-    liveness:
-      failureThreshold: 120
-    readiness:
-      periodSeconds: 30
-      failureThreshold: 4
 
 
 #############################################################

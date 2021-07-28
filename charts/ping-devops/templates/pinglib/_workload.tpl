@@ -115,24 +115,7 @@ spec:
         {{- end }}
 
         {{/*--------------------- Probes ---------------------*/}}
-        {{- with $v.probes }}
-        livenessProbe:
-          exec:
-            command: [ {{ .liveness.command }} ]
-          initialDelaySeconds: {{ .liveness.initialDelaySeconds }}
-          periodSeconds: {{ .liveness.periodSeconds }}
-          timeoutSeconds: {{ .liveness.timeoutSeconds }}
-          successThreshold: {{ .liveness.successThreshold }}
-          failureThreshold: {{ .liveness.failureThreshold }}
-        readinessProbe:
-          exec:
-            command: [ {{ .readiness.command }} ]
-          initialDelaySeconds: {{ .readiness.initialDelaySeconds }}
-          periodSeconds: {{ .readiness.periodSeconds }}
-          timeoutSeconds: {{ .readiness.timeoutSeconds }}
-          successThreshold: {{ .readiness.successThreshold }}
-          failureThreshold: {{ .readiness.failureThreshold }}
-        {{- end }}
+        {{- toYaml $v.container.probes | nindent 8 }}
 
         {{/*--------------------- Resources ------------------*/}}
         resources: {{ toYaml $v.container.resources | nindent 10 }}
