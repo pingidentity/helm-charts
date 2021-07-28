@@ -1,5 +1,61 @@
 # Release Notes
 
+## Release 0.6.7 (July 28, 2021)
+
+* [Issue #170](https://github.com/pingidentity/helm-charts/issues/170) Update Ingress resource kind
+
+    If kubernetes vesion is >1.18, setting the ingress apiVersion to `v1`.  Otherwise, current
+    default will be used `v1beta1`.
+
+* [Issue #171](https://github.com/pingidentity/helm-charts/issues/171) Reevaluate Lifecycle probes
+
+    Adding startupProble as well as re-organizing how the probes are defined, allowing the deployer to use standard k8s probe definitions out of the box.
+
+    1. Moving the probes section under global.container
+    2. Changing names: (liveness --> livenessProbe, readiness --> readinessProbe)
+    3. Adding startupProbe
+
+    The new default looks like:
+
+    ```yaml
+        ############################################################
+        # Probes
+        #
+        # Probes have a number of fields that you can use to more precisely control the
+        # behavior of liveness and readiness checks.
+        #
+        # https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+        ############################################################
+        probes:
+          livenessProbe:
+            exec:
+              command:
+                - /opt/liveness.sh
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 4
+          readinessProbe:
+            exec:
+              command:
+                - /opt/readiness.sh
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 4
+          startupProbe:
+            exec:
+              command:
+                - /opt/liveness.sh
+            periodSeconds: 10
+            failureThreshold: 90
+    ```
+
+    !!! note "Breaking Changes"
+        This is a breaking change if anyone has overriding probes in their own values file.  The fix is simply move their definition of their probes to live under global.container or the (productName).container, as well as adding "Probe" to the definition.
+
 ## Release 0.6.6 (July 7, 2021)
 
 * [Issue #160](https://github.com/pingidentity/helm-charts/issues/160) Change default image tag to 2106
