@@ -4,7 +4,11 @@
 {{- $fullName := include "pinglib.fullname" . -}}
 {{- $defaultTlsSecret := $v.ingress.defaultTlsSecret -}}
 {{- $defaultDomain := $v.ingress.defaultDomain -}}
+{{- if semverCompare ">1.18" $top.Capabilities.KubeVersion.Version }}
+apiVersion: networking.k8s.io/v1
+{{- else }}
 apiVersion: networking.k8s.io/v1beta1
+{{- end }}
 kind: Ingress
 metadata:
   {{ include "pinglib.metadata.labels" .  | nindent 2  }}
