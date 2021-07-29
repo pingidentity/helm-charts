@@ -24,6 +24,9 @@
 
         ```
 
+    Additionally, adding the pathType for all versions as it is now required in
+    ingress v1.
+
 
 ## Release 0.6.7 (July 28, 2021)
 
