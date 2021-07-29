@@ -513,6 +513,7 @@ pingfederate-admin:
       - host: pingfederate-admin._defaultDomain_
         paths:
         - path: /
+          pathType: Prefix
           backend:
             serviceName: https
     tls:
@@ -596,6 +597,7 @@ pingfederate-engine:
       - host: pingfederate-engine._defaultDomain_
         paths:
         - path: /
+          pathType: Prefix
           backend:
             serviceName: https
     tls:
@@ -696,6 +698,7 @@ pingdirectory:
       - host: pingdirectory._defaultDomain_
         paths:
         - path: /
+          pathType: Prefix
           backend:
             serviceName: https
     tls:
@@ -780,6 +783,7 @@ pingdelegator:
       - host: pingdelegator._defaultDomain_
         paths:
         - path: /
+          pathType: Prefix
           backend:
             serviceName: https
     tls:
@@ -862,6 +866,7 @@ pingauthorize:
       - host: pingauthorize._defaultDomain_
         paths:
         - path: /
+          pathType: Prefix
           backend:
             serviceName: https
     tls:
@@ -903,6 +908,7 @@ pingauthorizepap:
       - host: pingauthorizepap._defaultDomain_
         paths:
         - path: /
+          pathType: Prefix
           backend:
             serviceName: https
     tls:
@@ -949,6 +955,7 @@ pingdatagovernance:
       - host: pingdatagovernance._defaultDomain_
         paths:
         - path: /
+          pathType: Prefix
           backend:
             serviceName: https
     tls:
@@ -990,6 +997,7 @@ pingdatagovernancepap:
       - host: pingdatagovernancepap._defaultDomain_
         paths:
         - path: /
+          pathType: Prefix
           backend:
             serviceName: https
     tls:
@@ -1047,6 +1055,7 @@ pingaccess-admin:
       - host: pingaccess-admin._defaultDomain_
         paths:
         - path: /
+          pathType: Prefix
           backend:
             serviceName: https
     tls:
@@ -1092,6 +1101,7 @@ pingaccess-engine:
       - host: pingaccess-engine._defaultDomain_
         paths:
         - path: /
+          pathType: Prefix
           backend:
             serviceName: https
     tls:
@@ -1139,6 +1149,7 @@ pingdataconsole:
       - host: pingdataconsole._defaultDomain_
         paths:
         - path: /
+          pathType: Prefix
           backend:
             serviceName: https
     tls:

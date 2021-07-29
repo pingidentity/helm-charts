@@ -33,6 +33,7 @@ spec:
         paths:
         {{- range .paths }}
           - path: {{ .path }}
+            pathType: {{ .pathType }}
             backend:
 {{- if semverCompare ">1.18" $top.Capabilities.KubeVersion.Version }}
               service:
