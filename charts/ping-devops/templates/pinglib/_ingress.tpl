@@ -34,8 +34,15 @@ spec:
         {{- range .paths }}
           - path: {{ .path }}
             backend:
+{{- if semverCompare ">1.18" $top.Capabilities.KubeVersion.Version }}
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ (index $v.services .backend.serviceName).servicePort }}
+{{- else }}
               serviceName: {{ $fullName }}
               servicePort: {{ (index $v.services .backend.serviceName).servicePort }}
+{{- end }}
         {{- end }}
   {{- end }}
 {{- end -}}

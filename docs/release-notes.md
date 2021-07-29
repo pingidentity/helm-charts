@@ -1,5 +1,30 @@
 # Release Notes
 
+## Release 0.6.8 (July 29, 2021)
+
+* [Issue #175](https://github.com/pingidentity/helm-charts/issues/175) Invalid ingress resources on Kubernetes clusters > 1.18
+
+    During resoluton of issue #170 providing support for ingress apiVersion v1,
+    the necessary ingress yaml fields wearn't updated to relfect that new version.
+    This is a fix.  The backend definition of the Ingress will now reflect the proper
+    definition based on a v1 or v1beta1 apiVersion.
+
+    !!! note "Example: If KubeVersion > 1.18"
+        ```
+              service:
+                name: https
+                port:
+                  number: 443
+        ```
+
+    !!! note "Example: If KubeVersion <= 1.18"
+        ```
+              serviceName: https
+              servicePort: 443
+
+        ```
+
+
 ## Release 0.6.7 (July 28, 2021)
 
 * [Issue #170](https://github.com/pingidentity/helm-charts/issues/170) Update Ingress resource kind
