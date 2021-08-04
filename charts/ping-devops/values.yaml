@@ -113,7 +113,7 @@ global:
   # By default the images uses will be indicated by these
   # variables.  An example might look like:
   #
-  #   pingidentity/pingdataconsole:2106 (June, 2021)
+  #   pingidentity/pingdataconsole:2107 (July, 2021)
   #
   # NOTE: image.name MUST be set in child chart
   #   Example: image.name: pingfederate
@@ -121,7 +121,7 @@ global:
   image:
     repository: pingidentity
     name:
-    tag: "2106"
+    tag: "2107"
     pullPolicy: IfNotPresent
 
   ############################################################
@@ -132,7 +132,7 @@ global:
   ############################################################
   externalImage:
     # pingtoolkit - based on alpine
-    pingtoolkit: pingidentity/pingtoolkit:2106
+    pingtoolkit: pingidentity/pingtoolkit:2107
 
   ############################################################
   # Services
@@ -385,7 +385,7 @@ sidecars: {}
 # sidecars:
 #   logger:
 #     name: log-container
-#     image: pingidentity/pingtoolkit:2106
+#     image: pingidentity/pingtoolkit:2107
 #     volumeMounts:
 #       - mountPath: /tmp/logs/
 #         name: logger
@@ -401,7 +401,7 @@ initContainers: {}
 # initContainers:
 #   init-example:
 #     name: 01-init
-#     image: pingidentity/pingtoolkit:2106
+#     image: pingidentity/pingtoolkit:2107
 #     command: ['sh', '-c', 'echo "InitContainer 1"']
 
 #############################################################
@@ -1231,8 +1231,15 @@ testFramework:
       - exit 0
 
   #########################################################
-  # SecurityContext for all containers
+  # Pod information to include
+  #
+  # Examples:
+  #   securityContext for all containers
+  #   serviceAccount for all containers
   #########################################################
-  securityContext:
-    runAsUser: 1000
-    runAsGroup: 2000
+  pod:
+    securityContext:
+      runAsUser: 1000
+      runAsGroup: 2000
+    # serviceAccount: serviceaccount-name
+

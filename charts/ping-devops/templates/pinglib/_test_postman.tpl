@@ -79,7 +79,7 @@ spec:
       requests:
         cpu: 0m
         memory: 64Mi
-  securityContext: {{ toYaml $testFramework.securityContext | nindent 4 }}
+  {{ toYaml $testFramework.pod | nindent 2 }}
   {{- end }}
 
   #--------------------- VolumeMounts -----------------
