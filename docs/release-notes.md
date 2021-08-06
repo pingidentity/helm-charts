@@ -1,8 +1,9 @@
 # Release Notes
 
-## Release 0.6.9 (August 04, 2021)
+## Release 0.6.9 (August 06, 2021)
 
 * [Issue #179](https://github.com/pingidentity/helm-charts/issues/179) Bump default image tag to 2107
+* [Issue #182](https://github.com/pingidentity/helm-charts/issues/182) Set default startupProbe.timeoutSeconds to 5
 * [Issue #180](https://github.com/pingidentity/helm-charts/issues/180) Enhance testFramework to support additional pod level configurations
 
     When using the testFramework there are additional pod level config items that need to be provided (i.e. serviceAccountName) along with the existing securityContext.
