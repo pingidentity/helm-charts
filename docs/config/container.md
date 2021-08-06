@@ -17,16 +17,17 @@ global:
     replicaCount: 1
     resources:
       requests:
-        cpu: 500m
-        memory: 500Mi
+        cpu: 0
+        memory: 0
       limits:
-        cpu: 4
-        memory: 8Gi
+        cpu: 0
+        memory: 0
     nodeSelector: {}
     tolerations: []
     affinity: {}
     terminationGracePeriodSeconds: 30
-    securityContext: {}
+    envFrom: []
+    lifecyle: {}
     probes:
       livenessProbe:
         exec:
@@ -51,7 +52,9 @@ global:
           command:
             - /opt/liveness.sh
         periodSeconds: 10
+        timeoutSeconds: 5
         failureThreshold: 90
+
 ```
 
 ## Probes Configuration

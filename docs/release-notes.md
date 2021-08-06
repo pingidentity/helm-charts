@@ -1,5 +1,34 @@
 # Release Notes
 
+## Release 0.6.9 (August 06, 2021)
+
+* [Issue #179](https://github.com/pingidentity/helm-charts/issues/179) Bump default image tag to 2107
+* [Issue #182](https://github.com/pingidentity/helm-charts/issues/182) Set default startupProbe.timeoutSeconds to 5
+* [Issue #180](https://github.com/pingidentity/helm-charts/issues/180) Enhance testFramework to support additional pod level configurations
+
+    When using the testFramework there are additional pod level config items that need to be provided (i.e. serviceAccountName) along with the existing securityContext.
+
+    To allow for any item to be configured, we should add a testFramework.pod that will pull in all items into the testFramework pod definition.
+
+    Example:
+    ```
+    testFramework:
+      #########################################################
+      # Pod information to include
+      #
+      # Examples:
+      #   securityContext for all containers
+      #   serviceAccount for all containers
+      #########################################################
+      pod:
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 2000
+        serviceAccount: serviceaccount-name
+    ```
+    !!! note "Breaking changes"
+        Note: that this will be a breaking change for anyone who has created a `testFramework.securityContext`.  If this is the case, they need to add `pod` in front of `securityContext`.
+
 ## Release 0.6.8 (July 29, 2021)
 
 * [Issue #175](https://github.com/pingidentity/helm-charts/issues/175) Invalid ingress resources on Kubernetes clusters > 1.18
