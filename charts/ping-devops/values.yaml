@@ -346,6 +346,7 @@ global:
           command:
             - /opt/liveness.sh
         periodSeconds: 10
+        timeoutSeconds: 5
         failureThreshold: 90
 
   ############################################################

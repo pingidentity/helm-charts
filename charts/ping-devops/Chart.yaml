@@ -7,7 +7,7 @@ name: ping-devops
 # 0.6.9 - Refer to http://helm.pingidentity.com/release-notes/#release-069
 ########################################################################
 version: 0.6.9
-description: Ping Identity helm charts - 08/04/21
+description: Ping Identity helm charts - 08/06/21
 type: application
 home: https://helm.pingidentity.com/
 icon: https://helm.pingidentity.com/img/logos/ping.png
