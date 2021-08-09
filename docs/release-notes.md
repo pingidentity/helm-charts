@@ -4,32 +4,32 @@
 
 * [Issue #184](https://github.com/pingidentity/helm-charts/issues/184) Create default ServiceAccount/Role/RoleBinding for testFramework
 
-To allow for a role to be created during testing, an `rbac` section is added to the `testFramework` allowing for the definition of that Role.  If enabled, it will create a ServiceAccount, Role and RoleBinding using the same naming rules of resources and add that serviceAccount to the test pod.
+    To allow for a role to be created during testing, an `rbac` section is added to the `testFramework` allowing for the definition of that Role.  If enabled, it will create a ServiceAccount, Role and RoleBinding using the same naming rules of resources and add that serviceAccount to the test pod.
 
-testFramework default rbac set to:
+    testFramework default rbac set to:
 
-```
-  #########################################################
-  # If rbac is enabled, this will create:
-  #   - serviceAccount
-  #   - role
-  #   - roleBinding (between serviceAccount and role)
-  #
-  # and apply the serviceAccount to the pod in the tests.
-  # The names for these resources will be named using the
-  # naming rules for all resources including the ReleaseName
-  #########################################################
-  rbac:
-    enabled: true
-    role:
-      rules:
-      - apiGroups:
-        - '*'
-        resources:
-        - '*'
-        verbs:
-        - '*'
-```
+    ```
+      #########################################################
+      # If rbac is enabled, this will create:
+      #   - serviceAccount
+      #   - role
+      #   - roleBinding (between serviceAccount and role)
+      #
+      # and apply the serviceAccount to the pod in the tests.
+      # The names for these resources will be named using the
+      # naming rules for all resources including the ReleaseName
+      #########################################################
+      rbac:
+        enabled: true
+        role:
+          rules:
+          - apiGroups:
+            - '*'
+            resources:
+            - '*'
+            verbs:
+            - '*'
+    ```
 
 ## Release 0.6.9 (August 06, 2021)
 
