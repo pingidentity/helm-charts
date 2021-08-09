@@ -1,3 +1,11 @@
 {{- if .Values.testFramework.enabled }}
 {{ include "pinglib.test.job" (list $ $.Values.global $.Values.testFramework) }}
+---
+{{- if .Values.testFramework.rbac.enabled }}
+{{ include "pinglib.test.service-account" (list $ $.Values.global $.Values.testFramework) }}
+---
+{{ include "pinglib.test.role" (list $ $.Values.global $.Values.testFramework) }}
+---
+{{ include "pinglib.test.role-binding" (list $ $.Values.global $.Values.testFramework) }}
+{{- end -}}
 {{- end -}}

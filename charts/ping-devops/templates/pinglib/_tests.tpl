@@ -79,6 +79,10 @@ spec:
       requests:
         cpu: 0m
         memory: 64Mi
+  {{- if $testFramework.rbac.enabled }}
+  serviceAccountName: {{ include "pinglib.addreleasename" (list $top $v "test-service-account") }}
+  {{- end }}
+
   {{ toYaml $testFramework.pod | nindent 2 }}
   {{- end }}
 
@@ -99,4 +103,55 @@ spec:
       - key: file
         path: {{ . }}
   {{- end }}
+{{- end -}}
+
+{{- define "pinglib.test.service-account" -}}
+{{- $top := index . 0 -}}
+{{- $v := index . 1 -}}
+{{- $testFramework := index . 2 -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  {{ include "pinglib.metadata.labels" .  | nindent 2  }}
+  {{ include "pinglib.metadata.annotations" .  | nindent 2  }}
+  annotations:
+    "helm.sh/hook": test
+  name: {{ include "pinglib.addreleasename" (list $top $v "test-service-account") }}
+{{- end -}}
+
+{{- define "pinglib.test.role" -}}
+{{- $top := index . 0 -}}
+{{- $v := index . 1 -}}
+{{- $testFramework := index . 2 -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  {{ include "pinglib.metadata.labels" .  | nindent 2  }}
+  {{ include "pinglib.metadata.annotations" .  | nindent 2  }}
+  annotations:
+    "helm.sh/hook": test
+  name: {{ include "pinglib.addreleasename" (list $top $v "test-role") }}
+{{ toYaml $testFramework.rbac.role }}
+{{- end -}}
+
+{{- define "pinglib.test.role-binding" -}}
+{{- $top := index . 0 -}}
+{{- $v := index . 1 -}}
+{{- $testFramework := index . 2 -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  {{ include "pinglib.metadata.labels" .  | nindent 2  }}
+  {{ include "pinglib.metadata.annotations" .  | nindent 2  }}
+  annotations:
+    "helm.sh/hook": test
+  name: {{ include "pinglib.addreleasename" (list $top $v "test-role-binding") }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "pinglib.addreleasename" (list $top $v "test-role") }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "pinglib.addreleasename" (list $top $v "test-service-account") }}
+  namespace: {{ $top.Release.Namespace}}
 {{- end -}}
