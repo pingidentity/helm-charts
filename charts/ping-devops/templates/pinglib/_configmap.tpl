@@ -110,17 +110,17 @@ data:
       {{ $ingressHost := include "pinglib.ingress.hostname" (list $top $v .host) }}
       {{- $ingressPort := $httpsService.ingressPort | int }}
       {{- if eq $ingressPort 443 }}
-  PF_ADMIN_BASEURL: {{ printf "https://%s" $ingressHost }}
+  PF_ADMIN_PUBLIC_BASEURL: {{ printf "https://%s" $ingressHost }}
       {{- else }}
-  PF_ADMIN_BASEURL: {{ printf "https://%s:%d" $ingressHost $ingressPort }}
+  PF_ADMIN_PUBLIC_BASEURL: {{ printf "https://%s:%d" $ingressHost $ingressPort }}
       {{- end }}
     {{- end }}
   {{- else }}
     {{- $containerPort := $httpsService.containerPort | int }}
     {{- if eq $containerPort 443 }}
-  PF_ADMIN_BASEURL: "https://localhost"
+  PF_ADMIN_PUBLIC_BASEURL: "https://localhost"
     {{- else }}
-  PF_ADMIN_BASEURL: {{ printf "https://localhost:%d" $containerPort }}
+  PF_ADMIN_PUBLIC_BASEURL: {{ printf "https://localhost:%d" $containerPort }}
     {{- end }}
   {{- end }}
 {{- end -}}
