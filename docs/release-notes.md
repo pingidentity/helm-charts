@@ -1,5 +1,33 @@
 # Release Notes
 
+## Release 0.7.1 (August 13, 2021)
+
+* [Issue #187](https://github.com/pingidentity/helm-charts/issues/187) Create the PUBLIC hostname/ports in the global env vars configmap all the time
+
+    Currently, the PUBLIC hostname/ports in the global env vars configmap are created if and only if the ingress in enabled.
+
+    Normally, this would be fine, except that some of the products (i.e PingFederate) use the PUBLIC environment variable to setup items like BASE URLs and redirects for the browser.  This is required for use cases when there is no ingress, but the user creates a port forward, as well as testing with no ingresses.
+
+    So, if no ingress is created, then the PUBLIC_HOSTNAMES should be set to `localhost` and the PUBLIC_PORT_* should be set to the same port as the contianerPort.
+
+    If ingress is used, then the functionality will not be changed, and the public hostname will be constructed as well as the public ingressPort.
+
+* [Issue #188](https://github.com/pingidentity/helm-charts/issues/188) Add the PF_ADMIN_BASEURL environment variable to the pingfederate admin/engine configmaps
+
+    With the 10.3 release of PingFederate, there is a variable used to provide redirect links called the PF_ADMIN_BASEURL.  This needs to be set by the helm chart, as it will either be a public host or localhost, depending on if the ingress is available.  The container has no idea which it should be as it doesn't have insight into the environment it's running.
+
+    If ingress is enabled, an example for this variable is:
+
+    ```
+    PF_ADMIN_BAESURL=https://pingfederate-admin.example.com
+    ```
+
+    If ingress is not enable, an example for this variable:
+
+    ```
+    PF_ADMIN_BASEURL=https://localhost:9999
+    ```
+
 ## Release 0.7.0 (August 09, 2021)
 
 * [Issue #184](https://github.com/pingidentity/helm-charts/issues/184) Create default ServiceAccount/Role/RoleBinding for testFramework

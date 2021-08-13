@@ -54,10 +54,10 @@ data:
 {{- $v := index . 1 }}
 {{- $envPrefix := index . 2 }}
 {{- $prodName := index . 3 }}
+{{- $services := (index $top.Values $prodName).services }}
 {{- with (index $top.Values $prodName) }}
   {{- if .ingress }}
     {{- if .ingress.enabled }}
-      {{- $services := (index $top.Values $prodName).services }}
       {{- range .ingress.hosts }}
   {{ $envPrefix }}_PUBLIC_HOSTNAME: {{ include "pinglib.ingress.hostname" (list $top $v .host) | quote }}
 
@@ -66,7 +66,61 @@ data:
         {{- end }}
 
       {{- end }}
+    {{- else }}
+      {{- range .ingress.hosts }}
+  {{ $envPrefix }}_PUBLIC_HOSTNAME: localhost
+
+        {{- range .paths }}
+  {{ $envPrefix }}_PUBLIC_PORT_{{ .backend.serviceName | replace "-" "_" | upper }}: {{ (index $services .backend.serviceName).containerPort | quote }}
+        {{- end }}
+
+      {{- end }}
     {{- end }}
   {{- end }}
 {{- end }}
+{{- end -}}
+
+{{/**********************************************************************
+   ** pinglib.configmap.pingfederate
+   **
+   ** provide default pingfederate configmap items (same for admin and engine)
+
+
+  ingress:
+    hosts:
+      - host: pingfederate-admin._defaultDomain_
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            serviceName: https
+
+   **********************************************************************/}}
+{{- define "pinglib.configmap.pingfederate" -}}
+{{- $top := index . 0 }}
+{{- $v := index . 1 }}
+{{- $pingfedAdmin := index $top.Values "pingfederate-admin" }}
+{{- $httpsService := $pingfedAdmin.services.https }}
+  CLUSTER_BIND_ADDRESS: "NON_LOOPBACK"
+  CLUSTER_NAME: {{ $top.Release.Name | quote }}
+  DNS_QUERY_LOCATION: "{{ include "pinglib.fullclusterservicename" . }}.{{ $top.Release.Namespace }}.svc.cluster.local"
+  DNS_RECORD_TYPE: "A"
+  {{- if $pingfedAdmin.ingress.enabled }}
+    {{- range $pingfedAdmin.ingress.hosts }}
+      {{ $ingressHost := include "pinglib.ingress.hostname" (list $top $v .host) }}
+      {{- $ingressPort := $httpsService.ingressPort | int }}
+      {{- if eq $ingressPort 443 }}
+  PF_ADMIN_BASEURL: {{ printf "https://%s" $ingressHost }}
+      {{- else }}
+  PF_ADMIN_BASEURL: {{ printf "https://%s:%d" $ingressHost $ingressPort }}
+      {{- end }}
+    {{- end }}
+  {{- else }}
+    {{- $containerPort := $httpsService.containerPort | int }}
+    {{- if eq $containerPort 443 }}
+  PF_ADMIN_BASEURL: "https://localhost"
+    {{- else }}
+  PF_ADMIN_BASEURL: {{ printf "https://localhost:%d" $containerPort }}
+    {{- end }}
+  {{- end }}
 {{- end -}}
