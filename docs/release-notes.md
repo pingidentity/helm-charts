@@ -1,5 +1,11 @@
 # Release Notes
 
+## Release 0.7.2 (August 13, 2021)
+
+* [Issue #191](https://github.com/pingidentity/helm-charts/issues/191) Change variable PF_ADMIN_BASEURL to PF_ADMIN_PUBLIC_BASEURL
+
+    Release 0.7.2 created the new variable `PF_ADMIN_BASEURL`.  Due to the current user of the same variable with added `_PUBLIC_`,  the actual variable name needs to be `PF_ADMIN_PUBLIC_BASEURL`.
+
 ## Release 0.7.1 (August 13, 2021)
 
 * [Issue #187](https://github.com/pingidentity/helm-charts/issues/187) Create the PUBLIC hostname/ports in the global env vars configmap all the time
