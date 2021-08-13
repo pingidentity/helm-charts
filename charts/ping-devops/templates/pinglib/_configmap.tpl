@@ -56,7 +56,7 @@ data:
 {{- $prodName := index . 3 }}
 {{- $services := (index $top.Values $prodName).services }}
 {{- with (index $top.Values $prodName) }}
-  {{- if and .ingress }}
+  {{- if .ingress }}
     {{- if .ingress.enabled }}
       {{- range .ingress.hosts }}
   {{ $envPrefix }}_PUBLIC_HOSTNAME: {{ include "pinglib.ingress.hostname" (list $top $v .host) | quote }}
