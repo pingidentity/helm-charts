@@ -6,8 +6,5 @@
 {{- $v := index . 1 -}}
 data:
   OPERATIONAL_MODE: CLUSTERED_CONSOLE
-  CLUSTER_BIND_ADDRESS: "NON_LOOPBACK"
-  CLUSTER_NAME: {{ $top.Release.Name | quote }}
-  DNS_QUERY_LOCATION: "{{ include "pinglib.fullclusterservicename" . }}.{{ $top.Release.Namespace }}.svc.cluster.local"
-  DNS_RECORD_TYPE: "A"
+{{ include "pinglib.configmap.pingfederate" . }}
 {{- end -}}
