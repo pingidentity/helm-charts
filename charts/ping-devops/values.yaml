@@ -256,7 +256,7 @@ global:
     #       and group used with PingIdentity images (except PingDelegator).
     #       The fsGroup is set to same as group, however, it can be set to
     #       any gid number.
-    #       The fsGroup is required for any wordloads that volumeMount
+    #       The fsGroup is required for any workloads that volumeMount
     #       a pvc (i.e. StatefulSets)
     ############################################################
     securityContext:
@@ -491,7 +491,7 @@ pingfederate-admin:
   # configMapVolumes:
   #  pingfederate-props:
   #     items:
-  #      pf-props: /opt/in/etc/pingfederate.properties
+  #       pf-props: /opt/in/etc/pingfederate.properties
 
   services:
     https:
@@ -845,10 +845,7 @@ pingauthorize:
 
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
-    SERVER_PROFILE_PATH: paz-pap-integration/pingauthorize
-    SERVER_PROFILE_PARENT: PAZ
-    SERVER_PROFILE_PAZ_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
-    SERVER_PROFILE_PAZ_PATH: baseline/pingauthorize
+    SERVER_PROFILE_PATH: getting-started/pingauthorize
 
   services:
     https:
@@ -894,9 +891,8 @@ pingauthorizepap:
         memory: 2Gi
 
   envs:
-    SERVER_PROFILE_URL: https://www.github.com/pingidentity/pingidentity-server-profiles.git
-    SERVER_PROFILE_PATH: paz-pap-integration/pingauthorizepap
     HTTPS_PORT: "8443"
+
   services:
     https:
       servicePort: 8443
@@ -1221,18 +1217,18 @@ testFramework:
     # Array of steps.
     # Example includes:
     #########################################################
-    # - name: 01-wait-for-pingfederate-engine
+    # 01-wait-for-pingfederate-engine:
     #   waitFor:
     #     pingfederate-engine:
     #       service: https
 
-    # - name: 02-init-test
+    # 02-init-test:
     #   image: busybox
     #   command:
     #     - /bin/sh
     #     - /var/run/init-test.sh
 
-    # - name: 03-check-pingfederate
+    # 03-check-pingfederate:
     #   image: postman/newman:5-alpine
     #   command:
     #     - newman
@@ -1246,11 +1242,19 @@ testFramework:
   finalStep:
     name: 99-completion
     image: busybox
+    imagePullPolicy: IfNotPresent
     command:
       - /bin/sh
       - -c
       - echo "*************************************"; echo "Testing Complete"; date; echo "*************************************";
       - exit 0
+    resources:
+      limits:
+        cpu: 500m
+        memory: 128Mi
+      requests:
+        cpu: 1m
+        memory: 64Mi
 
   #########################################################
   # Pod information to include
