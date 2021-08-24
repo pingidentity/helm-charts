@@ -1,5 +1,59 @@
 # Release Notes
 
+
+## Release 0.7.3 (August 24, 2021)
+
+* [Issue #194](https://github.com/pingidentity/helm-charts/issues/194) Change default envs for pingauthorize/pingauthorizepap
+
+    The current envs for pingauthroize in the values.yaml file are:
+
+    ```
+      envs:
+        SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+        SERVER_PROFILE_PATH: paz-pap-integration/pingauthorize
+        SERVER_PROFILE_PARENT: PAZ
+        SERVER_PROFILE_PAZ_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+        SERVER_PROFILE_PAZ_PATH: baseline/pingauthorize
+    ```
+
+    Just a side note here, the `baseline/pingauthorize` PATH includes a connection to pingdirectory, which will cause this to fail (pingauthorize https will return a 503).
+
+    If someone wants to override these, they need to be sure to uset/override the `SERVER_PROFILE_PARENT` variable, so the parent profiles aren't brought in.
+
+    The better default values.yaml should probably be:
+
+    ```
+      envs:
+        SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+        SERVER_PROFILE_PATH: getting-started/pingauthorize
+    ```
+
+    For pingauthorizepap, it should have a default SERVER_PROFILE variables as empty, as no SERVER_PROFILE is needed by default.
+
+* [Issue #198](https://github.com/pingidentity/helm-charts/issues/198) testFramework: Support full definition of initContainers attributes in testSteps and finalStep
+
+    Update the testFramework to pull in all attributes of the testSteps and finalStep into the init containers and final container.  This allow for setting any resource, imagePullPolicy, ...
+
+    This came about as there was no way to set resource or imagePullPolicy details.
+
+    With this change, will be adding a couple of defaults into the value.yamls file for the finalStep:
+
+    ```
+      finalStep:
+        name: 99-completion
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command:
+          ...
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 1m
+            memory: 64Mi
+    ```
+
 ## Release 0.7.2 (August 13, 2021)
 
 * [Issue #191](https://github.com/pingidentity/helm-charts/issues/191) Change variable PF_ADMIN_BASEURL to PF_ADMIN_PUBLIC_BASEURL

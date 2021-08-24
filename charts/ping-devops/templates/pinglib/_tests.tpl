@@ -21,23 +21,16 @@ spec:
   restartPolicy: Never
   initContainers:
 
+
   {{- range $testFramework.testSteps }}
-  {{- $stepName := .name }}
   {{- if .waitFor }}
-    {{ include "pinglib.workload.init.waitfor" (list $top $v .waitFor $stepName) | nindent 2 }}
+    {{ include "pinglib.workload.init.waitfor" (list $top $v .waitFor .name) | nindent 2 }}
   {{- else }}
-
-
-  - name: {{ $stepName }}
-    env: []
-    #--------------------- Image -------------------------
-    image: {{ default .image (index $v.externalImage .image) }}
+  - env: []
     imagePullPolicy: IfNotPresent
-    #--------------------- Command -----------------------
-    command:
-      {{ toYaml .command | nindent 6 }}
-    securityContext: {{ toYaml .securityContext | nindent 6 }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
+
     #--------------------- Environment -----------------
     envFrom:
     - configMapRef:
@@ -64,27 +57,17 @@ spec:
     {{- end }}
   containers:
   {{- with $testFramework.finalStep }}
-  - name: {{ .name }}
-    image: {{ default .image (index $v.externalImage .image) }}
-    command:
-      {{ toYaml .command | nindent 6 }}
-    securityContext: {{ toYaml .securityContext | nindent 6 }}
+  - imagePullPolicy: IfNotPresent
     volumeMounts:
     - name: shared-data
       mountPath: {{ $sharedMountPath }}
-    resources:
-      limits:
-        cpu: 500m
-        memory: 128Mi
-      requests:
-        cpu: 0m
-        memory: 64Mi
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- if $testFramework.rbac.enabled }}
   serviceAccountName: {{ include "pinglib.addreleasename" (list $top $v "test-service-account") }}
   {{- end }}
 
   {{ toYaml $testFramework.pod | nindent 2 }}
-  {{- end }}
 
   #--------------------- VolumeMounts -----------------
   # Setup a volume for each file in the configMaps.files
