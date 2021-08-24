@@ -1217,18 +1217,18 @@ testFramework:
     # Array of steps.
     # Example includes:
     #########################################################
-    # 01-wait-for-pingfederate-engine:
+    # - name: 01-wait-for-pingfederate-engine
     #   waitFor:
     #     pingfederate-engine:
     #       service: https
 
-    # 02-init-test:
+    # - name: 02-init-test
     #   image: busybox
     #   command:
     #     - /bin/sh
     #     - /var/run/init-test.sh
 
-    # 03-check-pingfederate:
+    # - name: 03-check-pingfederate
     #   image: postman/newman:5-alpine
     #   command:
     #     - newman
