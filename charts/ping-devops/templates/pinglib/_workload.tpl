@@ -55,8 +55,8 @@ spec:
       tolerations: {{ toYaml $v.container.tolerations | nindent 8 }}
       affinity: {{ toYaml $v.container.affinity | nindent 8 }}
       initContainers:
-        {{ include "pinglib.workload.init.waitfor" (concat . (list $v.container.waitFor "")) | nindent 6 }}
-        {{ include "pinglib.workload.init.genPrivateCert" . | nindent 6 }}
+      {{ include "pinglib.workload.init.waitfor" (concat . (list $v.container.waitFor "")) | nindent 6 }}
+      {{ include "pinglib.workload.init.genPrivateCert" . | nindent 6 }}
       {{- range $v.includeInitContainers }}
       - name: {{ . }}
         {{ index $top.Values.initContainers . | toYaml | nindent 8 }}
@@ -220,12 +220,9 @@ spec:
     {{- $port := (index $waitForServices $val.service).servicePort | quote }}
     {{- $timeout := printf "-t %d" (int (default 300 $val.timeoutSeconds )) -}}
     {{- $server := printf "%s:%s" $host $port }}
-- name: {{ default (print "wait-for" $prod "-init") $containerName }}
-  imagePullPolicy: {{ $v.image.pullPolicy }}
-  image: {{ $v.externalImage.pingtoolkit }}
+- name: {{ print (default "wait-for" $containerName) "-" $prod }}
+  {{ toYaml $v.externalImage.pingtoolkit | nindent 2 }}
   command: ['sh', '-c', 'echo "Waiting for {{ $server }}..." && wait-for {{ $server }} {{ $timeout }} -- echo "{{ $server }} running"']
-  {{ include "pinglib.workload.init.default.resources" . | nindent 2 }}
-  {{ include "pinglib.workload.init.default.securityContext" $v.workload.securityContext | nindent 2 }}
     {{- end }}
   {{- end }}
 {{- end -}}
@@ -236,8 +233,7 @@ spec:
 {{- $v := index . 1 -}}
 {{- if $v.privateCert.generate }}
 - name: generate-private-cert-init
-  imagePullPolicy: {{ $v.image.pullPolicy }}
-  image: {{ $v.externalImage.pingtoolkit }}
+  {{ toYaml $v.externalImage.pingtoolkit | nindent 2 }}
   command: ["/bin/sh"]
   args:
     - -c
@@ -251,8 +247,6 @@ spec:
         echo "PRIVATE_KEYSTORE_TYPE=${PRIVATE_KEYSTORE_TYPE}">>${_certEnv} &&
         echo "PRIVATE_KEYSTORE_PIN=${PRIVATE_KEYSTORE_PIN}">>${_certEnv} &&
         echo "PRIVATE_KEYSTORE=${PRIVATE_KEYSTORE}">>${_certEnv}
-  {{ include "pinglib.workload.init.default.resources" . | nindent 2 }}
-  {{ include "pinglib.workload.init.default.securityContext" $v.workload.securityContext | nindent 2 }}
   {{/*--------------------- Resources ------------------*/}}
   volumeMounts:
   - name: private-cert
@@ -260,29 +254,6 @@ spec:
   - name: private-keystore
     mountPath: /run/secrets/private-keystore
 {{- end }}
-{{- end -}}
-
-
-{{- define "pinglib.workload.init.default.resources" -}}
-resources:
-  limits:
-    cpu: 0
-    memory: 128Mi
-  requests:
-    cpu: 0
-    memory: 64Mi
-{{- end -}}
-
-{{- define "pinglib.workload.init.default.securityContext" -}}
-securityContext:
-  allowPrivilegeEscalation: false
-  capabilities:
-    drop:
-    - ALL
-  readOnlyRootFilesystem: true
-  runAsGroup: {{ .runAsGroup}}
-  runAsNonRoot: true
-  runAsUser: {{ .runAsUser}}
 {{- end -}}
 
 
