@@ -125,14 +125,36 @@ global:
     pullPolicy: IfNotPresent
 
   ############################################################
-  # External Images
+  # External Images (typically for initContainers)
   #
   # Provides ability to use external images for various purposes
-  # such as using curl.
+  # such as using curl, waitfor, ...  Example below is for use
+  # of the pingtoolkit image used as a waitFor and generation of
+  # private cert initContainers.
+  #
+  # Values found within each external image are copied directly
+  # to the container/initContainer.
   ############################################################
   externalImage:
-    # pingtoolkit - based on alpine
-    pingtoolkit: pingidentity/pingtoolkit:2107
+    pingtoolkit:
+      image: pingidentity/pingtoolkit:2107
+      imagePullPolicy: IfNotPresent
+      resources:
+        limits:
+          cpu: 500m
+          memory: 128Mi
+        requests:
+          cpu: 1m
+          memory: 64Mi
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        runAsUser: 9031
+        runAsGroup: 9999
 
   ############################################################
   # Services
@@ -1216,9 +1238,15 @@ testFramework:
     #########################################################
     # Array of steps.
     # Example includes:
+    #
+    # waitFor - Example below will create 2 init containers:
+    #           - 01-wait-for-pingfederate-admin
+    #           - 01-wait-for-pingfederate-engine
     #########################################################
-    # - name: 01-wait-for-pingfederate-engine
+    # - name: 01-wait-for
     #   waitFor:
+    #     pingfederate-admin:
+    #       service: https
     #     pingfederate-engine:
     #       service: https
 

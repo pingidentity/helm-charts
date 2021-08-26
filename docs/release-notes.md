@@ -1,5 +1,65 @@
 # Release Notes
 
+## Release 0.7.4 (August 26, 2021)
+
+* [Issue #196](https://github.com/pingidentity/helm-charts/issues/196) Set initContainer settings from values.yaml instead of hard coded templates
+
+    This issue was created since the initContainer resources were hard coded in the
+    template, not allowing the implementor to provide their own values, causing issues
+    when trying to deploy the pingfederate-engine in openshift.
+
+    Moving a lot of the hard coded yaml out of the template files into the default values.yaml file.  This will give the implementor full control of how the initContainer runs.
+
+    One breaking change with the values.yaml if anyone has overridden, is that the `{image name}` in the `global.externalImage.{name}: {image name}` value is moved into a map.  The default pingtoolkit externalImage looks like:
+
+    ```
+    global:
+      externalImage:
+        pingtoolkit:
+          image: pingidentity/pingtoolkit:2107
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: 1m
+              memory: 128Mi
+            requests:
+              cpu: 500m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 9031
+            runAsGroup: 9999
+    ```
+
+* [Issue #203](https://github.com/pingidentity/helm-charts/issues/203) testFramework - Support multiple waitFor products in testSteps
+
+    When there are 2 waitFor's together, allow for combining them to
+    run them within same initContainer, with a definition like:
+
+    ```
+      testSteps:
+        - name: 01-wait-for
+          waitFor:
+            pingfederate-admin:
+              service: https
+            pingfederate-engine:
+              service: https
+    ```
+
+    creating a couple of initContainers of:
+
+    ```
+      initContainers:
+        - name: 01-wait-for-pingfederate-admin
+          ...
+        - name: 01-wait-for-pingfederate-engine
+          ...
+    ```
 
 ## Release 0.7.3 (August 24, 2021)
 
