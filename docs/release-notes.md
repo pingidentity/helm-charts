@@ -1,5 +1,9 @@
 # Release Notes
 
+## Release 0.7.5 (August 27, 2021)
+
+* [Issue #206](https://github.com/pingidentity/helm-charts/issues/206) Bump default image tag to 2108
+
 ## Release 0.7.4 (August 26, 2021)
 
 * [Issue #196](https://github.com/pingidentity/helm-charts/issues/196) Set initContainer settings from values.yaml instead of hard coded templates
