@@ -1,6 +1,6 @@
 # Release Notes
 
-## Release 0.7.5 (August 27, 2021)
+## Release 0.7.5 (August 30, 2021)
 
 * [Issue #206](https://github.com/pingidentity/helm-charts/issues/206) Bump default image tag to 2108
 
