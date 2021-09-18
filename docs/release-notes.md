@@ -1,5 +1,11 @@
 # Release Notes
 
+## Release 0.7.6 (Sept 18, 2021)
+
+* [Issue #209](https://github.com/pingidentity/helm-charts/issues/209) Fix incorrect default ldap-sdk-tools probe exec commands
+* [Issue #210](https://github.com/pingidentity/helm-charts/issues/210) Add helm-chart product/image pingtoolkit
+* [Issue #211](https://github.com/pingidentity/helm-charts/issues/211) Allow for schedulerName to be provide on workloads (pods)
+
 ## Release 0.7.5 (August 30, 2021)
 
 * [Issue #206](https://github.com/pingidentity/helm-charts/issues/206) Bump default image tag to 2108
