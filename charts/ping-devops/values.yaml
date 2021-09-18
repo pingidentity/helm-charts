@@ -1,7 +1,7 @@
 ############################################################
 # Ping Identity DevOps values.yaml
 ############################################################
-# The yaml is seperated into 2 major sections:
+# The yaml is separated into 2 major sections:
 #  - global - Represents the base set of values that will
 #             be used for each product, if that product
 #             doesn't override the global values.
@@ -79,7 +79,7 @@ global:
   privateCert:
     generate: false
     additionalHosts: []
-    additioanlIPs: []
+    additionalIPs: []
 
   ############################################################
   # Fields used to annotate secret hashicorp vault information
@@ -168,7 +168,7 @@ global:
   #                  will round-robin across the backend containers.
   #
   # clusterService - If set to true, a "headless" service is
-  #                  explicityly specifyig "None" for the
+  #                  explicitly specifying "None" for the
   #                  clusterIP.  DNS requests to this service
   #                  will provide one of the IPs of the backend
   #                  containers.
@@ -220,9 +220,18 @@ global:
     annotations: {}
 
     ############################################################
+    # schedulerName
+    #
+    # Provide the kubernetes default-scheduler, and allow for override
+    #
+    # https://kubernetes.io/docs/tasks/extend-kubernetes/configure-multiple-schedulers/
+    ############################################################
+    schedulerName: default-scheduler
+
+    ############################################################
     # Deployments
     #
-    # Detailed information used to create a deployment speicific
+    # Detailed information used to create a deployment specific
     # workload.
     #
     # https://kubernetes.io/docs/concepts/workloads/controllers/deployment
@@ -238,7 +247,7 @@ global:
     ############################################################
     # StatefulSets
     #
-    # Detailed information used to create a statefulset speicific
+    # Detailed information used to create a statefulSet specific
     # workload.
     #
     # https://kubernetes.io/docs/concepts/workloads/controllers/statefulset
@@ -299,7 +308,7 @@ global:
     # replicaCount - Instructs Deployment/StatefulSet now many containers to run
     replicaCount: 1
 
-    # resources - Reqeust  0 cpu/0 GB
+    # resources - Request  0 cpu/0 GB
     #             Limit    4 cpu/0 GB
     resources:
       requests:
@@ -329,9 +338,9 @@ global:
     #
     # https://kubernetes.io/docs/tasks/configure-pod-container/attach-handler-lifecycle-event
     ############################################################
-    lifecyle: {}
+    lifecycle: {}
     # Example
-    # lifecyle:
+    # lifecycle:
     #   postStart:
     #     exec:
     #       command: ["/bin/sh", "-c", "echo Start Complete > /tmp/message"]
@@ -375,7 +384,7 @@ global:
   # Licensing
   #
   # license.secret.devOps
-  #    Identify the k8s secret to keep the DevOps USER/KEY if used during deployement.
+  #    Identify the k8s secret to keep the DevOps USER/KEY if used during deployment.
   #
   # NOTE: licenseSecretName can be set in deploying chart values to specify a secret
   #       with actual product license.  This would override the DevOps secret.
@@ -458,10 +467,12 @@ ldap-sdk-tools:
     probes:
       livenessProbe:
         exec:
-          command: echo
+          command:
+            - echo
       readinessProbe:
         exec:
-          command: echo
+          command:
+            - echo
 
 #############################################################
 # pingfederate-admin values
@@ -594,7 +605,7 @@ pingfederate-engine:
     # - type: Pods
     #   pods:
     #     metric:
-    #       name: custommetric
+    #       name: custom-metric
     #     target:
     #       type: AverageValue
     #       averageValue: 10000m
@@ -1001,7 +1012,7 @@ pingdatagovernancepap:
         memory: 2Gi
 
   envs:
-    SERVER_PROFILE_URL: https://www.github.com/pingidentity/pingidentity-server-profiles.git
+    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: pdg-pap-integration/pingdatagovernancepap
     HTTPS_PORT: "8443"
   services:
@@ -1186,11 +1197,29 @@ pd-replication-timing:
     name: pingtoolkit
 
   envs:
-    SERVER_PROFILE_URL: https://www.github.com/pingidentity/pingidentity-server-profiles
+    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: dsreplication-timing
     STARTUP_COMMAND: /opt/out/instance/bin/start-server
     STARTUP_BACKGROUND_OPTS: ""
 
+#############################################################
+# pingtoolkit values
+#############################################################
+pingtoolkit:
+  enabled: false
+  name: pingtoolkit
+  image:
+    name: pingtoolkit
+
+    probes:
+      livenessProbe:
+        exec:
+          command:
+            - echo
+      readinessProbe:
+        exec:
+          command:
+            - echo
 
 #############################################################
 # testFramework

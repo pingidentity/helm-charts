@@ -54,6 +54,7 @@ spec:
       nodeSelector: {{ toYaml $v.container.nodeSelector | nindent 8 }}
       tolerations: {{ toYaml $v.container.tolerations | nindent 8 }}
       affinity: {{ toYaml $v.container.affinity | nindent 8 }}
+      schedulerName: {{ $v.workload.schedulerName }}
       initContainers:
       {{ include "pinglib.workload.init.waitfor" (concat . (list $v.container.waitFor "")) | nindent 6 }}
       {{ include "pinglib.workload.init.genPrivateCert" . | nindent 6 }}
@@ -190,6 +191,10 @@ spec:
 
       {{/*--------------------- Volumes (defined in product.workload.volumes) ------------------*/}}
       {{- include "pinglib.workload.volumes" $v | nindent 6 }}
+
+      {{- if $v.workload.toYaml }}
+        {{ toYaml $v.workload.toYaml | nindent 6 }}
+      {{- end }}
 
   {{/*----------------- VolumeClameTemplates ------------------*/}}
   {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
