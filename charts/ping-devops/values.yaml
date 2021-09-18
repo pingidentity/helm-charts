@@ -473,6 +473,10 @@ ldap-sdk-tools:
         exec:
           command:
             - echo
+      startupProbe:
+        exec:
+          command:
+            - echo
 
 #############################################################
 # pingfederate-admin values
@@ -1210,16 +1214,6 @@ pingtoolkit:
   name: pingtoolkit
   image:
     name: pingtoolkit
-
-    probes:
-      livenessProbe:
-        exec:
-          command:
-            - echo
-      readinessProbe:
-        exec:
-          command:
-            - echo
 
 #############################################################
 # testFramework
