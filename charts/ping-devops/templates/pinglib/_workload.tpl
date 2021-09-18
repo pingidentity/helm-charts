@@ -192,10 +192,6 @@ spec:
       {{/*--------------------- Volumes (defined in product.workload.volumes) ------------------*/}}
       {{- include "pinglib.workload.volumes" $v | nindent 6 }}
 
-      {{- if $v.workload.toYaml }}
-        {{ toYaml $v.workload.toYaml | nindent 6 }}
-      {{- end }}
-
   {{/*----------------- VolumeClameTemplates ------------------*/}}
   {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
   volumeClaimTemplates:
