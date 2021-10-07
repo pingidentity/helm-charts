@@ -13,7 +13,6 @@
           runAsGroup: 0
     ```
 
-
 * [Issue #218](https://github.com/pingidentity/helm-charts/issues/218) Update default global.image.tag to 2109
 
 ## Release 0.7.6 (Sept 18, 2021)
