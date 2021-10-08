@@ -113,7 +113,7 @@ global:
   # By default the images uses will be indicated by these
   # variables.  An example might look like:
   #
-  #   pingidentity/pingdataconsole:2108 (August, 2021)
+  #   pingidentity/pingdataconsole:2109 (September, 2021)
   #
   # NOTE: image.name MUST be set in child chart
   #   Example: image.name: pingfederate
@@ -121,7 +121,7 @@ global:
   image:
     repository: pingidentity
     name:
-    tag: "2108"
+    tag: "2109"
     pullPolicy: IfNotPresent
 
   ############################################################
@@ -137,7 +137,7 @@ global:
   ############################################################
   externalImage:
     pingtoolkit:
-      image: pingidentity/pingtoolkit:2108
+      image: pingidentity/pingtoolkit:2109
       imagePullPolicy: IfNotPresent
       resources:
         limits:
@@ -154,7 +154,7 @@ global:
         readOnlyRootFilesystem: true
         runAsNonRoot: true
         runAsUser: 9031
-        runAsGroup: 9999
+        runAsGroup: 0
 
   ############################################################
   # Services
@@ -283,7 +283,7 @@ global:
     ############################################################
     # securityContext
     #
-    # Note: The user (9031) and group (9999) represent the current user
+    # Note: The user (9031) and group (0) represent the current user
     #       and group used with PingIdentity images (except PingDelegator).
     #       The fsGroup is set to same as group, however, it can be set to
     #       any gid number.
@@ -291,9 +291,9 @@ global:
     #       a pvc (i.e. StatefulSets)
     ############################################################
     securityContext:
-      fsGroup: 9999
+      fsGroup: 0
       runAsUser: 9031
-      runAsGroup: 9999
+      runAsGroup: 0
       # allowPrivilegeEscalation: false
       # capabilities:
       #   drop:
@@ -417,7 +417,7 @@ sidecars: {}
 # sidecars:
 #   logger:
 #     name: log-container
-#     image: pingidentity/pingtoolkit:2108
+#     image: pingidentity/pingtoolkit:2109
 #     volumeMounts:
 #       - mountPath: /tmp/logs/
 #         name: logger
@@ -433,7 +433,7 @@ initContainers: {}
 # initContainers:
 #   init-example:
 #     name: 01-init
-#     image: pingidentity/pingtoolkit:2108
+#     image: pingidentity/pingtoolkit:2109
 #     command: ['sh', '-c', 'echo "InitContainer 1"']
 
 #############################################################

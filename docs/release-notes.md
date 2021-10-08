@@ -1,5 +1,20 @@
 # Release Notes
 
+## Release 0.7.7 (Oct 7, 2021)
+
+* [Issue #217](https://github.com/pingidentity/helm-charts/issues/217) Update default security context group id to root (0)
+
+    ```
+    global:
+      workload:
+        securityContext:
+          fsGroup: 0
+          runAsUser: 9031
+          runAsGroup: 0
+    ```
+
+* [Issue #218](https://github.com/pingidentity/helm-charts/issues/218) Update default global.image.tag to 2109
+
 ## Release 0.7.6 (Sept 18, 2021)
 
 * [Issue #209](https://github.com/pingidentity/helm-charts/issues/209) Fix incorrect default ldap-sdk-tools probe exec commands
