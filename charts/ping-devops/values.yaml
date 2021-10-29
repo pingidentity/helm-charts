@@ -510,9 +510,6 @@ pingfederate-admin:
   #       service: ldaps
   #       timeoutSeconds: 300
 
-  envs:
-    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
-    SERVER_PROFILE_PATH: getting-started/pingfederate
 
   # Example: Pulling in a secret (called pingfederate-license) into container
   #          mounting the name (license) value into a file (/opt/in/.../pingfederate.lic)
@@ -582,8 +579,6 @@ pingfederate-engine:
         timeoutSeconds: 300
 
   envs:
-    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
-    SERVER_PROFILE_PATH: getting-started/pingfederate
     PF_ADMIN_PORT: "9999"
 
   #############################################################
@@ -710,8 +705,6 @@ pingdirectory:
                   storage: 8Gi
 
   envs:
-    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
-    SERVER_PROFILE_PATH: baseline/pingdirectory
     MAKELDIF_USERS: "20000"
 
   services:
@@ -763,10 +756,6 @@ pingdirectoryproxy:
         cpu: 2
         memory: 2Gi
 
-  envs:
-    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
-    SERVER_PROFILE_PATH: baseline/pingdirectoryproxy
-
   services:
     ldaps:
       servicePort: 636
@@ -804,10 +793,6 @@ pingdelegator:
 
   pingDirectoryServer:
     port: 443
-
-  envs:
-    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
-    SERVER_PROFILE_PATH: baseline/pingdelegator
 
   services:
     https:
@@ -847,10 +832,6 @@ pingdatasync:
         cpu: 2
         memory: 2Gi
 
-  envs:
-    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
-    SERVER_PROFILE_PATH: simple-sync/pingdatasync
-
   services:
     ldaps:
       servicePort: 636
@@ -879,10 +860,6 @@ pingauthorize:
       limits:
         cpu: 2
         memory: 4Gi
-
-  envs:
-    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
-    SERVER_PROFILE_PATH: getting-started/pingauthorize
 
   services:
     https:
@@ -968,10 +945,6 @@ pingdatagovernance:
         cpu: 2
         memory: 4Gi
 
-  envs:
-    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
-    SERVER_PROFILE_PATH: baseline/pingdatagovernance-8.1.0.0
-
   services:
     https:
       servicePort: 443
@@ -1016,8 +989,6 @@ pingdatagovernancepap:
         memory: 2Gi
 
   envs:
-    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
-    SERVER_PROFILE_PATH: pdg-pap-integration/pingdatagovernancepap
     HTTPS_PORT: "8443"
   services:
     https:
@@ -1069,10 +1040,6 @@ pingaccess-admin:
   #       service: https
   #       timeoutSeconds: 300
 
-  envs:
-    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
-    SERVER_PROFILE_PATH: getting-started/pingaccess
-
   services:
     https:
       servicePort: 9000
@@ -1119,10 +1086,6 @@ pingaccess-engine:
         service: https
         timeoutSeconds: 300
 
-  envs:
-    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
-    SERVER_PROFILE_PATH: getting-started/pingaccess
-
   services:
     https:
       servicePort: 3000
@@ -1166,10 +1129,6 @@ pingdataconsole:
       host: pingdirectory-cluster
       port: 636
     username: administrator
-
-  envs:
-    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
-    SERVER_PROFILE_PATH: baseline/pingdataconsole
 
   services:
     https:

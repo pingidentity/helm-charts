@@ -9,4 +9,6 @@ data:
   ORCHESTRATION_TYPE: KUBERNETES
   K8S_STATEFUL_SET_NAME: {{ include "pinglib.fullname" . }}
   K8S_STATEFUL_SET_SERVICE_NAME: {{ include "pinglib.fullclusterservicename" . }}
+  LDAP_PORT: {{ $top.Values.pingdirectory.services.ldap.containerPort | quote }}
+  LDAPS_PORT: {{ $top.Values.pingdirectory.services.ldaps.containerPort | quote }}
 {{- end -}}
