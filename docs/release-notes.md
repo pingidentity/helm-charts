@@ -1,5 +1,60 @@
 # Release Notes
 
+
+## Release 0.7.8 (Nov 1, 2021)
+
+* [Issue #216](https://github.com/pingidentity/helm-charts/issues/216) Add option to generate a master password for ping services
+
+    In the interest of better security practice, this enhancement provides the ability to generate this password via the `derivedPassword` function in helm.  With this, several items can be used by default and overridden by the deployer to generate a secure password.  When it generates the password:
+
+    - A note will be added to the NOTES (see below)
+    - The password will be set into the global configmap PING_IDENTITY_PASSWORD. (we may want to use a secret instead)
+
+    NOTES (see the generated password as well as the WARNING)
+    ```
+    $ helm upgrade --install test-pw pingidentity/ping-devops  --set global.masterPassword.enabled=true
+    NOTES:
+    #-------------------------------------------------------------------------------------
+    # Ping DevOps
+    #
+    # Description: Ping Identity helm charts - 09/18/21
+    #-------------------------------------------------------------------------------------
+    # WARNING: Master Password has been requested and generated.  This is intended to
+    #          generate a password for DEVELOPMENT PURPOSES ONLY.  This password will be
+    #          assigned to the PING_IDENTITY_PASSWORD unless overridden by the values.
+    #
+    #          PING_IDENTITY_PASSWORD: **************
+    #-------------------------------------------------------------------------------------
+    ```
+
+    The values used to drive the creation of this password are:
+
+    values.yaml
+    ```
+    global:
+      ############################################################
+      # Master Password Generation
+      #
+      # Uses Helm function derivePassword, which uses the master password
+      # specification: https://masterpassword.app/masterpassword-algorithm.pdf
+      #
+      #      masterPassword.enabled: {true | false}
+      #      masterPassword.strength: {master password template: long | maximum}
+      #      masterPassword.name: {defaults to .Release.Name}
+      #      masterPassword.site: {defaults to .Chart.Name}
+      #      masterPassword.secret: {defaults to .Release.Namespace}
+      ############################################################
+      masterPassword:
+        enabled: false
+        strength: long
+        name:   # default - .Release.Name
+        site:   # default - .Chart.Name
+        secret: # default - .Release.Namespace
+    ```
+
+    As shown in the example above, a deployer only needs to provide the `global.masterPassword.enabled=true` to have it generated.
+
+
 ## Release 0.7.7 (Oct 7, 2021)
 
 * [Issue #217](https://github.com/pingidentity/helm-charts/issues/217) Update default security context group id to root (0)

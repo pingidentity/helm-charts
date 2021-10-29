@@ -1,4 +1,13 @@
 {{ include "pinglib.notes.header" . }}
+{{- if $.Values.global.masterPassword.enabled }}
+# WARNING: Master Password has been requested and generated.  This is intended to
+#          generate a password for DEVELOPMENT PURPOSES ONLY.  This password will be
+#          assigned to the PING_IDENTITY_PASSWORD unless overridden by the values.
+#
+#          PING_IDENTITY_PASSWORD: {{ include "pinglib.gen-master-password" . }}
+#-------------------------------------------------------------------------------------
+{{- end }}
+
 {{- $format := "%-1.1s %-21.21s %-7.7s %-3.3s %2.2s %4.4s%1s%-4.4s %4.4s%1s%-4.4s %3.3s" }}
 {{- $initconFormat := "    init    - %s" }}
 {{- $sidecarFormat := "    sidecar - %s" }}
