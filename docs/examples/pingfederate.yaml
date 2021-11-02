@@ -10,20 +10,17 @@
 #  - PingFederate Administrative Console with native authentication
 #  - PingFederate Engines clustered with console
 ############################################################
-global:
-  image:
-    tag: "2109"
 
 pingfederate-admin:
   enabled: true
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: getting-started/pingfederate
-    SERVER_PROFILE_BRANCH: "2109"
+    SERVER_PROFILE_BRANCH: "2110"
 
 pingfederate-engine:
   enabled: true
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: getting-started/pingfederate
-    SERVER_PROFILE_BRANCH: "2109"
+    SERVER_PROFILE_BRANCH: "2110"

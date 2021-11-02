@@ -3,6 +3,14 @@
 
 ## Release 0.7.8 (Nov 1, 2021)
 
+* [Issue #213](https://github.com/pingidentity/helm-charts/issues/213) Removed default SERVER_PROFILE variables from values.yaml
+
+  ```diff
+  envs:
+  - SERVER_PROFILE_URL:
+  - SERVER_PROFILE_PATH:
+  ```
+
 * [Issue #216](https://github.com/pingidentity/helm-charts/issues/216) Add option to generate a master password for ping services
 
     In the interest of better security practice, this enhancement provides the ability to generate this password via the `derivedPassword` function in helm.  With this, several items can be used by default and overridden by the deployer to generate a secure password.  When it generates the password:
@@ -54,6 +62,8 @@
 
     As shown in the example above, a deployer only needs to provide the `global.masterPassword.enabled=true` to have it generated.
 
+* [Issue #221](https://github.com/pingidentity/helm-charts/issues/221) PingDirectory service.x.containerPort updates to LDAPS_PORT environment variable
+* [Issue #222](https://github.com/pingidentity/helm-charts/issues/222) Update default global.image.tag to 2110
 
 ## Release 0.7.7 (Oct 7, 2021)
 
