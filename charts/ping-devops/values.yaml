@@ -92,13 +92,16 @@ global:
   #      masterPassword.name: {defaults to .Release.Name}
   #      masterPassword.site: {defaults to .Chart.Name}
   #      masterPassword.secret: {defaults to .Release.Namespace}
+  # 
+  #      masterPassword:
+  #        enabled: true
+  #        strength: long
+  #        name:   # default - .Release.Name
+  #        site:   # default - .Chart.Name
+  #        secret: # default - .Release.Namespace
   ############################################################
   masterPassword:
     enabled: false
-    strength: long
-    name:   # default - .Release.Name
-    site:   # default - .Chart.Name
-    secret: # default - .Release.Namespace
 
   ############################################################
   # Fields used to annotate secret hashicorp vault information
@@ -132,7 +135,7 @@ global:
   # By default the images uses will be indicated by these
   # variables.  An example might look like:
   #
-  #   pingidentity/pingdataconsole:2109 (September, 2021)
+  #   pingidentity/pingdataconsole:2110 (November, 2021)
   #
   # NOTE: image.name MUST be set in child chart
   #   Example: image.name: pingfederate
@@ -140,7 +143,7 @@ global:
   image:
     repository: pingidentity
     name:
-    tag: "2109"
+    tag: "2110"
     pullPolicy: IfNotPresent
 
   ############################################################
@@ -156,7 +159,7 @@ global:
   ############################################################
   externalImage:
     pingtoolkit:
-      image: pingidentity/pingtoolkit:2109
+      image: pingidentity/pingtoolkit:2110
       imagePullPolicy: IfNotPresent
       resources:
         limits:
@@ -436,7 +439,7 @@ sidecars: {}
 # sidecars:
 #   logger:
 #     name: log-container
-#     image: pingidentity/pingtoolkit:2109
+#     image: pingidentity/pingtoolkit:2110
 #     volumeMounts:
 #       - mountPath: /tmp/logs/
 #         name: logger
@@ -452,7 +455,7 @@ initContainers: {}
 # initContainers:
 #   init-example:
 #     name: 01-init
-#     image: pingidentity/pingtoolkit:2109
+#     image: pingidentity/pingtoolkit:2110
 #     command: ['sh', '-c', 'echo "InitContainer 1"']
 
 #############################################################
