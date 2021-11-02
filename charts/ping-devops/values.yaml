@@ -92,7 +92,7 @@ global:
   #      masterPassword.name: {defaults to .Release.Name}
   #      masterPassword.site: {defaults to .Chart.Name}
   #      masterPassword.secret: {defaults to .Release.Namespace}
-  # 
+  #
   #      masterPassword:
   #        enabled: true
   #        strength: long
