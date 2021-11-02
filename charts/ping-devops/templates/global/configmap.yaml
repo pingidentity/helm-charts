@@ -5,6 +5,9 @@
 {{- $v := index . 1 -}}
 
 data:
+  {{- if $top.Values.global.masterPassword.enabled }}
+  PING_IDENTITY_PASSWORD: {{ include "pinglib.gen-master-password" $top | quote }}
+  {{- end }}
   {{ include "global.private.host.port" (list $top $v "PA_ADMIN" "pingaccess-admin") }}
   {{ include "global.private.host.port" (list $top $v "PA_ENGINE" "pingaccess-engine") }}
   {{ include "global.private.host.port" (list $top $v "PAZ_ENGINE" "pingauthorize") }}

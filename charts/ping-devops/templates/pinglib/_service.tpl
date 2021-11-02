@@ -6,6 +6,10 @@ kind: Service
 metadata:
   {{ include "pinglib.metadata.labels" .  | nindent 2  }}
   {{ include "pinglib.metadata.annotations" .  | nindent 2  }}
+{{- if $v.services.dataExternalDNSHostname }}
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: {{ $v.services.dataExternalDNSHostname }}
+{{- end }}
   name: {{ include "pinglib.fullname" . }}
 spec:
   ports:

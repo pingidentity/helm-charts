@@ -4,11 +4,11 @@
 apiVersion: v2
 name: ping-devops
 ########################################################################
-# 0.7.7 - Refer to http://helm.pingidentity.com/release-notes/#release-077
+# 0.7.8 - Refer to http://helm.pingidentity.com/release-notes/#release-078
 ########################################################################
-version: 0.7.7
-description: Ping Identity helm charts - 10/07/21
+version: 0.7.8
+description: Ping Identity helm charts - 11/02/21
 type: application
 home: https://helm.pingidentity.com/
 icon: https://helm.pingidentity.com/img/logos/ping.png
-appVersion: "2109"
+appVersion: "2110"

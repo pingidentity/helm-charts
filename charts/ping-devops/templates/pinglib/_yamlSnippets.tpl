@@ -36,7 +36,9 @@ annotations:
   {{- end }}
 {{- end -}}
 
-{{/* Generate certificates */}}
+{{/**********************************************************************
+   ** gen-cert - Generate certificates
+   **********************************************************************/}}
 {{- define "pinglib.gen-cert" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
@@ -56,4 +58,19 @@ annotations:
 {{- $cert := genSelfSignedCert $subjectCN $alt.ips $alt.names 365 -}}
 tls.crt: {{ $cert.Cert | b64enc }}
 tls.key: {{ $cert.Key | b64enc }}
+{{- end -}}
+
+{{/**********************************************************************
+   ** gen-master-password - Generate Password
+   **********************************************************************/}}
+{{- define "pinglib.gen-master-password" -}}
+  {{ with .Values.global.masterPassword }}
+    {{- if .enabled }}
+      {{- $strength := default "long" .strength }}
+      {{- $name := default $.Release.Name .name }}
+      {{- $site := default $.Chart.Name .site }}
+      {{- $secret := default $.Release.Namespace .secret }}
+      {{- derivePassword 1 $strength $secret $name $site }}
+    {{- end }}
+  {{- end }}
 {{- end -}}
