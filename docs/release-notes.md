@@ -1,7 +1,7 @@
 # Release Notes
 
 
-## Release 0.7.8 (Nov 1, 2021)
+## Release 0.7.8 (Nov 2, 2021)
 
 * [Issue #213](https://github.com/pingidentity/helm-charts/issues/213) Removed default SERVER_PROFILE variables from values.yaml
 
