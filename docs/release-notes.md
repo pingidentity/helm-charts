@@ -64,7 +64,12 @@
 
 * [Issue #221](https://github.com/pingidentity/helm-charts/issues/221) PingDirectory service.x.containerPort updates to LDAPS_PORT environment variable
 * [Issue #222](https://github.com/pingidentity/helm-charts/issues/222) Update default global.image.tag to 2110
-* [Issue #224](https://github.com/pingidentity/helm-charts/issues/224) External Hostname Annotations on PD data service
+* [Issue #224](https://github.com/pingidentity/helm-charts/issues/224) External Hostname Annotations on PD data service => example below
+  ```
+  pingdirectory:
+  services:
+    dataExternalDNSHostname:
+  ```
 
 ## Release 0.7.7 (Oct 7, 2021)
 
