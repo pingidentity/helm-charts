@@ -1,0 +1,59 @@
+############################################################
+# Ping Identity
+#
+# This example starts up a utility sidecar along each PD
+# instance in the statefulset. The sidecar should be used
+# for running command-line tools like collect-support-data
+# and backup.
+############################################################
+
+pingdirectory:
+  enabled: true
+  envs:
+    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+    SERVER_PROFILE_PATH: getting-started/pingdirectory
+  includeSidecars: [pd-utility]
+  workload:
+    # Share process namespace for sidecar to get a view inside the main container
+    shareProcessNamespace: true
+    statefulSet:
+      persistentvolume:
+        volumes:
+          out-dir:
+            mountPath: /opt/out
+            persistentVolumeClaim:
+              accessModes:
+              - ReadWriteOnce
+              storageClassName:
+              resources:
+                requests:
+                  storage: 4Gi
+  # Share /tmp so sidecar can see Java processes. Don't keep /tmp around between restarts though.
+  volumes:
+  - name: temp
+    emptyDir: {}
+  volumeMounts:
+  - name: temp
+    mountPath: /tmp
+
+sidecars:
+  # Run the same pingdirectory image without it doing anything on startup
+  pd-utility:
+    name: pingdirectory-utility
+    image: pingidentity/pingdirectory:2110
+    command: ["tail"]
+    args: ["-f", "/dev/null"]
+    # CSD requires a lot of resources by default
+    resources:
+      limits:
+        cpu: "1"
+        memory: 2Gi
+      requests:
+        cpu: "1"
+        memory: 2Gi
+    # Volume mounts for /opt/out and /tmp shared between containers
+    volumeMounts:
+    - name: out-dir
+      mountPath: /opt/out
+    - name: temp
+      mountPath: /tmp
