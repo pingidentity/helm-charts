@@ -251,6 +251,15 @@ global:
     schedulerName: default-scheduler
 
     ############################################################
+    # shareProcessNamespace
+    #
+    # Share process namespace between containers in a pod. Disabled by default.
+    #
+    # https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/
+    ############################################################
+    shareProcessNamespace: false
+
+    ############################################################
     # Deployments
     #
     # Detailed information used to create a deployment specific
