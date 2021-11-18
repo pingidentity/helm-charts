@@ -1,0 +1,65 @@
+# This example shows how to create a k8s CronJob for executing a script on
+# a given pod. This will need to be updated based on the name of your
+# Helm deployment.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: internal-kubectl
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: modify-pods
+rules:
+  - apiGroups: [""]
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - delete
+  - apiGroups: [""]
+    resources: 
+      - pods/exec
+    verbs: 
+      - create
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: modify-pods-to-sa
+subjects:
+  - kind: ServiceAccount
+    name: internal-kubectl
+roleRef:
+  kind: Role
+  name: modify-pods
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: backup-kubectl-test
+spec:
+  # Run the backup every 6 hours
+  schedule: "0 */6 * * *"
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccount: internal-kubectl
+          restartPolicy: OnFailure
+          containers:
+          - name: kubectl
+            image: bitnami/kubectl:latest
+            command: ["kubectl"]
+            # Replace "deployment" in the pod name with the name of your helm deployment
+            args: ["exec", "-ti", "deployment-pingdirectory-0", "--container", "pingdirectory-utility", "--", "/opt/in/backup.sh"]

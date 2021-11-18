@@ -1,0 +1,15 @@
+# This ConfigMap contains an example shell script for running a PingDirectory backup.
+# The storage of the created backup is not implemented here.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pingdirectory-backup
+data:
+  backup.sh: |-
+    #!/bin/sh
+    set -e
+    # Create a directory for the backup
+    mkdir -p /opt/pingdirectory-backup
+    # Run the backup
+    backup --backupDirectory /opt/pingdirectory-backup --backendID userRoot --retainPreviousFullBackupAge '1 day'
+    # TODO implement based on the environment: upload backup files (to S3 or other storage)

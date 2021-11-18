@@ -5,6 +5,12 @@
 # instance in the statefulset. The sidecar should be used
 # for running command-line tools like collect-support-data
 # and backup.
+#
+# This example relies on some configuration outside of the
+# Helm charts to set up a backup script and a cronjob for
+# running the backup. See the files in the pingdirectory-backup
+# folder for that configuration. Those resources will need
+# to be deployed before the Helm chart is installed.
 ############################################################
 
 pingdirectory:
@@ -32,6 +38,10 @@ pingdirectory:
   volumes:
   - name: temp
     emptyDir: {}
+  - name: backup-script
+    configMap:
+      name: pingdirectory-backup
+      defaultMode: 0555
   volumeMounts:
   - name: temp
     mountPath: /tmp
@@ -57,3 +67,6 @@ sidecars:
       mountPath: /opt/out
     - name: temp
       mountPath: /tmp
+    - name: backup-script
+      mountPath: /opt/in/backup.sh
+      subPath: backup.sh
