@@ -1,0 +1,12 @@
+{{- include "pinglib.service-cluster" (list . "pingaccess-admin") -}}
+
+
+{{- define "pingaccess-admin.service-cluster" -}}
+metadata:
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+spec:
+  publishNotReadyAddresses: true
+  selector:
+    clusterIdentifier: {{ include "pinglib.addreleasename" (append . "pingaccess") }}
+{{- end }}

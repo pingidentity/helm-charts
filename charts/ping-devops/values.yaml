@@ -619,8 +619,27 @@ pingfederate-engine:
       maxReplicas: 4
       targetCPUUtilizationPercentage: 75
       # targetMemoryUtilizationPercentage: 50
+      behavior: {}
+      # Custom Horizontal Pod Scaling behavior
+      # ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#default-behavior
+      #  scaleDown:
+      #    stabilizationWindowSeconds: 300
+      #    policies:
+      #    - type: Percent
+      #      value: 100
+      #      periodSeconds: 15
+      #  scaleUp:
+      #    stabilizationWindowSeconds: 0
+      #    policies:
+      #    - type: Percent
+      #      value: 100
+      #      periodSeconds: 15
+      #    - type: Pods
+      #      value: 4
+      #      periodSeconds: 15
+      #    selectPolicy: Max
 
-    autoscalingTemplate: []
+    autoscalingMetricsTemplate: []
     # Custom or additional autoscaling metrics
     # ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#support-for-custom-metrics
     # - type: Pods

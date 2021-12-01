@@ -27,7 +27,6 @@ spec:
     {{ include "pinglib.workload.init.waitfor" (list $top $v .waitFor .name) | nindent 2 }}
   {{- else }}
   - env: []
-    imagePullPolicy: IfNotPresent
     {{- toYaml . | nindent 4 }}
   {{- end }}
 

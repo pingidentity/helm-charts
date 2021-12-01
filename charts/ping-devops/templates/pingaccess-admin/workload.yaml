@@ -2,4 +2,9 @@
 
 
 {{- define "pingaccess-admin.workload" -}}
+spec:
+  template:
+    metadata:
+      labels:
+        clusterIdentifier: {{ include "pinglib.addreleasename" (append . "pingaccess") }}
 {{- end -}}
