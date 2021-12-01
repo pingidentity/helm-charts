@@ -1,5 +1,71 @@
 # Release Notes
 
+## Release 0.7.9 (Dec 1, 2021)
+
+* [Issue #223](https://github.com/pingidentity/helm-charts/issues/223) Support for HPA Scaling Behavior
+
+  ```
+  clustering:
+    autoscaling:
+      enabled: true
+      behavior:
+        scaleDown:
+          stabilizationWindowSeconds: 300
+          policies:
+          - type: Percent
+            value: 100
+            periodSeconds: 15
+        scaleUp:
+          stabilizationWindowSeconds: 0
+          policies:
+          - type: Percent
+            value: 100
+            periodSeconds: 15
+          - type: Pods
+            value: 4
+            periodSeconds: 15
+          selectPolicy: Max
+  ```
+
+* [Issue #229](https://github.com/pingidentity/helm-charts/issues/229) Support for [shareProcessNamespace in pod spec](https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/)
+
+  A PingDirectory utility sidecar container needs to share the process namespace with the main PingDirectory container running in the same pod in order to get useful output out of tools like jps.
+  ### More support to come on the utility sidecar in future Helm release.
+
+* [Issue #231](https://github.com/pingidentity/helm-charts/issues/231) Helm test image pull policy no longer hard-coded in `helm-charts/charts/ping-devops/templates/pinglib/_tests/tpl`
+  ```diff
+  - imagePullPolicy: IfNotPresent
+  ```
+
+* [Issue #233](https://github.com/pingidentity/helm-charts/issues/233) Cluster service for pingaccess-admin in Multi-region
+  Support for multi-region PingAccess deployment without using an ingress. The headless service is an effective way to share the pod id across clusters.
+  ```
+  pingaccess-admin:
+  enabled: true
+  privateCert:
+    generate: true
+  envs:
+    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+    SERVER_PROFILE_PATH: baseline/pingaccess
+  container:
+    replicaCount: 1
+    waitFor:
+      pingfederate-engine:
+        service: https
+  services:
+    https:
+      servicePort: 9000
+      containerPort: 9000
+      ingressPort: 443
+      dataService: true
+      clusterService: true
+    clusterconfig:
+      servicePort: 9090
+      containerPort: 9090
+      ingressPort: 443
+      dataService: true
+    clusterExternalDNSHostname: pingaccess-admin.usa.ping-multi-cluster.com
+  ```
 
 ## Release 0.7.8 (Nov 2, 2021)
 
