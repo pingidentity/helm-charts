@@ -83,6 +83,10 @@ spec:
           {{- end }}
         {{- end }}
 
+        args:
+          {{- if $v.container.args }}
+          {{- toYaml $v.container.args | nindent 8}}
+          {{- end }}
 
         {{/*--------------------- Ports -----------------------*/}}
         {{- with $v.services }}
