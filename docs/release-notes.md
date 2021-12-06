@@ -7,6 +7,8 @@
   A PingDirectory utility sidecar container needs to share the process namespace with the main PingDirectory container running in the same pod in order to get useful output out of tools like jps.
   ### More support to come on the utility sidecar in future Helm release.
 
+* [Issue #232](https://github.com/pingidentity/helm-charts/issues/232) Update default global.image.tag to 2111
+
 * [Issue #239](https://github.com/pingidentity/helm-charts/issues/239) Support for custom container arguments
 
   ```
@@ -152,7 +154,7 @@
     As shown in the example above, a deployer only needs to provide the `global.masterPassword.enabled=true` to have it generated.
 
 * [Issue #221](https://github.com/pingidentity/helm-charts/issues/221) PingDirectory service.x.containerPort updates to LDAPS_PORT environment variable
-* [Issue #222](https://github.com/pingidentity/helm-charts/issues/222) Update default global.image.tag to 2111
+* [Issue #222](https://github.com/pingidentity/helm-charts/issues/222) Update default global.image.tag to 2110
 * [Issue #224](https://github.com/pingidentity/helm-charts/issues/224) External Hostname Annotations on PD data service
 
 ## Release 0.7.7 (Oct 7, 2021)

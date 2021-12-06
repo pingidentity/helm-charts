@@ -259,10 +259,6 @@ global:
     ############################################################
     shareProcessNamespace: false
 
-    utilitySidecar:
-      enabled: false
-      
-
     ############################################################
     # Deployments
     #
