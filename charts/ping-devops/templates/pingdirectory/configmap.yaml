@@ -11,6 +11,5 @@ data:
   K8S_STATEFUL_SET_SERVICE_NAME: {{ include "pinglib.fullclusterservicename" . }}
   LDAP_PORT: {{ $top.Values.pingdirectory.services.ldap.containerPort | quote }}
   LDAPS_PORT: {{ $top.Values.pingdirectory.services.ldaps.containerPort | quote }}
-  HTTP_PORT: {{ $top.Values.pingdirectory.services.http.containerPort | quote }}
   HTTPS_PORT: {{ $top.Values.pingdirectory.services.https.containerPort | quote }}
 {{- end -}}
