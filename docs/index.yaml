@@ -26,7 +26,7 @@ entries:
     - https://github.com/pingidentity/helm-charts/releases/download/ping-devops-0.7.9/ping-devops-0.7.9.tgz
     version: 0.7.9
   - apiVersion: v2
-    appVersion: "2110"
+    appVersion: "2111"
     created: "2021-11-02T14:45:53.785177-05:00"
     description: Ping Identity helm charts - 11/01/21
     digest: e34459be192eb7a1b896469ec773c427ff8626c0414191f3f1d4dcf62df75dbf
