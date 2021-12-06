@@ -1,5 +1,9 @@
 # Release Notes
 
+## Release 0.8.1 (Dec 6, 2021)
+
+* [Issue #240](https://github.com/pingidentity/helm-charts/issues/240) Fix failure on installation of 0.8.0 due to missing PingDirectory HTTP port value
+
 ## Release 0.8.0 (Dec 6, 2021)
 
 * [Issue #229](https://github.com/pingidentity/helm-charts/issues/229) Support for [shareProcessNamespace in pod spec](https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/)
@@ -18,14 +22,12 @@
       args: ["start-server","tail -f /dev/null"]
   ```
 
-* [Issue #240](https://github.com/pingidentity/helm-charts/issues/240) Allow specifying PingDirectory HTTP and HTTPS ports in values
+* [Issue #240](https://github.com/pingidentity/helm-charts/issues/240) Allow specifying PingDirectory HTTPS port in values
 
   ```
   pingdirectory:
     enabled: true
     services:
-      http:
-        containerPort: 7443
       https:
         containerPort: 8443
   ```
