@@ -1,5 +1,35 @@
 # Release Notes
 
+## Release 0.8.0 (Dec 6, 2021)
+
+* [Issue #229](https://github.com/pingidentity/helm-charts/issues/229) Support for [shareProcessNamespace in pod spec](https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/)
+
+  A PingDirectory utility sidecar container needs to share the process namespace with the main PingDirectory container running in the same pod in order to get useful output out of tools like jps.
+  ### More support to come on the utility sidecar in future Helm release.
+
+* [Issue #232](https://github.com/pingidentity/helm-charts/issues/232) Update default global.image.tag to 2111
+
+* [Issue #239](https://github.com/pingidentity/helm-charts/issues/239) Support for custom container arguments
+
+  ```
+  pingfederate-admin:
+    enabled: true
+    container:
+      args: ["start-server","tail -f /dev/null"]
+  ```
+
+* [Issue #240](https://github.com/pingidentity/helm-charts/issues/240) Allow specifying PingDirectory HTTP and HTTPS ports in values
+
+  ```
+  pingdirectory:
+    enabled: true
+    services:
+      http:
+        containerPort: 7443
+      https:
+        containerPort: 8443
+  ```
+
 ## Release 0.7.9 (Dec 1, 2021)
 
 * [Issue #223](https://github.com/pingidentity/helm-charts/issues/223) Support for HPA Scaling Behavior
@@ -26,11 +56,6 @@
             periodSeconds: 15
           selectPolicy: Max
   ```
-
-* [Issue #229](https://github.com/pingidentity/helm-charts/issues/229) Support for [shareProcessNamespace in pod spec](https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/)
-
-  A PingDirectory utility sidecar container needs to share the process namespace with the main PingDirectory container running in the same pod in order to get useful output out of tools like jps.
-  ### More support to come on the utility sidecar in future Helm release.
 
 * [Issue #231](https://github.com/pingidentity/helm-charts/issues/231) Helm test image pull policy no longer hard-coded in `helm-charts/charts/ping-devops/templates/pinglib/_tests/tpl`
   ```diff
