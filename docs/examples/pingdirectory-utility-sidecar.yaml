@@ -46,27 +46,9 @@ pingdirectory:
   - name: temp
     mountPath: /tmp
 
-sidecars:
-  # Run the same pingdirectory image without it doing anything on startup
-  pd-utility:
-    name: pingdirectory-utility
-    image: pingidentity/pingdirectory:2110
-    command: ["tail"]
-    args: ["-f", "/dev/null"]
-    # CSD requires a lot of resources by default
-    resources:
-      limits:
-        cpu: "1"
-        memory: 2Gi
-      requests:
-        cpu: "1"
-        memory: 2Gi
-    # Volume mounts for /opt/out and /tmp shared between containers
-    volumeMounts:
-    - name: out-dir
-      mountPath: /opt/out
-    - name: temp
-      mountPath: /tmp
+  utilitySidecar:
+    enabled: true
+    volumes:
     - name: backup-script
       mountPath: /opt/in/backup.sh
       subPath: backup.sh
