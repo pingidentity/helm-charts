@@ -154,14 +154,16 @@ spec:
         {{ index $top.Values.sidecars . | toYaml | nindent 8 }}
       {{- end }}
 
-      {{- if $v.workload.utilitySidecar.enabled }}
+      {{- if $v.utilitySidecar.enabled }}
       - name: utility-sidecar
+        {{- with $v.image }}
         image: "{{ .repository }}/{{ .name }}:{{ .tag }}"
         imagePullPolicy: {{ .pullPolicy }}
+        {{- end }}
         command: ["tail"]
         args: ["-f", "/dev/null"]
-        {{- if $v.workload.utilitySidecar.resources }}
-          {{ toYaml $v.workload.utilitySidecar.resources | nindent 8 }}
+        {{- if $v.utilitySidecar.resources }}
+          {{ toYaml $v.utilitySidecar.resources | nindent 8 }}
         {{- end }}
         # Volume mounts for /opt/out and /tmp shared between containers
         volumeMounts:
@@ -169,8 +171,8 @@ spec:
           mountPath: /opt/out
         - name: temp
           mountPath: /tmp
-        {{- if $v.workload.utilitySidecar.volumes }}
-          {{ toYaml $v.workload.utilitySidecar.volumes | nindent 8 }}
+        {{- if $v.utilitySidecar.volumes }}
+          {{ toYaml $v.utilitySidecar.volumes | nindent 8 }}
         {{- end }}
       {{- end }}
 
