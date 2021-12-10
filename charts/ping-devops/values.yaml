@@ -705,6 +705,14 @@ pingfederate-engine:
 # pingdirectory values
 #############################################################
 pingdirectory:
+  cronjob:
+    enabled: false
+    spec:
+      schedule: "0 */6 * * *"
+      successfulJobsHistoryLimit: 0
+      failedJobsHistoryLimit: 1
+    args:
+      - echo
   enabled: false
   name: pingdirectory
   image:
