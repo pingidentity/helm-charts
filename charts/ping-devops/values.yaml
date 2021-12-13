@@ -493,6 +493,20 @@ volumes: {}
 #     emptyDir: {}
 
 #############################################################
+# ConfigMap Definitions
+#
+# ConfigMaps that can be mounted to product containers
+#############################################################
+configMaps: {}
+# Example:
+# configMaps:
+#   pingdirectory-backup:
+#     data:
+#       backup.sh: |-
+#         #!/bin/sh
+#         ...
+
+#############################################################
 # Image/Product values
 #############################################################
 
@@ -708,7 +722,9 @@ pingdirectory:
   cronjob:
     enabled: false
     spec:
-      schedule: "0 */6 * * *"
+      # A schedule must be set for cronjobs.
+      # Example running once every six hours:
+      # schedule: "0 */6 * * *"
       successfulJobsHistoryLimit: 0
       failedJobsHistoryLimit: 1
     args:

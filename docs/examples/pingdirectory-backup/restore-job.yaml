@@ -1,15 +1,17 @@
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: Job
 metadata:
   name: restore-kubectl-test
 spec:
   template:
     spec:
-      serviceAccount: internal-kubectl
+      # Replace "deployment" in the serviceAccount with the name of your helm deployment
+      serviceAccount: deployment-pingdirectory-internal-kubectl
       restartPolicy: OnFailure
       containers:
       - name: kubectl
         image: bitnami/kubectl:latest
         command: ["kubectl"]
         # Replace "deployment" in the pod name with the name of your helm deployment
-        args: ["exec", "-ti", "deployment-pingdirectory-0", "--container", "pingdirectory-utility", "--", "/opt/in/restore.sh"]
+        # Replace "2FederateM0re" with the password for the admin user
+        args: ["exec", "-ti", "deployment-pingdirectory-0", "--container", "utility-sidecar", "--", "/opt/in/restore.sh", "2FederateM0re"]
