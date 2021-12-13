@@ -22,6 +22,9 @@ These will create
         {{- $baseTemplate := printf "pinglib.%s.tpl" $resourceType -}}
         {{- $overrides := fromYaml (include $overrideTemplate $paramList) | default (dict ) -}}
         {{- $tpl := fromYaml (include $baseTemplate $paramList) | default (dict ) -}}
-        {{- toYaml (merge $tpl $overrides) -}}
+        {{- $final := merge $tpl $overrides -}}
+        {{- if $final -}}
+            {{- toYaml $final -}}
+        {{- end -}}
     {{- end -}}
 {{- end -}}
