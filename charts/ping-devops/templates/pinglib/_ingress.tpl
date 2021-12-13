@@ -4,7 +4,7 @@
 {{- $fullName := include "pinglib.fullname" . -}}
 {{- $defaultTlsSecret := $v.ingress.defaultTlsSecret -}}
 {{- $defaultDomain := $v.ingress.defaultDomain -}}
-{{- if semverCompare ">1.18" $top.Capabilities.KubeVersion.Version }}
+{{- if semverCompare ">=1.18.x" $top.Capabilities.KubeVersion.Version }}
 apiVersion: networking.k8s.io/v1
 {{- else }}
 apiVersion: networking.k8s.io/v1beta1
@@ -35,7 +35,7 @@ spec:
           - path: {{ .path }}
             pathType: {{ .pathType }}
             backend:
-{{- if semverCompare ">1.18" $top.Capabilities.KubeVersion.Version }}
+{{- if semverCompare ">=1.18.x" $top.Capabilities.KubeVersion.Version }}
               service:
                 name: {{ $fullName }}
                 port:
