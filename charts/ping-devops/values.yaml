@@ -734,8 +734,7 @@ pingdirectory:
       failedJobsHistoryLimit: 1
     # The image can be replaced with any desired image that includes kubectl
     image: bitnami/kubectl:latest
-    args:
-      - echo
+    args: {}
   enabled: false
   name: pingdirectory
   image:
