@@ -259,6 +259,19 @@ global:
     ############################################################
     shareProcessNamespace: false
 
+    # Deploy a utility sidecar for running command-line tools
+    utilitySidecar:
+      enabled: false
+      # CSD and other command line tools can require a lot of resources.
+      # Modify these values to change the sidecar container's resource requirements.
+      resources:
+        limits:
+          cpu: "1"
+          memory: 2Gi
+        requests:
+          cpu: "1"
+          memory: 2Gi
+
     ############################################################
     # Deployments
     #
