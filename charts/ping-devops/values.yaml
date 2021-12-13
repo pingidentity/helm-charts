@@ -732,6 +732,8 @@ pingdirectory:
       # schedule: "0 */6 * * *"
       successfulJobsHistoryLimit: 0
       failedJobsHistoryLimit: 1
+    # The image can be replaced with any desired image that includes kubectl
+    image: bitnami/kubectl:latest
     args:
       - echo
   enabled: false

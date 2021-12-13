@@ -21,7 +21,7 @@ spec:
           restartPolicy: OnFailure
           containers:
           - name: kubectl
-            image: bitnami/kubectl:latest
+            image: {{ $v.cronjob.image }}
             command: ["kubectl"]
             args:
               {{- range $args }}
