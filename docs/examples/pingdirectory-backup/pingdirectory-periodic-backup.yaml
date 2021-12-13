@@ -16,7 +16,7 @@
 # the sidecar via a mounted configMap. Note that the storage
 # and retrieval of those backups is not implemented here.
 # That implementation will depend on the desired storage and
-# the cloud environment (S3, etc.)
+# the cloud environment (S3, etc.).
 #
 # If a restore is necessary, it will need to be done
 # outside of the Helm charts, as deploying Jobs via Helm
@@ -50,6 +50,7 @@ configMaps:
         _adminPassword="${1}"
     
         # TODO implement based on the environment: pull down backup files (from S3 or other storage) to SERVER_RESTORE_DIR
+        # The files should be placed in directories under /tmp/restore based on the backend name (like /tmp/restore/userRoot/)
         SERVER_RESTORE_DIR=/tmp/restore
         mkdir -p "${SERVER_RESTORE_DIR}"
     
@@ -149,6 +150,7 @@ configMaps:
         echo "Restore complete"
 
 pingdirectory:
+  # Use a cronJob to run backups every six hours
   cronjob:
     enabled: true
     spec:
@@ -171,15 +173,17 @@ pingdirectory:
   - name: backup-script
     configMap:
       name: pingdirectory-backup
-      defaultMode: 0777
+      defaultMode: 0755
   - name: restore-script
     configMap:
       name: pingdirectory-restore
-      defaultMode: 0777
+      defaultMode: 0755
   volumeMounts:
   - name: temp
     mountPath: /tmp
 
+  # Backups, restores, and other CLI tools should be run from the sidecar to prevent interfering
+  # with the main PingDirectory container process.
   utilitySidecar:
     enabled: true
     volumes:

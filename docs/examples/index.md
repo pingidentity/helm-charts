@@ -3,12 +3,12 @@
 The following contains example configs and examples of how to run and configure Ping products
 using the Ping Devops Helm Chart. Please review the [Getting Started Page](../getting-started) before trying them.
 
-| Config                        | Description                                    | .yaml                                                                    |
-| ----------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------ |
-| Everything                    | Example with most products integrated together | [everything.yaml](everything.yaml)                                       |
-| PingFederate                  | PingFederate Admin Console & Engine            | [pingfederate.yaml](pingfederate.yaml)                                   |
-| Simple Sync                   | PingDataSync and PingDirectory                 | [simple-sync.yaml](simple-sync.yaml)                                     |
-| PingDirectory Utility Sidecar | PingDirectory with sidecar for CLI tools       | [pingdirectory-utility-sidecar.yaml](pingdirectory-utility-sidecar.yaml) |
+| Config                           | Description                                          | .yaml                                                                                         |
+| -----------------------------    | ----------------------------------------------       | ------------------------------------------------------------------------                      |
+| Everything                       | Example with most products integrated together       | [everything.yaml](everything.yaml)                                                            |
+| PingFederate                     | PingFederate Admin Console & Engine                  | [pingfederate.yaml](pingfederate.yaml)                                                        |
+| Simple Sync                      | PingDataSync and PingDirectory                       | [simple-sync.yaml](simple-sync.yaml)                                                          |
+| PingDirectory Backup and Sidecar | PingDirectory with periodic backup and sidecar       | [pingdirectory-periodic-backup.yaml](pingdirectory-backup/pingdirectory-utility-sidecar.yaml) |
 
 ## To Deploy
 

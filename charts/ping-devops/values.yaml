@@ -495,7 +495,8 @@ volumes: {}
 #############################################################
 # ConfigMap Definitions
 #
-# ConfigMaps that can be mounted to product containers
+# Custom ConfigMaps that can be mounted to product containers
+# or sidecar containers.
 #############################################################
 configMaps: {}
 # Example:
@@ -719,6 +720,10 @@ pingfederate-engine:
 # pingdirectory values
 #############################################################
 pingdirectory:
+  # cronjobs run a kubectl exec command to run commands on
+  # a utility sidecar container.
+  # They will also create the necessary ServiceAccount, Role,
+  # and RoleBinding to run the jobs.
   cronjob:
     enabled: false
     spec:
