@@ -167,7 +167,8 @@ spec:
         command: ["tail"]
         args: ["-f", "/dev/null"]
         {{- if $v.utilitySidecar.resources }}
-          {{ toYaml $v.utilitySidecar.resources | nindent 8 }}
+        resources:
+          {{ toYaml $v.utilitySidecar.resources | nindent 10 }}
         {{- end }}
         # Volume mounts for /opt/out and /tmp shared between containers
         volumeMounts:
