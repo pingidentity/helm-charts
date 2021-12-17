@@ -1,0 +1,11 @@
+{{- $params := list . .Values.global -}}
+{{- range $name, $val := .Values.configMaps -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  {{- include "pinglib.metadata.labels" $params | nindent 2  }}
+  {{- include "pinglib.metadata.annotations" $params | nindent 2  -}}
+  name: {{ $name }}
+{{ toYaml $val }}
+---
+{{- end -}}

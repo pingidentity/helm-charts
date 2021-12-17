@@ -158,6 +158,29 @@ spec:
         {{ index $top.Values.sidecars . | toYaml | nindent 8 }}
       {{- end }}
 
+      {{- if $v.utilitySidecar.enabled }}
+      - name: utility-sidecar
+        {{- with $v.image }}
+        image: "{{ .repository }}/{{ .name }}:{{ .tag }}"
+        imagePullPolicy: {{ .pullPolicy }}
+        {{- end }}
+        command: ["tail"]
+        args: ["-f", "/dev/null"]
+        {{- if $v.utilitySidecar.resources }}
+        resources:
+          {{ toYaml $v.utilitySidecar.resources | nindent 10 }}
+        {{- end }}
+        # Volume mounts for /opt/out and /tmp shared between containers
+        volumeMounts:
+        - name: out-dir
+          mountPath: /opt/out
+        - name: temp
+          mountPath: /tmp
+        {{- if $v.utilitySidecar.volumes }}
+          {{ toYaml $v.utilitySidecar.volumes | nindent 8 }}
+        {{- end }}
+      {{- end }}
+
       {{/*---------------- Security Context -------------*/}}
       securityContext: {{ toYaml $v.workload.securityContext | nindent 8 }}
 

@@ -1,0 +1,54 @@
+{{- include "pinglib.cronjob" (list . "pingdirectory") -}}
+
+{{- define "pingdirectory.cronjob" -}}
+{{- end }}
+
+{{- $top := . -}}
+{{- $prodName := "pingdirectory" -}}
+{{- $mergedValues := merge (index $top.Values "pingdirectory") $top.Values.global -}}
+{{- $params := list $top $mergedValues -}}
+{{- if $top.Values.pingdirectory.cronjob.enabled }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  {{- include "pinglib.metadata.labels" $params | nindent 2  }}
+  {{- include "pinglib.metadata.annotations" $params | nindent 2  -}}
+  name: {{ include "pinglib.fullname" $params }}-internal-kubectl
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  {{- include "pinglib.metadata.labels" $params | nindent 2  }}
+  {{- include "pinglib.metadata.annotations" $params | nindent 2  -}}
+  name: {{ include "pinglib.fullname" $params }}-modify-pods
+rules:
+  - apiGroups: [""]
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - delete
+  - apiGroups: [""]
+    resources: 
+      - pods/exec
+    verbs: 
+      - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  {{- include "pinglib.metadata.labels" $params | nindent 2  }}
+  {{- include "pinglib.metadata.annotations" $params | nindent 2  -}}
+  name: {{ include "pinglib.fullname" $params }}-modify-pods-to-sa
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "pinglib.fullname" $params }}-internal-kubectl
+roleRef:
+  kind: Role
+  name: {{ include "pinglib.fullname" $params }}-modify-pods
+  apiGroup: rbac.authorization.k8s.io
+{{- end -}}
+
+
