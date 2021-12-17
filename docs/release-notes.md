@@ -1,5 +1,23 @@
 # Release Notes
 
+## Release 0.8.2 (Dec 17, 2021)
+
+* [Issue #238](https://github.com/pingidentity/helm-charts/issues/238) Added support for running a utility sidecar alongside a product workload
+
+  The `utilitySidecar` field under a given product can be used to run a sidecar container that will permanently alongside the product container. This sidecar can be used for utility command-line processes, such as running the collect-support-data tool or running a backup.
+
+  An example can be found in the docs/examples/pingdirectory-backup directory for running a PingDirectory backup every 6 hours via a CronJob.
+
+  ```
+  pingdirectory:
+    workload:
+      shareProcessNamespace: true
+    utilitySidecar:
+      enabled: true
+  ```
+
+* [Issue #247](https://github.com/pingidentity/helm-charts/issues/247) Update default global.image.tag to 2111.1
+
 ## Release 0.8.1 (Dec 6, 2021)
 
 * [Issue #240](https://github.com/pingidentity/helm-charts/issues/240) Fix failure on installation of 0.8.0 due to missing PingDirectory HTTP port value
