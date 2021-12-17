@@ -143,7 +143,7 @@ global:
   image:
     repository: pingidentity
     name:
-    tag: "2111"
+    tag: "2111.1"
     pullPolicy: IfNotPresent
 
   ############################################################
@@ -159,7 +159,7 @@ global:
   ############################################################
   externalImage:
     pingtoolkit:
-      image: pingidentity/pingtoolkit:2111
+      image: pingidentity/pingtoolkit:2111.1
       imagePullPolicy: IfNotPresent
       resources:
         limits:
