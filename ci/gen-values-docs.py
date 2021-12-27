@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 import sys
 
+# This script generates markdown documentation for the values that are supported in the Helm chart.
+# TODO explain how it is generated (how to update values.yaml for document a given param)
+
 def fail(message):
     exit("❌ Error: {}".format(message))
 
