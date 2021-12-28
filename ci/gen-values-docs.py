@@ -79,7 +79,7 @@ destFilename = ""
 if len(sys.argv) == 3:
     destFilename = sys.argv[2]
 sections = {}
-currentParam = {}
+currentParam = None
 currentSection = ""
 try:
     with open(srcFilename) as input:
@@ -90,7 +90,12 @@ try:
                 if split[1] == "@section":
                     currentSection = " ".join(split[2:])
                 if split[1] == "@param":
-                    if currentParam:
+                    isFirstParam = currentParam == None
+                    if isFirstParam:
+                        currentParam = {}
+                        if currentSection:
+                            currentParam["section"] = currentSection
+                    if not isFirstParam and currentParam:
                         addParam(sections, currentParam)
                         currentParam = {}
                         if currentSection:
@@ -100,6 +105,13 @@ try:
                         currentParam["description"] = " ".join(split[3:])
                 elif split[1] == "@default":
                     currentParam["default"] = " ".join(split[2:])
+                elif split[1] == "@desc":
+                    descLine = " ".join(split[2:])
+                    if descLine:
+                        if "description" in currentParam:
+                            currentParam["description"] += " " + descLine
+                        else:
+                            currentParam["description"] = descLine
         if currentParam:
             addParam(sections, currentParam)
 

@@ -12,18 +12,20 @@
 ############################################################
 
 ############################################################
-# Global values
+# @section Global values
 ############################################################
 global:
   ############################################################
-  # annotations - Annotations listed, will be added to the
-  #               kubernetes resource
+  # @param    global.annotations Annotations listed, will be
+  # @desc     added to the kubernetes resource
+  # @default  {}
   ############################################################
   annotations: {}
 
   ############################################################
-  # envs - Environment variables listed will be added to the
-  #        global-env-vars configmap.
+  # @param    global.envs Environment variables listed will be 
+  # @desc     added to the global-env-vars configmap
+  # @default  {}
   #
   # NOTE: Environment variables listed at the global: level
   #       will actually end up being listed twice in the
@@ -32,8 +34,9 @@ global:
   envs: {}
 
   ############################################################
-  #  addReleaseNameToResource: Provides global ability to add
-  #                            names to kubernetes resources
+  # @param    global.addReleaseNameToResource Provides global ability
+  # @desc     to add names to kubernetes resources. One of `{none, append, prepend}`
+  # @default  prepend
   #                      none: No use of Release.Name
   #                    append: Appends the Release.Name
   #                   prepend: Prepends the Release.Name ** DEFAULT **
@@ -43,10 +46,22 @@ global:
   ############################################################
   # Ingress
   #
-  #          ingress.enabled: {true | false}
-  # ingress.addReleaseToHost: {prepend | append | subdomain | none}
-  #    ingress.defaultDomain: Replaces with "_defaultDomain_" in host fields
-  # ingress.defaultTlsSecret: Replaces with "_defaultTlsSecret_" in tls.secretName
+  # @param    global.ingress.enabled
+  # @default  false
+  #
+  # @param    global.ingress.addReleaseToHost Add release to host. 
+  # @desc     One of `{prepend, append, subdomain, none}`
+  # @default  subdomain
+  #
+  # @param    global.ingress.defaultDomain Replaces with
+  # @desc     "_defaultDomain_" in host fields
+  # @default  example.com
+  #
+  # @param    global.ingress.defaultTlsSecret Replaces with
+  # @desc     "_defaultTlsSecret_" in tls.secretName
+  #
+  # @param    global.ingress.annotations
+  # @default  {}
   ############################################################
   ingress:
     enabled: false
@@ -61,20 +76,21 @@ global:
   ############################################################
   # Internal Certificates
   #
-  # If set to true, then an internal certificate secret will
-  # be created along with mount of the certificate in
-  # /run/secrets/internal-cert (creates a tls.crt and tls.key)
-  #
-  # By default the Issuer of the cert will be the service name
-  # created by the Helm Chart.  Additionally, the ingress hosts,
-  # if enabled, will be added to the list of X509v3 Subject Alternative Name
+  # @param    global.privateCert.generate If true, then an internal certificate
+  # @desc     secret will be created along with mount of the certificate in
+  # @desc     /run/secrets/internal-cert (creates a tls.crt and tls.key).
+  # @desc     By default the Issuer of the cert will be the service name
+  # @desc     created by the Helm Chart.  Additionally, the ingress hosts,
+  # @desc     if enabled, will be added to the list of X509v3 Subject Alternative Name
+  # @default  false
   #
   # Use the additionalHosts and additionalIPs if additional custom
   # names and ips are needed.
   #
-  #      privateCert.generate: {true | false}
-  #      privateCert.additionalHosts: {optional array of hosts}
-  #      privateCert.additionalIPs: {optional array of IP Addresses}
+  # @param global.privateCert.additionalHosts Additional hosts for the cert
+  # @default []
+  # @param global.privateCert.additionalIPs Additional IP addresses for the cert
+  # @default []
   ############################################################
   privateCert:
     generate: false
