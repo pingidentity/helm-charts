@@ -1,0 +1,8 @@
+{{- include "pinglib.env-vars" (list . "ldap-sdk-tools") -}}
+
+
+{{- define "ldap-sdk-tools.env-vars" -}}
+data:
+  STARTUP_COMMAND: "tail"
+  STARTUP_BACKGROUND_OPTS: "-f /dev/null"
+{{- end -}}

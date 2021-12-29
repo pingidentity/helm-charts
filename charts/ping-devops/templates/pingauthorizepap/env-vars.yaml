@@ -1,8 +1,8 @@
-{{- include "pinglib.configmap" (list . "pingdatagovernancepap") -}}
+{{- include "pinglib.env-vars" (list . "pingauthorizepap") -}}
 
 
 
-{{- define "pingdatagovernancepap.configmap" -}}
+{{- define "pingauthorizepap.env-vars" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
 data:
@@ -14,5 +14,5 @@ data:
 {{- end -}}
 
 
-{{- define "pingdatagovernancepap.configmap" -}}
+{{- define "pingauthorizepap.env-vars" -}}
 {{- end -}}
