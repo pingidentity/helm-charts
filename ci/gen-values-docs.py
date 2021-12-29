@@ -7,7 +7,11 @@ import sys
 def fail(message):
     exit("❌ Error: {}".format(message))
 
-markdownHeader="## Supported values"
+markdownHeader='''## Supported values\n
+These are the values supported in the ping-devops chart. In general, values specified in the
+global section can be overridden for individual products. The product sections have many global fields
+overridden by default (workloads, services, etc.).
+'''
 
 def generateTable(params):
     if len(params) == 0:
