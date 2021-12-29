@@ -603,11 +603,14 @@ configMaps: {}
 #         ...
 
 #############################################################
-# Image/Product values
+# @section Image/Product values
 #############################################################
 
 #############################################################
-# ldap-sdk-tools values
+# @param    ldap-sdk-tools LDAP SDK tools values, overriding global values
+#
+# @param    ldap-sdk-tools.enabled Enable LDAP SDK tools deployment
+# @default  false
 #############################################################
 ldap-sdk-tools:
   enabled: false
@@ -633,7 +636,10 @@ ldap-sdk-tools:
             - echo
 
 #############################################################
-# pingfederate-admin values
+# @param    pingfederate-admin PingFederate admin values, overriding global values
+#
+# @param    pingfederate-admin.enabled Enable PingFederate admin deployment
+# @default  false
 #############################################################
 pingfederate-admin:
   enabled: false
@@ -711,7 +717,10 @@ pingfederate-admin:
           - pingfederate-admin._defaultDomain_
 
 #############################################################
-# pingfederate-engine values
+# @param    pingfederate-engine PingFederate engine values, overriding global values
+#
+# @param    pingfederate-engine.enabled Enable PingFederate engine deployment
+# @default  false
 #############################################################
 pingfederate-engine:
   enabled: false
@@ -812,7 +821,10 @@ pingfederate-engine:
           - pingfederate-engine._defaultDomain_
 
 #############################################################
-# pingdirectory values
+# @param    pingdirectory values, PingDirectory overriding global values
+#
+# @param    pingdirectory.enabled Enable PingDirectory deployment
+# @default  false
 #############################################################
 pingdirectory:
   # cronjobs run a kubectl exec command to run commands on
@@ -927,7 +939,10 @@ pingdirectory:
 
 
 #############################################################
-# pingdirectoryproxy values
+# @param    pingdirectoryproxy PingDirectoryProxy values, overriding global values
+#
+# @param    pingdirectoryproxy.enabled Enable PingDirectoryProxy deployment
+# @default  false
 #############################################################
 pingdirectoryproxy:
   enabled: false
@@ -956,7 +971,10 @@ pingdirectoryproxy:
     clusterServiceName: pingdirectoryproxy-cluster
 
 #############################################################
-# pingdelegator values
+# @param    pingdelegator PingDelegator values, overriding global values
+#
+# @param    pingdelegator.enabled Enable PingDelegator deployment
+# @default  false
 #############################################################
 pingdelegator:
   enabled: false
@@ -1003,7 +1021,10 @@ pingdelegator:
           - pingdelegator._defaultDomain_
 
 #############################################################
-# pingdatasync values
+# @param    pingdatasync PingDataSync values, overriding global values
+#
+# @param    pingdatasync.enabled Enable PingDataSync deployment
+# @default  false
 #############################################################
 pingdatasync:
   enabled: false
@@ -1032,7 +1053,10 @@ pingdatasync:
     clusterServiceName: pingdatasync-cluster
 
 #############################################################
-# pingauthorize values
+# @param    pingauthorize PingAuthorize values, overriding global values
+#
+# @param    pingauthorize.enabled Enable PingAuthorize deployment
+# @default  false
 #############################################################
 pingauthorize:
   enabled: false
@@ -1075,7 +1099,10 @@ pingauthorize:
           - pingauthorize._defaultDomain_
 
 #############################################################
-# pingauthorizepap values
+# @param    pingauthorizepap PingAuthorizePAP values, overriding global values
+#
+# @param    pingauthorizepap.enabled Enable PingAuthorizePAP deployment
+# @default  false
 #############################################################
 pingauthorizepap:
   enabled: false
@@ -1116,7 +1143,10 @@ pingauthorizepap:
           - pingauthorizepap._defaultDomain_
 
 #############################################################
-# pingdatagovernance values
+# @param    pingdatagovernance PingDataGovernance values, overriding global values
+#
+# @param    pingdatagovernance.enabled Enable PingDataGovernance deployment
+# @default  false
 #############################################################
 pingdatagovernance:
   enabled: false
@@ -1159,7 +1189,10 @@ pingdatagovernance:
           - pingdatagovernance._defaultDomain_
 
 #############################################################
-# pingdatagovernancepap values
+# @param    pingdatagovernancepap PingDataGovernancePAP values, overriding global values
+#
+# @param    pingdatagovernancepap.enabled Enable PingDataGovernancePAP deployment
+# @default  false
 #############################################################
 pingdatagovernancepap:
   enabled: false
@@ -1199,7 +1232,10 @@ pingdatagovernancepap:
           - pingdatagovernancepap._defaultDomain_
 
 #############################################################
-# pingaccess-admin values
+# @param    pingaccess-admin PingAccess admin values, overriding global values
+#
+# @param    pingaccess-admin.enabled Enable PingAccess admin deployment
+# @default  false
 #############################################################
 pingaccess-admin:
   enabled: false
@@ -1253,7 +1289,10 @@ pingaccess-admin:
           - pingaccess-admin._defaultDomain_
 
 #############################################################
-# pingaccess-engine values
+# @param    pingaccess-engine PingAccess engine values, overriding global values
+#
+# @param    pingaccess-engine.enabled Enable PingAccess engine deployment
+# @default  false
 #############################################################
 pingaccess-engine:
   enabled: false
@@ -1295,7 +1334,10 @@ pingaccess-engine:
           - pingaccess-engine._defaultDomain_
 
 #############################################################
-# pingdataconsole values
+# @param    pingdataconsole PingDataConsole values, overriding global values
+#
+# @param    pingdataconsole.enabled Enable PingDataConsole deployment
+# @default  false
 #############################################################
 pingdataconsole:
   enabled: false
@@ -1339,7 +1381,10 @@ pingdataconsole:
           - pingdataconsole._defaultDomain_
 
 #############################################################
-# pd-replication-timing values
+# @param    pd-replication-timing values, overriding global values
+#
+# @param    pd-replication-timing.enabled Enable PingDirectory replication deployment
+# @default  false
 #############################################################
 pd-replication-timing:
   enabled: false
@@ -1354,7 +1399,10 @@ pd-replication-timing:
     STARTUP_BACKGROUND_OPTS: ""
 
 #############################################################
-# pingtoolkit values
+# @param    pingtoolkit PingToolkit values, overriding global values
+#
+# @param    pingtoolkit.enabled Enable PingToolkit deployment
+# @default  false
 #############################################################
 pingtoolkit:
   enabled: false
