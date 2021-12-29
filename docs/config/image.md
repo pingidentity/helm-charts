@@ -1,23 +1,23 @@
-# Vault Configuration
+# Image Configuration
 
 Provides values to define kubernetes image information to deployments and statefulsets.
 
 ## Global Section
 
-Default yaml defined in the product vault section.
+Default image yaml defined in the global section:
 
 ```yaml
-image:
+global:
   image:
     repository: pingidentity
-    name:                                 # Should be completed in product section
-    tag: 2010
+    name:                                 # Set in product section
+    tag: 2111
     pullPolicy: Always
 ```
 
 ## Product Section
 
-An example product section specifies the name.
+Each product section specifies the name by default
 
 ```yaml
 pingaccess-admin:
