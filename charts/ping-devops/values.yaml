@@ -749,9 +749,29 @@ pingfederate-engine:
   # By default this is disabled, since there dependencies to the containers
   # CPU and/or Memory limits.
   #
-  # If enabled, ensure that a proper container.resource.request.cpu limit is set
-  # and coordinated with the a targetCPUUtilizationPercentage or
-  # targetMemoryUtilizationPercentage
+  # @param    pingfederate-engine.clustering.autoscaling Configure Horizontal Pod Autoscaling
+  #
+  # @param    pingfederate-engine.clustering.autoscaling.enabled Enable Horizontal Pod Autoscaling.
+  # @desc     If enabled, ensure that proper pingfederate.container.resources values are set and
+  # @desc     coordinated with the targetCPUUtilizationPercentage or targetMemoryUtilizationPercentage
+  # @default  false
+  #
+  # @param    pingfederate-engine.clustering.autoscaling.minReplicas Autoscaler minimum replicas
+  # @default  1
+  #
+  # @param    pingfederate-engine.clustering.autoscaling.maxReplicas Autoscaler maximum replicas
+  # @default  4
+  #
+  # @param    pingfederate-engine.clustering.autoscaling.targetCPUUtilizationPercentage Target CPU utilization
+  # @default  75
+  #
+  # @param    pingfederate-engine.clustering.autoscaling.targetMemoryUtilizationPercentage Target memory utilization
+  # 
+  # @param    pingfederate-engine.clustering.autoscaling.behavior Custom HPA behavior yaml
+  # @default  {}
+  #
+  # @param    pingfederate-engine.clustering.autoscalingMetricsTemplate Custom HPA metrics yaml
+  # @default  []
   #############################################################
   clustering:
     autoscaling:
@@ -821,16 +841,27 @@ pingfederate-engine:
           - pingfederate-engine._defaultDomain_
 
 #############################################################
-# @param    pingdirectory values, PingDirectory overriding global values
+# @param    pingdirectory PingDirectory values, overriding global values
 #
 # @param    pingdirectory.enabled Enable PingDirectory deployment
 # @default  false
 #############################################################
 pingdirectory:
-  # cronjobs run a kubectl exec command to run commands on
-  # a utility sidecar container.
-  # They will also create the necessary ServiceAccount, Role,
-  # and RoleBinding to run the jobs.
+  # @param    pingdirectory.cronjob CronJobs run a kubectl exec command to run commands on
+  # @desc     a utility sidecar container. They will also create the necessary ServiceAccount, Role,
+  # @desc     and RoleBinding to run the jobs
+  #
+  # @param    pingdirectory.cronjob.enabled Enable the PingDirectory CronJob
+  # @default  false
+  #
+  # @param    pingdirectory.cronjob.spec yaml to insert into the created CronJob spec. The jobTemplate
+  # @desc     should not be included. A schedule value must be provided
+  #
+  # @param    pingdirectory.cronjob.image Image to run the Jobs. The image must include kubectl
+  # @default  bitname/kubectl:latest
+  #
+  # @param    pingdirectory.cronjob.args Job arguments
+  # @default  []
   cronjob:
     enabled: false
     spec:
@@ -1354,6 +1385,16 @@ pingdataconsole:
         cpu: 2
         memory: 2Gi
 
+  # @param    pingdataconsole.defaultLogin Default login details for the console
+  #
+  # @param    pingdataconsole.defaultLogin.server.host Default hostname
+  # @default  pingdirectory-cluster
+  #
+  # @param    pingdataconsole.defaultLogin.server.port Default port
+  # @default  636
+  #
+  # @param    pingdataconsole.defaultLogin.username Default username
+  # @default  administrator
   defaultLogin:
     server:
       host: pingdirectory-cluster
@@ -1381,9 +1422,9 @@ pingdataconsole:
           - pingdataconsole._defaultDomain_
 
 #############################################################
-# @param    pd-replication-timing values, overriding global values
+# @param    pd-replication-timing PingDirectory replication timing values, overriding global values
 #
-# @param    pd-replication-timing.enabled Enable PingDirectory replication deployment
+# @param    pd-replication-timing.enabled Enable PingDirectory replication timing deployment
 # @default  false
 #############################################################
 pd-replication-timing:
