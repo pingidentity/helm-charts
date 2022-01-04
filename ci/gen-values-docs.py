@@ -2,7 +2,11 @@
 import sys
 
 # This script generates markdown documentation for the values that are supported in the Helm chart.
-# TODO explain how it is generated (how to update values.yaml for document a given param)
+# 
+# The following types of lines are parsed from the values.yaml file to generate the docs
+# @param name here is the description
+# @desc and the description can continue on a later lines like this
+# @default defaultValue
 
 def fail(message):
     exit("❌ Error: {}".format(message))
