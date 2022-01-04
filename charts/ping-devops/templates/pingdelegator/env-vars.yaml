@@ -1,8 +1,8 @@
-{{- include "pinglib.configmap" (list . "pingdelegator") -}}
+{{- include "pinglib.env-vars" (list . "pingdelegator") -}}
 
 
 
-{{- define "pingdelegator.configmap" -}}
+{{- define "pingdelegator.env-vars" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
 data:

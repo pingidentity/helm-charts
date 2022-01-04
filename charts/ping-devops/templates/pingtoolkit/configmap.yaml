@@ -1,7 +1,7 @@
-{{- include "pinglib.configmap" (list . "pingtoolkit") -}}
+{{- include "pinglib.env-vars" (list . "pingtoolkit") -}}
 
 
-{{- define "pingtoolkit.configmap" -}}
+{{- define "pingtoolkit.env-vars" -}}
 data:
   STARTUP_COMMAND: "tail"
   STARTUP_BACKGROUND_OPTS: "-f /dev/null"

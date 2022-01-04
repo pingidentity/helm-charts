@@ -1,4 +1,4 @@
-{{- define "pinglib.configmap.tpl" -}}
+{{- define "pinglib.env-vars.tpl" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
 apiVersion: v1
@@ -13,8 +13,8 @@ data:
 {{- end -}}
 
 
-{{- define "pinglib.configmap" -}}
-  {{- include "pinglib.merge.templates" (append . "configmap") -}}
+{{- define "pinglib.env-vars" -}}
+  {{- include "pinglib.merge.templates" (append . "env-vars") -}}
 {{- end -}}
 
 
@@ -81,9 +81,9 @@ data:
 {{- end -}}
 
 {{/**********************************************************************
-   ** pinglib.configmap.pingfederate
+   ** pinglib.env-vars.pingfederate
    **
-   ** provide default pingfederate configmap items (same for admin and engine)
+   ** provide default pingfederate env configmap items (same for admin and engine)
 
 
   ingress:
@@ -96,7 +96,7 @@ data:
             serviceName: https
 
    **********************************************************************/}}
-{{- define "pinglib.configmap.pingfederate" -}}
+{{- define "pinglib.env-vars.pingfederate" -}}
 {{- $top := index . 0 }}
 {{- $v := index . 1 }}
 {{- $pingfedAdmin := index $top.Values "pingfederate-admin" }}

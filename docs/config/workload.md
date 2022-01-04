@@ -9,7 +9,8 @@ are created depending on configuration values.
 
 ## Global Section
 
-Default yaml defined in the product workload section.
+Default yaml is defined in the global workload section.
+Individual products override these defaults based on the needed workload.
 
 ```yaml
 global:

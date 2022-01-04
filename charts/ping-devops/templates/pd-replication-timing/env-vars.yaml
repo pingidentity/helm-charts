@@ -1,0 +1,8 @@
+{{- include "pinglib.env-vars" (list . "pd-replication-timing") -}}
+
+
+{{- define "pd-replication-timing.env-vars" -}}
+data:
+  STARTUP_COMMAND: "tail"
+  STARTUP_BACKGROUND_OPTS: "-f /dev/null"
+{{- end -}}

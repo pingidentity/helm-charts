@@ -1,6 +1,6 @@
 # PrivateCert Configuration
 
-Generates a private certificate (.crt and .key) based on the internal hostname of the service
+Generates a private certificate (.crt and .key) based on the internal hostname of the service.
 
 ## Global Section
 
@@ -39,19 +39,18 @@ global:
 Generating an internal certificate is as simple setting the `privateCert.generate` to `true`.
 
 !!! note "Example of generating an internal certificate for pingaccess-engine"
-
-```yaml
-pingaccess-admin:
-  privateCert:
-    generate:true
-```
+    ```yaml
+    pingaccess-admin:
+      privateCert:
+        generate:true
+    ```
 
 This will ultimately create a secret named `{release-productname}-private-cert`
 containing a valid `tls.crt` and `tls.key`.
 
 By default the Issuer of the cert will be the service name
 created by the Helm Chart.  Additionally, the ingress hosts,
-if enabled, will be added to the list of `X509v3 Subject Alternative Name`
+if enabled, will be added to the list of `X509v3 Subject Alternative Name`.
 
 The product image will then create an init container to generate a pkcs12 file that will
 be placed in `/run/secrets/private-keystore/keystore.env` that will be mounted into the

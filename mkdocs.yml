@@ -63,5 +63,6 @@ nav:
       - Vault: "config/vault.md"
       - VolumeMounts: "config/volume-mounts.md"
       - Workload: "config/workload.md"
+      - List of Supported Values: "config/supported-values.md"
   - Examples:
       - Introduction: "examples/index.md"

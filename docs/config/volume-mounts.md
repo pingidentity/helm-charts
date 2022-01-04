@@ -1,6 +1,6 @@
 # VolumeMounts Configuration
 
-Provides support for importing a secret containing license into the container.
+Provides support for mounting secret or configMap volumes on a workload container.
 
 ## Global/Product Section
 
