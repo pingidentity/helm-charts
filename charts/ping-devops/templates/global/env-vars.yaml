@@ -1,6 +1,6 @@
-{{- include "pinglib.configmap" (list . "global") -}}
+{{- include "pinglib.env-vars" (list . "global") -}}
 
-{{- define "global.configmap" -}}
+{{- define "global.env-vars" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
 

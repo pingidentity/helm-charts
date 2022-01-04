@@ -40,8 +40,8 @@ spec:
         {{ include "pinglib.selector.labels" . | nindent 8 }}
       annotations:
         {{ include "pinglib.annotations.vault" $v.vault | nindent 8 }}
-        {{ $prodChecksum := (include (print $top.Template.BasePath "/" $v.name "/configmap.yaml") $top | fromYaml).data | toYaml | sha256sum }}
-        {{ $globChecksum := (include (print $top.Template.BasePath "/global/configmap.yaml") $top | fromYaml).data | toYaml | sha256sum }}
+        {{ $prodChecksum := (include (print $top.Template.BasePath "/" $v.name "/env-vars.yaml") $top | fromYaml).data | toYaml | sha256sum }}
+        {{ $globChecksum := (include (print $top.Template.BasePath "/global/env-vars.yaml") $top | fromYaml).data | toYaml | sha256sum }}
         checksum/config: {{ print $prodChecksum $globChecksum | sha256sum }}
         {{- if $v.workload.annotations }}
         {{- toYaml $v.workload.annotations | nindent 8 }}

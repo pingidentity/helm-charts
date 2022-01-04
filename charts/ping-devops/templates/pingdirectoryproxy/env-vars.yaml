@@ -1,0 +1,6 @@
+{{- include "pinglib.env-vars" (list . "pingdirectoryproxy") -}}
+
+
+{{- define "pingdirectoryproxy.env-vars" -}}
+data:
+{{- end -}}
