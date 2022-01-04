@@ -1,10 +1,10 @@
 # External Image Configuration
 
-Provides a secret used for obtaining evaluation licenses for Ping Identity products.
+Defines an external image for initContainer utilities.
 
 ## Global Section
 
-Default yaml defined in the global license section, followed by definitions for each parameter.
+Default yaml defined in the global externalImage section:
 
 ```yaml
 global:
@@ -17,6 +17,6 @@ global:
 | pingtoolkit               | Registry, image and tag location for pingtoolkit.  Used for primarily during init containers. |
 
 !!! note "Private Repository Location"
-    Often, if your kubernetes cluster doesn't have access to an external docker repository,
+    If your kubernetes cluster doesn't have access to an external docker repository,
     you can download and save the `pingtoolkit` image to your local repo.  Setting this to your
-    local location will force the charts to use that image.
+    local repo will cause the charts to use that image.

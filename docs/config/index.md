@@ -1,7 +1,7 @@
 # Introduction
 
 The charts make heavy use of `Values` yaml files to pass configuration details
-to the Helm Charts.  As defined by [Helm Values Files](https://helm.sh/docs/chart_template_guide/values_files/), values are provided the chart using the following
+to the Helm Charts.  As defined by [Helm Values Files](https://helm.sh/docs/chart_template_guide/values_files/), values are provided to the chart using the following
 mechanisms:
 
 * `values.yaml` file in the chart
@@ -39,12 +39,12 @@ section unless it's overridden in that section.
 and take precedence.
 
 !!! warning
-    Values can only be modified when merged.  They cannot be deleted.  Also, if a values is
+    Values can only be modified when merged.  They cannot be deleted.  Also, if a value is
     set to the boolean true, and merged with a boolean of false, it will always be true.
 
 ## global Section
 
-The `global:` section of the values contains configurations that's available to each
+The `global:` section of the values contains configuration that is available to each
 products section.  If a value is set in globals, that will be available to every product.
 This is very powerful, as you can turn on the ingress for every product by simply setting:
 
@@ -64,20 +64,18 @@ pingaccess:
 pingdirectory:
   ingress:
     enable: true
-
-and so on.
 ```
+and so on.
 
-Much easier to set something in `global:` section, rather an repeat it for each product.
-Now, if you only wanted to enable the ingress for a couple of products, then you could
-leave the default of `global.ingress.enabled=false` and just set that value for those
-product sections.
+It is much easier to set something in the `global:` section, rather than repeat it for each
+product. To enable the ingress for only a few specific products, leave the default of
+`global.ingress.enabled=false` and set that value for those product sections.
 
-## product Sections
+## Product Sections
 
 Just like the `global:` values, each product can have the same values as well as many
-more that are specific to that product/image.  Take the following example in PingDirectory
-where persistent volume information can be provided:
+more that are specific to that product/image.  In the following example,
+persistent volume configuration is provided for PingDirectory:
 
 ```yaml
 pingdirectory:
