@@ -102,7 +102,6 @@ CI_SCRIPTS_DIR="${CI_PROJECT_DIR:-.}/ci_scripts"
 returnCode=""
 
 test -z "${product}" && usage "Providing a product is required"
-! test -d "${CI_PROJECT_DIR}/${product}" && echo "invalid product ${product}" && exit 98
 ! test -d "${CI_PROJECT_DIR}/helm-tests/smoke-tests/${product}/" && echo "${product} has no smoke tests" && exit 98
 
 if test -n "${IS_LOCAL_BUILD}"; then
