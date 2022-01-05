@@ -7,6 +7,11 @@
 #
 test "${VERBOSE}" = "true" && set -x
 
+#gimme jq
+JQ=/usr/bin/jq
+curl -sL https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 > $JQ && chmod +x $JQ
+ls -la $JQ
+
 command_prefix=""
 if ! type shellcheck; then
     if test "$(uname -m)" = "x86_64" && test "$(uname -s)" = "Linux"; then
