@@ -9,7 +9,6 @@
 #
 test "${VERBOSE}" = "true" && set -x
 
-
 # Usage printing function
 usage() {
     test -n "${*}" && echo "${*}"
