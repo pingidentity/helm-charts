@@ -170,6 +170,7 @@ _run_helm_test() {
     local _cmd="${CI_SCRIPTS_DIR}/run_helm_tests.sh \
         --namespace-suffix -${_test_number} \
         --helm-test ${_test_name} \
+        --helm-chart charts/ping-devops/ \
         --helm-set-values global.image.repository=${FOUNDATION_REGISTRY} \
         --helm-set-values global.image.tag=${_test_tag} \
         --helm-set-values global.image.pullPolicy=Always \
