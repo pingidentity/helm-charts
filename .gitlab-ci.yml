@@ -8,7 +8,7 @@ default:
     - ci_scripts/before_script.sh
   services:
     - $PIPELINE_DEPS_REGISTRY/docker:18.09-dind
-  image: alpine #$RUNNER_IMAGE_X86_64
+  image: $RUNNER_IMAGE_X86_64
 ################################################
 # Default variables used by all jobs unless they
 # are overridden by the job
