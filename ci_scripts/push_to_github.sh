@@ -21,7 +21,7 @@ rm -rf ~/tmp/build
 mkdir -p ~/tmp/build && cd ~/tmp/build || exit 9
 
 git clone "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
-cd docker-builds || exit 97
+cd helm-charts || exit 97
 git config user.email "devops_program@pingidentity.com"
 git config user.name "devops_program"
 
