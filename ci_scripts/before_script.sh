@@ -5,10 +5,6 @@ echo "hello from before script"
 pwd
 env | sort
 echo "${USER}"
-#gimme jq
-JQ=/usr/bin/jq
-curl -sL https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 > $JQ && chmod +x $JQ
-ls -la $JQ
 type jq
 type python
 python --version
@@ -19,10 +15,10 @@ aws --version
 #type az
 #az --version
 
-type docker
-docker info
-type docker-compose
-docker-compose version
+# type docker
+# docker info
+# type docker-compose
+# docker-compose version
 type envsubst
 envsubst --version
 
