@@ -6,11 +6,6 @@
 #
 test "${VERBOSE}" = "true" && set -x
 
-#gimme jq
-JQ=/usr/bin/jq
-curl -sL https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 > $JQ && chmod +x $JQ
-ls -la $JQ
-
 #for local, uncomment:
 # CHANGED_FILES=$( git diff --name-only master HEAD )
 # echo "edited files: " $CHANGED_FILES
