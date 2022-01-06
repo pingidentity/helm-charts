@@ -61,6 +61,7 @@ def generateMarkdown(sections):
             if sectionName != "undefined":
                 markdown += "### " + sectionName + "\n"
             markdown += generateTable(sections[sectionName])
+            markdown += "\n"
     
     return markdown
 
