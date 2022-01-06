@@ -23,7 +23,7 @@ global:
   annotations: {}
 
   ############################################################
-  # @param    global.envs Environment variables listed will be 
+  # @param    global.envs Environment variables listed will be
   # @desc     added to the global-env-vars configmap
   # @default  {}
   #
@@ -49,7 +49,7 @@ global:
   # @param    global.ingress.enabled
   # @default  false
   #
-  # @param    global.ingress.addReleaseToHost Add release to host. 
+  # @param    global.ingress.addReleaseToHost Add release to host.
   # @desc     One of `{prepend, append, subdomain, none}`
   # @default  subdomain
   #
@@ -161,20 +161,20 @@ global:
   #
   # NOTE: image.name MUST be set in child chart
   #   Example: image.name: pingfederate
-  # 
+  #
   # @param    global.image.repository Default image repository
   # @default  pingidentity
   #
   # @param    global.image.tag Default image tag
-  # @default  2111.1
-  # 
+  # @default  2112
+  #
   # @param    global.image.pullPolicy Default image pull policy
   # @default  IfNotPresent
   ############################################################
   image:
     repository: pingidentity
     name:
-    tag: "2111.1"
+    tag: "2112"
     pullPolicy: IfNotPresent
 
   ############################################################
@@ -189,7 +189,7 @@ global:
   ############################################################
   externalImage:
     pingtoolkit:
-      image: pingidentity/pingtoolkit:2111.1
+      image: pingidentity/pingtoolkit:2112
       imagePullPolicy: IfNotPresent
       resources:
         limits:
@@ -217,7 +217,7 @@ global:
   #
   # @param    global.services.clusterExternalDNSHostname
   # @desc     Value for the external-dns.alpha.kubernetes.io/hostname annotation
-  # @default  
+  # @default
   #
   # @param    global.services.clusterServiceName If set, then this name will
   # @desc     be used as the cluster service name (i.e clusterService == true).
@@ -346,7 +346,7 @@ global:
       #
       # @param    global.workload.statefulSet.persistentvolume.volumes.volumeName.mountPath
       # @desc     Mount path for the volume
-      # 
+      #
       # @param    global.workload.statefulSet.persistentvolume.volumes.volumeName.persistentVolumeClaim
       # @desc     volumeClaimTemplate
       #
@@ -373,7 +373,7 @@ global:
     # @desc     required for any workloads that volumeMount a pvc (i.e. StatefulSets)
     # @default  fsGroup 0, runAsUser 9031, runAsGroup 0
     #
-    # Note: 
+    # Note:
     ############################################################
     securityContext:
       fsGroup: 0
@@ -766,7 +766,7 @@ pingfederate-engine:
   # @default  75
   #
   # @param    pingfederate-engine.clustering.autoscaling.targetMemoryUtilizationPercentage Target memory utilization
-  # 
+  #
   # @param    pingfederate-engine.clustering.autoscaling.behavior Custom HPA behavior yaml
   # @default  {}
   #
