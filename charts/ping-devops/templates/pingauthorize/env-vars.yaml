@@ -1,0 +1,6 @@
+{{- include "pinglib.env-vars" (list . "pingauthorize") -}}
+
+
+
+{{- define "pingauthorize.env-vars" -}}
+{{- end -}}

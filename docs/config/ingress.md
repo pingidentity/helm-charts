@@ -4,7 +4,7 @@
 
 ## Global Section
 
-Default yaml defined in the global ingress section, followed by definitions for each parameter.
+Default yaml defined in the global ingress section, followed by definitions for each parameter:
 
 ```yaml
 global:
@@ -33,7 +33,7 @@ global:
 
 ## Product Section
 
-Default yaml defined in the product ingress section, followed by definitions for each parameter.
+Default yaml defined in the product ingress section, followed by definitions for each parameter:
 
 ```yaml
   ingress:

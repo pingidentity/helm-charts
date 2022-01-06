@@ -1,0 +1,10 @@
+{{- include "pinglib.env-vars" (list . "pingfederate-admin") -}}
+
+
+{{- define "pingfederate-admin.env-vars" -}}
+{{- $top := index . 0 -}}
+{{- $v := index . 1 -}}
+data:
+  OPERATIONAL_MODE: CLUSTERED_CONSOLE
+{{ include "pinglib.env-vars.pingfederate" . }}
+{{- end -}}

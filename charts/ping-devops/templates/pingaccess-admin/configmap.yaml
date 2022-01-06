@@ -1,8 +1,0 @@
-{{- include "pinglib.configmap" (list . "pingaccess-admin") -}}
-
-
-
-{{- define "pingaccess-admin.configmap" -}}
-data:
-  OPERATIONAL_MODE: CLUSTERED_CONSOLE
-{{- end -}}
