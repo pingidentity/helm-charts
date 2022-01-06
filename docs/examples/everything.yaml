@@ -3,10 +3,6 @@
 #
 ############################################################
 
-global:
-  envs:
-    PING_IDENTITY_ACCEPT_EULA: "YES"
-
 pingaccess-admin:
   enabled: true
   privateCert:
