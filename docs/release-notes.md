@@ -3,7 +3,7 @@
 ## Release 0.8.3 (Jan 6, 2022)
 
 ### Features ###
-- [Generated Values documentation](https://helm.pingidentity.com/config/supported-values)
+- Document [supported values](https://helm.pingidentity.com/config/supported-values)
 ### Issues Resolved ###
 * [Issue #233](https://github.com/pingidentity/helm-charts/issues/235) Ingress - semverCompare now retrieves correct K8 version for applying the correct apiVersion
   ```
