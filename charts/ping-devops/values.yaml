@@ -157,7 +157,7 @@ global:
   # By default the images uses will be indicated by these
   # variables.  An example might look like:
   #
-  #   pingidentity/pingdataconsole:2111 (November, 2021)
+  #   pingidentity/pingdataconsole:2112 (December, 2021)
   #
   # NOTE: image.name MUST be set in child chart
   #   Example: image.name: pingfederate
@@ -553,7 +553,7 @@ sidecars: {}
 # sidecars:
 #   logger:
 #     name: log-container
-#     image: pingidentity/pingtoolkit:2111
+#     image: pingidentity/pingtoolkit:2112
 #     volumeMounts:
 #       - mountPath: /tmp/logs/
 #         name: logger
@@ -570,7 +570,7 @@ initContainers: {}
 # initContainers:
 #   init-example:
 #     name: 01-init
-#     image: pingidentity/pingtoolkit:2111
+#     image: pingidentity/pingtoolkit:2112
 #     command: ['sh', '-c', 'echo "InitContainer 1"']
 
 #############################################################
