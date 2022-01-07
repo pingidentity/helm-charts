@@ -164,7 +164,6 @@ requirePipelineVar() {
     fi
 }
 
-
 if test -n "${PING_IDENTITY_SNAPSHOT}"; then
     #we are in building snapshot
     FOUNDATION_REGISTRY="${PIPELINE_BUILD_REGISTRY}/${PIPELINE_BUILD_REPO}"
