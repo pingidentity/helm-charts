@@ -102,7 +102,6 @@ CI_SCRIPTS_DIR="${CI_PROJECT_DIR:-.}/ci_scripts"
 returnCode=""
 
 test -z "${product}" && usage "Providing a product is required"
-! test -d "${CI_PROJECT_DIR}/${product}" && echo "invalid product ${product}" && exit 98
 ! test -d "${CI_PROJECT_DIR}/helm-tests/smoke-tests/${product}/" && echo "${product} has no smoke tests" && exit 98
 
 if test -n "${IS_LOCAL_BUILD}"; then
@@ -154,24 +153,21 @@ _final() {
 # _run_helm_test
 #
 # Parameters
-#   _test_number - A unique number for each test
 #   _test_name   - Name of the test
-#   _test_tag    - Tag of product to run
 ################################################################################
 _run_helm_test() {
     local _test_number="${1}"
     local _test_name="${2}"
-    local _test_tag="${3}"
     local _smoke_file="${_tmpDir}/s${_test_number}"
 
-    banner "Running with image  ${FOUNDATION_REGISTRY}/$(basename "${_test_name}"):${_test_tag}"
+    banner "Running with image  ${FOUNDATION_REGISTRY}/$(basename "${_test_name}")"
 
     #shellcheck disable=SC2086
     local _cmd="${CI_SCRIPTS_DIR}/run_helm_tests.sh \
         --namespace-suffix -${_test_number} \
         --helm-test ${_test_name} \
+        --helm-chart charts/ping-devops/ \
         --helm-set-values global.image.repository=${FOUNDATION_REGISTRY} \
-        --helm-set-values global.image.tag=${_test_tag} \
         --helm-set-values global.image.pullPolicy=Always \
         --helm-set-values testFramework.finalStep.image=${DEPS_REGISTRY}busybox \
         ${NS_OPT}"
@@ -243,82 +239,15 @@ if test -n "${_image_tag_override}"; then
 
     _pids+=(["${_smoke_cnt}"]="$!")
 else
+    _smoke_cnt=1
     #
-    # VERSIONs
+    # Running helm test
     #
-    # If a list of versions are passed, use those, otherwise
-    # get a list of all versions to build for the product from the versions.json file
-    #
-    if test -z "${versions}" && test -f "${CI_PROJECT_DIR}/${product}"/versions.json; then
-        versions=$(_getAllVersionsToBuildForProduct "${product}")
-    fi
+    _run_helm_test "${_smoke_cnt}" "${_test}" &
 
-    for _version in ${versions}; do
-        #
-        # SHIMs
-        #
-        # If a list of shims are passed, use those, otherwise
-        # get a list of all shims to build for the product from the versions.json file
-        #
-        test "${_version}" = "none" && _version=""
-        if test -z "${shimList}"; then
-            shimList=$(_getShimsToBuildForProductVersion "${product}" "${_version}")
-        fi
-
-        for _shim in ${shimList}; do
-            test "${_shim}" = "none" && _shim=""
-            # get the long tag for the shim
-            _shimTag=$(_getLongTag "${_shim}")
-
-            #
-            # JVMs
-            #
-            # If a list of jvms are passed, use those, otherwise
-            # get a list of all jvms to build for the product/version from the versions.json file
-            #
-            _jvms=$(_getJVMsToBuildForProductVersionShim "${product}" "${_version}" "${_shim}")
-
-            for _jvm in ${_jvms}; do
-                if test -z "${jvmList}"; then
-                    _smoke_cnt=$((_smoke_cnt + 1))
-                else
-                    listContainsValue "${jvmList}" "${_jvm}" || continue
-                    _smoke_cnt=$((_smoke_cnt + 1))
-                    echo "Found ${_jvm} in ${jvmList}...incremented count to ${_smoke_cnt}"
-                fi
-                test "${_jvm}" = "none" && _jvm=""
-
-                #
-                # Construct the ultimate tag.  Typically this will look like:
-                #          version-shim--------jvm--ciTag------------arch
-                #            \/     \/          \/   \/               \/
-                # Example: 8.2.0.5-alpine_3.14-al11-branch-name-4fa1-x86_64
-                #
-                _tag="${_version}"
-                test -n "${_shimTag}" && _tag="${_tag:+${_tag}-}${_shimTag}"
-                test -n "${_jvm}" && _tag="${_tag:+${_tag}-}${_jvm}"
-                # CI_TAG is assigned when we source ci_tools.lib.sh
-                test -n "${CI_TAG}" && _tag="${_tag:+${_tag}-}${CI_TAG}"
-                _tag="${_tag}-${ARCH}"
-
-                #
-                # Running helm test in background.  This will allow for multiple
-                # smoke tests to be run in the cluster making optimal use of
-                # cluster resources and running in parallel
-                #
-                _run_helm_test "${_smoke_cnt}" "${_test}" "${_tag}" &
-
-                #
-                # Capture the PID of the running function, so we can later wait for
-                # the test to complete
-                #
-                _pids+=(["${_smoke_cnt}"]="$!")
-
-                # Throttle a bit so we don't thrash the cluster with traffic
-                sleep 2
-            done
-        done
-    done
+    _pids+=(["${_smoke_cnt}"]="$!")
+    # Throttle a bit so we don't thrash the cluster with traffic
+    sleep 2
 fi
 
 #

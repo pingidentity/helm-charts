@@ -163,3 +163,132 @@ requirePipelineVar() {
         exit 1
     fi
 }
+
+if test -n "${PING_IDENTITY_SNAPSHOT}"; then
+    #we are in building snapshot
+    FOUNDATION_REGISTRY="${PIPELINE_BUILD_REGISTRY}/${PIPELINE_BUILD_REPO}"
+    # we terminate to DEPS registry with a slash so it can be omitted to revert to implicit
+    DEPS_REGISTRY="${PIPELINE_DEPS_REGISTRY}/"
+
+    banner "CI PIPELINE using ${PIPELINE_BUILD_REGISTRY_VENDOR} - ${FOUNDATION_REGISTRY}"
+
+    #
+    # setup the docker config.json.
+    #
+    setupDockerConfigJson
+
+    case "${PIPELINE_BUILD_REGISTRY_VENDOR}" in
+        aws)
+            # shellcheck source=./aws_tools.lib.sh
+            . "${CI_SCRIPTS_DIR}/aws_tools.lib.sh"
+            ;;
+        google)
+            # shellcheck source=./google_tools.lib.sh
+            . "${CI_SCRIPTS_DIR}/google_tools.lib.sh"
+            ;;
+        azure)
+            echo_red "azure not implemented yet"
+            exit 1
+            # shellcheck source=./azure_tools.lib.sh
+            . "${CI_SCRIPTS_DIR}/azure_tools.lib.sh"
+            ;;
+    esac
+
+    GIT_REV_SHORT=$(date '+%H%M')
+    GIT_REV_LONG=$(date '+%s')
+    CI_TAG="$(date '+%Y%m%d')"
+elif test -n "${CI_COMMIT_REF_NAME}"; then
+    #we are in CI pipeline
+    FOUNDATION_REGISTRY="${PIPELINE_BUILD_REGISTRY}/${PIPELINE_BUILD_REPO}"
+    # we terminate to DEPS registry with a slash so it can be omitted to revert to implicit
+    DEPS_REGISTRY="${PIPELINE_DEPS_REGISTRY}/"
+
+    banner "CI PIPELINE using ${PIPELINE_BUILD_REGISTRY_VENDOR} - ${FOUNDATION_REGISTRY}"
+
+    #
+    # setup the docker config.json.
+    #
+    setupDockerConfigJson
+
+    case "${PIPELINE_BUILD_REGISTRY_VENDOR}" in
+        aws)
+            # shellcheck source=./aws_tools.lib.sh
+            . "${CI_SCRIPTS_DIR}/aws_tools.lib.sh"
+            ;;
+        google)
+            # shellcheck source=./google_tools.lib.sh
+            . "${CI_SCRIPTS_DIR}/google_tools.lib.sh"
+            ;;
+        azure)
+            echo_red "azure not implemented yet"
+            exit 1
+            # shellcheck source=./azure_tools.lib.sh
+            . "${CI_SCRIPTS_DIR}/azure_tools.lib.sh"
+            ;;
+    esac
+
+    #
+    # setup the docker trust material.
+    #
+    requirePipelineVar DOCKER_TRUST_PRIVATE_KEY
+    requirePipelineVar DOCKER_TRUST_PRIVATE_KEY_SIGNER
+    requirePipelineVar VAULT_ADDR
+    requirePipelineVar CI_JOB_JWT
+
+    #Temp file location for docker private keys retrieved from Vault
+    keys_temp_file=$(mktemp)
+
+    #Retreive the vault token to authenticate for vault secrets
+    VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=pingdevops jwt="${CI_JOB_JWT}")"
+    test -z "${VAULT_TOKEN}" && VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=pingdevops-tag jwt="${CI_JOB_JWT}")"
+    test -z "${VAULT_TOKEN}" && echo "Error: Vault token was not retrieved" && exit 1
+    export VAULT_TOKEN
+
+    #Retreive the vault secret
+    vault kv get -field=Signing_Key_Base64 pingdevops/Base64_key > "${keys_temp_file}"
+    test $? -ne 0 && echo "Error: Failed to retrieve private docker keys from vault" && exit 1
+
+    #Use private key file with DockerHub
+    mkdir -p "${docker_config_hub_dir}/trust/private"
+    (cd "${docker_config_hub_dir}/trust/private" && base64 --decode "${keys_temp_file}" | tar -xz)
+    docker --config "${docker_config_hub_dir}" trust key load "${docker_config_hub_dir}/trust/private/${DOCKER_TRUST_PRIVATE_KEY}" --name "${DOCKER_TRUST_PRIVATE_KEY_SIGNER}"
+
+    #Use private key file with Artifactory
+    mkdir -p "${docker_config_default_dir}/trust/private"
+    (cd "${docker_config_default_dir}/trust/private" && base64 --decode "${keys_temp_file}" | tar -xz)
+    docker --config "${docker_config_default_dir}" trust key load "${docker_config_default_dir}/trust/private/${DOCKER_TRUST_PRIVATE_KEY}" --name "${DOCKER_TRUST_PRIVATE_KEY_SIGNER}"
+
+    rm -f "${keys_temp_file}"
+
+    #Provide Root CA Certificate for Artifactory Notary Server
+    requirePipelineFile ARTIFACTORY_ROOT_CA_FILE
+    echo "Using root CA certificate file'${ARTIFACTORY_ROOT_CA_FILE}'"
+    cp "${ARTIFACTORY_ROOT_CA_FILE}" "/usr/local/share/ca-certificates/root-ca.crt"
+    update-ca-certificates
+
+    requirePipelineVar ARTIFACTORY_NOTARY_SERVER_IP
+    echo "Using notary server IP value'${ARTIFACTORY_NOTARY_SERVER_IP}'"
+    echo "${ARTIFACTORY_NOTARY_SERVER_IP} notaryserver" >> /etc/hosts
+
+    GIT_REV_SHORT=$(git rev-parse --short=4 "$CI_COMMIT_SHA")
+    GIT_REV_LONG=$(git rev-parse "$CI_COMMIT_SHA")
+    CI_TAG="${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHORT_SHA}"
+else
+    #we are on local
+    IS_LOCAL_BUILD=true
+    export IS_LOCAL_BUILD
+    FOUNDATION_REGISTRY="pingidentity"
+    DEPS_REGISTRY="${DEPS_REGISTRY_OVERRIDE}"
+    gitBranch=$(git rev-parse --abbrev-ref HEAD)
+    GIT_REV_SHORT=$(git rev-parse --short=4 HEAD)
+    GIT_REV_LONG=$(git rev-parse HEAD)
+    CI_TAG="${gitBranch}-${GIT_REV_SHORT}"
+fi
+ARCH="$(uname -m)"
+export ARCH
+export FOUNDATION_REGISTRY
+export DEPS_REGISTRY
+export GIT_REV_SHORT
+export GIT_REV_LONG
+export gitBranch
+export CI_TAG
