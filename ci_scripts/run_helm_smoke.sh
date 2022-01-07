@@ -16,13 +16,6 @@ Usage: ${0} {options}
     where {options} include:
     -p, --product
         The name of the product for which to build a docker image
-    -s, --shim
-        the name of the operating system for which to build a docker image
-    -j, --jvm
-        the id of the JVM to use to run the tests
-    -v, --version
-        the version of the product for which to build a docker image
-        this setting overrides the versions in the version file of the target product
     --fast-fail
         verbose docker build not using docker buildkit
     --image-tag-override {tag}
@@ -63,21 +56,6 @@ while test -n "${1}"; do
             test -z "${2}" && usage "You must provide a product to build if you specify the ${1} option"
             shift
             product="${1}"
-            ;;
-        -s | --shim)
-            test -z "${2}" && usage "You must provide an OS shim if you specify the ${1} option"
-            shift
-            shimList="${shimList:+${shimList} }${1}"
-            ;;
-        -j | --jvm)
-            test -z "${2}" && usage "You must provide a JVM id if you specify the ${1} option"
-            shift
-            jvmList="${jvmList:+${jvmList} }${1}"
-            ;;
-        -v | --version)
-            test -z "${2}" && usage "You must provide a version to build if you specify the ${1} option"
-            shift
-            versions="${1}"
             ;;
         --image-tag-override)
             test -z "${2}" && usage "You must specify an image-tag-override ${1} option (i.e. 2105)"

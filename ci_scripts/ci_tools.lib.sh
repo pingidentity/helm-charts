@@ -164,6 +164,43 @@ requirePipelineVar() {
     fi
 }
 
+################################################################################
+# This function does the following:
+# 1) Perform a docker login to docker hub.  This is required to properly authenticate and
+# sign images with docker as well as avoid rate limiting from Dockers new policies.
+# 2) Bring in the docker config.json for all other registries. Provides instructions to docker on how to
+# authenticate to docker registries.
+################################################################################
+setupDockerConfigJson() {
+    ####### SET UP DOCKERHUB #######
+    echo "Logging Into DockerHub..."
+    requirePipelineVar DOCKER_USERNAME
+    requirePipelineVar DOCKER_PASSWORD
+    requirePipelineVar DOCKER_HUB_REGISTRY
+    mkdir -p "${docker_config_hub_dir}"
+
+    # login to docker.io to create the docker hub config.json
+    docker --config "${docker_config_hub_dir}" login --username "${DOCKER_USERNAME}" --password "${DOCKER_PASSWORD}"
+    test ${?} -ne 0 && echo_red "Error: Failed to login to DockerHub in ci_tools.sh" && exit 1
+
+    ####### SET UP ALL OTHER REGISTRIES #######
+    # Ensure that the pipe-line provides the following variables/files
+    requirePipelineVar PIPELINE_BUILD_REGISTRY_VENDOR
+    requirePipelineVar PIPELINE_BUILD_REGISTRY
+    requirePipelineVar PIPELINE_BUILD_REPO
+    requirePipelineVar ARTIFACTORY_REGISTRY
+    requirePipelineVar FEDRAMP_REGISTRY
+    requirePipelineFile DOCKER_CONFIG_JSON
+
+    echo "Using Docker config.json '${DOCKER_CONFIG_JSON}'"
+    mkdir -p "${docker_config_default_dir}"
+    cp "${DOCKER_CONFIG_JSON}" "${docker_config_default_dir}/config.json"
+}
+
+#Define docker config file locations based on different image registry providers
+docker_config_hub_dir="/root/.docker-hub"
+docker_config_default_dir="/root/.docker"
+
 if test -n "${PING_IDENTITY_SNAPSHOT}"; then
     #we are in building snapshot
     FOUNDATION_REGISTRY="${PIPELINE_BUILD_REGISTRY}/${PIPELINE_BUILD_REPO}"
