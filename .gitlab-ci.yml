@@ -93,7 +93,7 @@ intel.i.shfmt:
 intel.t.pingaccess:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingaccess --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingaccess --helm-chart charts/ping-devops/
   retry: 2
 
 arm.t.pingaccess:
@@ -102,13 +102,13 @@ arm.t.pingaccess:
   tags:
     - platform=aarch64
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingaccess --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingaccess --helm-chart charts/ping-devops/
   retry: 2
 
 intel.t.pingauthorize:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingauthorize --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingauthorize --helm-chart charts/ping-devops/
   retry: 2
 
 arm.t.pingauthorize:
@@ -117,13 +117,13 @@ arm.t.pingauthorize:
   tags:
     - platform=aarch64
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingauthorize --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingauthorize --helm-chart charts/ping-devops/
   retry: 2
 
 intel.t.pingauthorizepap:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingauthorizepap --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingauthorizepap --helm-chart charts/ping-devops/
   retry: 2
 
 arm.t.pingauthorizepap:
@@ -132,13 +132,13 @@ arm.t.pingauthorizepap:
   tags:
     - platform=aarch64
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingauthorizepap --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingauthorizepap --helm-chart charts/ping-devops/
   retry: 2
 
 intel.t.pingdataconsole:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingdataconsole --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingdataconsole --helm-chart charts/ping-devops/
   retry: 2
 
 arm.t.pingdataconsole:
@@ -147,13 +147,13 @@ arm.t.pingdataconsole:
   tags:
     - platform=aarch64
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingdataconsole --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingdataconsole --helm-chart charts/ping-devops/
   retry: 2
 
 intel.t.pingdatagovernance:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingdatagovernance --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingdatagovernance --helm-chart charts/ping-devops/
   retry: 2
 
 arm.t.pingdatagovernance:
@@ -162,13 +162,13 @@ arm.t.pingdatagovernance:
   tags:
     - platform=aarch64
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingdatagovernance --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingdatagovernance --helm-chart charts/ping-devops/
   retry: 2
 
 intel.t.pingdatagovernancepap:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingdatagovernancepap --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingdatagovernancepap --helm-chart charts/ping-devops/
   retry: 2
 
 arm.t.pingdatagovernancepap:
@@ -177,13 +177,13 @@ arm.t.pingdatagovernancepap:
   tags:
     - platform=aarch64
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingdatagovernancepap --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingdatagovernancepap --helm-chart charts/ping-devops/
   retry: 2
 
 intel.t.pingdatasync:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingdatasync --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingdatasync --helm-chart charts/ping-devops/
   retry: 2
 
 arm.t.pingdatasync:
@@ -192,13 +192,13 @@ arm.t.pingdatasync:
   tags:
     - platform=aarch64
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingdatasync --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingdatasync --helm-chart charts/ping-devops/
   retry: 2
 
 intel.t.pingdelegator:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingdelegator --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingdelegator --helm-chart charts/ping-devops/
   retry: 2
 
 arm.t.pingdelegator:
@@ -207,13 +207,13 @@ arm.t.pingdelegator:
   tags:
     - platform=aarch64
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingdelegator --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingdelegator --helm-chart charts/ping-devops/
   retry: 2
 
 intel.t.pingdirectory:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingdirectory --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingdirectory --helm-chart charts/ping-devops/
   retry: 2
 
 arm.t.pingdirectory:
@@ -222,13 +222,13 @@ arm.t.pingdirectory:
   tags:
     - platform=aarch64
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingdirectory --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingdirectory --helm-chart charts/ping-devops/
   retry: 2
 
 intel.t.pingdirectoryproxy:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingdirectoryproxy --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingdirectoryproxy --helm-chart charts/ping-devops/
   retry: 2
 
 arm.t.pingdirectoryproxy:
@@ -237,13 +237,13 @@ arm.t.pingdirectoryproxy:
   tags:
     - platform=aarch64
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingdirectoryproxy --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingdirectoryproxy --helm-chart charts/ping-devops/
   retry: 2
 
 intel.t.pingfederate:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingfederate --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingfederate --helm-chart charts/ping-devops/
   retry: 2
 
 arm.t.pingfederate:
@@ -252,13 +252,13 @@ arm.t.pingfederate:
   tags:
     - platform=aarch64
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingfederate --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingfederate --helm-chart charts/ping-devops/
   retry: 2
 
 intel.t.pingtoolkit:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingtoolkit --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingtoolkit --helm-chart charts/ping-devops/
   retry: 2
 
 arm.t.pingtoolkit:
@@ -267,9 +267,9 @@ arm.t.pingtoolkit:
   tags:
     - platform=aarch64
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingtoolkit --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_tests.sh --helm-test ./smoke-tests/pingtoolkit --helm-chart charts/ping-devops/
   retry: 2
-  
+
 ################################################
 #   _____       _     _ _     _
 #  |  __ \     | |   | (_)   | |
