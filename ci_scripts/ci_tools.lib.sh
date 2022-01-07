@@ -11,6 +11,162 @@ set -o history
 HISTTIMEFORMAT='%T'
 export HISTTIMEFORMAT
 
+# get all versions (from versions.json) for a product to build
+_getAllVersionsToBuildForProduct() {
+    _jvmFilter=$(_getJVMFilterArray)
+    _file="${CI_PROJECT_DIR}/${1}/versions.json"
+    test -f "${_file}" && jq -r '.|.versions[]|[. as $v |.shims[]|.jvms[]|select(.build==true)|select(.jvm as $j|'"${_jvmFilter}"'|index($j))|$v.version]|unique|.[]' "${_file}"
+}
+
+# get all versions (from versions.json) for a product to deploy
+_getAllVersionsToDeployForProduct() {
+    _jvmFilter=$(_getJVMFilterArray)
+    _file="${CI_PROJECT_DIR}/${1}/versions.json"
+    test -f "${_file}" && jq -r '.|.versions[]|[. as $v |.shims[]|.jvms[]|select(.deploy==true)|select(.jvm as $j|'"${_jvmFilter}"'|index($j))|$v.version]|unique|.[]' "${_file}"
+}
+
+# get the latest (from versions.json) version of a product to build
+_getLatestVersionForProduct() {
+    _file="${CI_PROJECT_DIR}/${1}/versions.json"
+    test -f "${_file}" && jq -r 'if (.latest) then .latest else "" end' "${_file}"
+}
+
+# get the default shim (from versions.json) for a product version
+_getDefaultShimForProductVersion() {
+    _file="${CI_PROJECT_DIR}/${1}/versions.json"
+    test -f "${_file}" && jq -r '.|.versions[]| select(.version == "'"${2}"'") | .preferredShim' "${_file}"
+}
+
+# get all the shims (from versions.json) for a product version
+_getShimsToBuildForProductVersion() {
+    _jvmFilter=$(_getJVMFilterArray)
+    _file="${CI_PROJECT_DIR}/${1}/versions.json"
+    test -f "${_file}" && jq -r '[.|.versions[]| select(.version == "'"${2}"'")|.shims[]|. as $v|.jvms[]|select(.build==true)|select(.jvm as $j|'"${_jvmFilter}"'|index($j))|$v.shim]|unique|.[]' "${_file}"
+}
+
+# get all shims for JVM
+_getShimsToBuildForJVM() {
+    _file="${CI_PROJECT_DIR}/pingjvm/versions.json"
+    test -f "${_file}" && jq -r '[.|.versions[]|select(.id=="'"${1}"'")|.shims[]]|unique|.[]' "${_file}"
+}
+
+# get all the shims (from versions.json) for a product version
+_getShimsToDeployForProductVersion() {
+    _file="${CI_PROJECT_DIR}/${1}/versions.json"
+    test -f "${_file}" && jq -r '[.|.versions[]| select(.version == "'"${2}"'")|.shims[]|. as $v|.jvms[]|select(.deploy==true)|$v.shim]|unique|.[]' "${_file}"
+}
+
+# get all the shims (from versions.json) for a product
+_getAllShimsForProduct() {
+    _file="${CI_PROJECT_DIR}/${1}/versions.json"
+    test -f "${_file}" && jq -r '[.|.versions[]|.shims[]|.shim]|unique|.[]' "${_file}"
+}
+
+# get all the jvms (from versions.json) for a product to build
+_getJVMsToBuildForProductVersionShim() {
+    _jvmFilter=$(_getJVMFilterArray)
+    _file="${CI_PROJECT_DIR}/${1}/versions.json"
+    test -f "${_file}" && jq -r '.|.versions[]|select(.version=="'"${2}"'").shims[]|select(.shim=="'"${3}"'")|.jvms[]|select(.build==true)|select(.jvm as $j|'"${_jvmFilter}"'|index($j))|.jvm' "${_file}"
+}
+
+_getJVMsForArch() {
+    # treat as a singleton
+    if test -z "${_JVMS}"; then
+        _file="${CI_PROJECT_DIR}/pingjvm/versions.json"
+        _JVMS=$(jq -r '[.versions[]|select(.archs[]|contains("'"${ARCH}"'"))|.id]|.[]' "${_file}")
+        export _JVMS
+    fi
+    printf "%s" "${_JVMS}"
+}
+
+_getAllArchsForJVM() {
+    _file="${CI_PROJECT_DIR}/pingjvm/versions.json"
+    test -f "${_file}" && jq -r '.versions[]|select(.id == "'"${1}"'")|.archs|.[]' "${_file}"
+}
+
+_isJVMMultiArch() {
+    _file="${CI_PROJECT_DIR}/pingjvm/versions.json"
+    if test -f "${_file}"; then
+        _numArchs=$(jq -r '.versions[]|select(.id == "'"${1}"'")|.archs|length' "${_file}")
+        test "${_numArchs}" -gt 1 && return 0
+    fi
+    return 1
+}
+
+_getJVMFilterArray() {
+    # treat as a singleton
+    if test -z "${_JVM_FILTER_ARRAY}"; then
+        for _j in $(_getJVMsForArch); do
+            # shellcheck disable=SC2089
+            _v=${_v}${_v:+,}'"'${_j}'"'
+        done
+        _JVM_FILTER_ARRAY="[${_v}]"
+        # shellcheck disable=SC2090
+        export _JVM_FILTER_ARRAY
+    fi
+    printf "%s" "${_JVM_FILTER_ARRAY}"
+}
+
+_filterJVMForArch() {
+    _file="${CI_PROJECT_DIR}/pingjvm/versions.json"
+    test -f "${_file}" && jq -r '[.versions[]|select(.id=="'"${1}"'")|select(.archs[]|contains("'"${ARCH}"'"))|.id]|.[]' "${_file}"
+}
+
+# get all the jvms (from versions.json) for a product to deploy
+_getJVMsToDeployForProductVersionShim() {
+    _jvmFilter=$(_getJVMFilterArray)
+    _file="${CI_PROJECT_DIR}/${1}/versions.json"
+    test -f "${_file}" && jq -r '.|.versions[]|select(.version=="'"${2}"'").shims[]|select(.shim=="'"${3}"'")|.jvms[]|select(.deploy==true)|select(.jvm as $j|'"${_jvmFilter}"'|index($j))|.jvm' "${_file}"
+}
+
+# get the preferred (from versions.json) for a product, version and shim
+_getPreferredJVMForProductVersionShim() {
+    _file="${CI_PROJECT_DIR}/${1}/versions.json"
+    test -f "${_file}" && jq -r '.|.versions[]|select(.version=="'"${2}"'").shims[]|select(.shim=="'"${3}"'")|.preferredJVM' "${_file}"
+}
+
+# get the target image registries for a product, version, shim, and jvm
+_getTargetRegistriesForProductVersionShimJVM() {
+    _file="${CI_PROJECT_DIR}/${1}/versions.json"
+    test -f "${_file}" && jq -r '.|.versions[]|select(.version=="'"${2}"'").shims[]|select(.shim=="'"${3}"'")|.jvms[]|select(.jvm=="'"${4}"'")|.registries[]' "${_file}"
+}
+
+# get the jvm versions (from versions.json) for an ID
+_getJVMVersionForID() {
+    _file="${CI_PROJECT_DIR}/pingjvm/versions.json"
+    test -f "${_file}" && jq -r '.|.versions[]|select(.id=="'"${1}"'")|.version' "${_file}"
+}
+
+# get the jvm IDs (from versions.json) for a shim
+_getAllJVMIDsForShim() {
+    _file="${CI_PROJECT_DIR}/pingjvm/versions.json"
+    test -f "${_file}" && jq -r '[.versions[]|select(.archs[]|contains("'"${ARCH}"'"))|select(.shims[]|contains("'"${1}"'"))|.id]|unique|.[]' "${_file}"
+}
+
+# get the jvms (from versions.json) to build for a shim
+_getAllJVMsToBuildForShim() {
+    for _jvm in $(find "${CI_PROJECT_DIR}" -type f -not -path "${CI_PROJECT_DIR}/pingjvm/*" -name versions.json -exec jq -r '.|.versions[]|.shims[]|select(.shim=="'"${1}"'")|.jvms[]|select(.build==true)|.jvm' {} + 2> /dev/null | sort | uniq); do
+        _filterJVMForArch "${_jvm}"
+    done
+}
+
+# get the jvms (from versions.json) to build
+_getAllJVMsToBuild() {
+    find "${CI_PROJECT_DIR}" -type f -not -path "${CI_PROJECT_DIR}/pingjvm/*" -name versions.json -exec jq -r '.|.versions[]|.shims[]|.jvms[]|select(.build==true)|.jvm' {} + 2> /dev/null | sort | uniq
+}
+
+# get the jvm images (from versions.json) for a shim ID
+_getJVMImageForShimID() {
+    _file="${CI_PROJECT_DIR}/pingjvm/versions.json"
+    test -f "${_file}" && jq -r '[.versions[]|select(.shims[]|contains("'"${1}"'"))| select(.id=="'"${2}"'")|.from]|unique|.[]' "${_file}"
+}
+
+# get the dependencies (from versions.json) for product version
+_getDependenciesForProductVersion() {
+    _file="${CI_PROJECT_DIR}/${1}/versions.json"
+    test -f "${_file}" && jq -jr '.versions[]|select( .version == "'"${2}"'" )|if (.dependencies) then .dependencies[]|.product," ",.version,"\n" else "" end' "${_file}" | awk 'BEGIN{i=0} {print "--build-arg DEPENDENCY_"i"_PRODUCT="$1" --build-arg DEPENDENCY_"i"_VERSION="$2; i++}'
+}
+
 # get the long tag
 _getLongTag() {
     echo "${1}" | awk '{gsub(/[:\/]/,"_");print}'
@@ -19,6 +175,18 @@ _getLongTag() {
 # get the short tag
 _getShortTag() {
     echo "${1}" | awk '{gsub(/:.*/,"");print}'
+}
+
+# get the the shims (from versions.json)
+_getAllShims() {
+    find "${CI_PROJECT_DIR}" -type f -not -path "${CI_PROJECT_DIR}/pingjvm/*" -name versions.json -exec jq -r '[.|.versions[]|.shims[]|.shim]|unique|.[]' {} + 2> /dev/null | sort | uniq
+}
+
+# returns the license version from the full product version
+#
+# Example: 8.1.0.1 --> 8.1
+_getLicenseVersion() {
+    echo "${1}" | cut -d. -f1,2
 }
 
 ###############################################################################
@@ -141,6 +309,54 @@ _curl() {
 }
 
 ################################################################################
+# get the latest snapshot version for a product
+#
+# currently only available for the Ping Data products
+################################################################################
+_getLatestSnapshotVersionForProduct() {
+    _baseURL="${SNAPSHOT_NEXUS_URL}"
+    _basePath="com/unboundid/product/ds"
+    case "${1}" in
+        pingdirectory | pingdataconsole)
+            _product="directory"
+            ;;
+        pingdirectoryproxy)
+            _product="proxy"
+            ;;
+        pingdatasync)
+            _product="sync"
+            ;;
+        pingauthorize)
+            _product="broker"
+            ;;
+        pingauthorizepap)
+            _product="symphonic-pap-packaged"
+            _basePath="com/pingidentity/pd/governance"
+            ;;
+        *) ;;
+
+    esac
+    case "${1}" in
+        pingdataconsole | pingdatasync | pingdirectory | pingdirectoryproxy | pingauthorize | pingauthorizepap)
+            _curl "${_baseURL}/${_basePath}/${_product}/maven-metadata.xml" | xmllint --xpath 'string(/metadata/versioning/latest)' -
+            ;;
+        pingdelegator)
+            _curl "${SNAPSHOT_DELEGATOR_URL}/maven-metadata.xml" | xmllint --xpath 'string(/metadata/versioning/snapshotVersions/snapshotVersion/value)' -
+            ;;
+        pingcentral)
+            _curl "${SNAPSHOT_ARTIFACTORY_URL}/pass/pass-common/maven-metadata.xml" | sed -e 's/xmlns=".*"//g' | xmllint --xpath 'string(/metadata/versioning/latest)' -
+            ;;
+        pingfederate)
+            _curl "${SNAPSHOT_BLD_FED_URL}/artifact/pf-server/HuronPeak/assembly/pom.xml" | sed -e 's/xmlns=".*"//g' | xmllint --xpath 'string(/project/version)' -
+            ;;
+        pingaccess)
+            _curl "${SNAPSHOT_ARTIFACTORY_URL}/products/pingaccess/maven-metadata.xml" | sed -e 's/xmlns=".*"//g' | xmllint --xpath 'string(/metadata/versioning/latest)' -
+            ;;
+    esac
+    return ${?}
+}
+
+################################################################################
 # Verify that the file is found.  If not, then error/exit
 ################################################################################
 requirePipelineFile() {
@@ -164,16 +380,163 @@ requirePipelineVar() {
     fi
 }
 
-#we are on local
-IS_LOCAL_BUILD=true
-export IS_LOCAL_BUILD
-FOUNDATION_REGISTRY="pingidentity"
-DEPS_REGISTRY="${DEPS_REGISTRY_OVERRIDE}"
-gitBranch=$(git rev-parse --abbrev-ref HEAD)
-GIT_REV_SHORT=$(git rev-parse --short=4 HEAD)
-GIT_REV_LONG=$(git rev-parse HEAD)
-CI_TAG="${gitBranch}-${GIT_REV_SHORT}"
+################################################################################
+# This function does the following:
+# 1) Perform a docker login to docker hub.  This is required to properly authenticate and
+# sign images with docker as well as avoid rate limiting from Dockers new policies.
+# 2) Bring in the docker config.json for all other registries. Provides instructions to docker on how to
+# authenticate to docker registries.
+################################################################################
+setupDockerConfigJson() {
+    ####### SET UP DOCKERHUB #######
+    echo "Logging Into DockerHub..."
+    requirePipelineVar DOCKER_USERNAME
+    requirePipelineVar DOCKER_PASSWORD
+    requirePipelineVar DOCKER_HUB_REGISTRY
+    mkdir -p "${docker_config_hub_dir}"
 
+    # login to docker.io to create the docker hub config.json
+    docker --config "${docker_config_hub_dir}" login --username "${DOCKER_USERNAME}" --password "${DOCKER_PASSWORD}"
+    test ${?} -ne 0 && echo_red "Error: Failed to login to DockerHub in ci_tools.sh" && exit 1
+
+    ####### SET UP ALL OTHER REGISTRIES #######
+    # Ensure that the pipe-line provides the following variables/files
+    requirePipelineVar PIPELINE_BUILD_REGISTRY_VENDOR
+    requirePipelineVar PIPELINE_BUILD_REGISTRY
+    requirePipelineVar PIPELINE_BUILD_REPO
+    requirePipelineVar ARTIFACTORY_REGISTRY
+    requirePipelineVar FEDRAMP_REGISTRY
+    requirePipelineFile DOCKER_CONFIG_JSON
+
+    echo "Using Docker config.json '${DOCKER_CONFIG_JSON}'"
+    mkdir -p "${docker_config_default_dir}"
+    cp "${DOCKER_CONFIG_JSON}" "${docker_config_default_dir}/config.json"
+}
+
+#Define docker config file locations based on different image registry providers
+docker_config_hub_dir="/root/.docker-hub"
+docker_config_default_dir="/root/.docker"
+
+if test -n "${PING_IDENTITY_SNAPSHOT}"; then
+    #we are in building snapshot
+    FOUNDATION_REGISTRY="${PIPELINE_BUILD_REGISTRY}/${PIPELINE_BUILD_REPO}"
+    # we terminate to DEPS registry with a slash so it can be omitted to revert to implicit
+    DEPS_REGISTRY="${PIPELINE_DEPS_REGISTRY}/"
+
+    banner "CI PIPELINE using ${PIPELINE_BUILD_REGISTRY_VENDOR} - ${FOUNDATION_REGISTRY}"
+
+    #
+    # setup the docker config.json.
+    #
+    setupDockerConfigJson
+
+    case "${PIPELINE_BUILD_REGISTRY_VENDOR}" in
+        aws)
+            # shellcheck source=./aws_tools.lib.sh
+            . "${CI_SCRIPTS_DIR}/aws_tools.lib.sh"
+            ;;
+        google)
+            # shellcheck source=./google_tools.lib.sh
+            . "${CI_SCRIPTS_DIR}/google_tools.lib.sh"
+            ;;
+        azure)
+            echo_red "azure not implemented yet"
+            exit 1
+            # shellcheck source=./azure_tools.lib.sh
+            . "${CI_SCRIPTS_DIR}/azure_tools.lib.sh"
+            ;;
+    esac
+
+    GIT_REV_SHORT=$(date '+%H%M')
+    GIT_REV_LONG=$(date '+%s')
+    CI_TAG="$(date '+%Y%m%d')"
+elif test -n "${CI_COMMIT_REF_NAME}"; then
+    #we are in CI pipeline
+    FOUNDATION_REGISTRY="${PIPELINE_BUILD_REGISTRY}/${PIPELINE_BUILD_REPO}"
+    # we terminate to DEPS registry with a slash so it can be omitted to revert to implicit
+    DEPS_REGISTRY="${PIPELINE_DEPS_REGISTRY}/"
+
+    banner "CI PIPELINE using ${PIPELINE_BUILD_REGISTRY_VENDOR} - ${FOUNDATION_REGISTRY}"
+
+    #
+    # setup the docker config.json.
+    #
+    setupDockerConfigJson
+
+    case "${PIPELINE_BUILD_REGISTRY_VENDOR}" in
+        aws)
+            # shellcheck source=./aws_tools.lib.sh
+            . "${CI_SCRIPTS_DIR}/aws_tools.lib.sh"
+            ;;
+        google)
+            # shellcheck source=./google_tools.lib.sh
+            . "${CI_SCRIPTS_DIR}/google_tools.lib.sh"
+            ;;
+        azure)
+            echo_red "azure not implemented yet"
+            exit 1
+            # shellcheck source=./azure_tools.lib.sh
+            . "${CI_SCRIPTS_DIR}/azure_tools.lib.sh"
+            ;;
+    esac
+
+    #
+    # setup the docker trust material.
+    #
+    requirePipelineVar DOCKER_TRUST_PRIVATE_KEY
+    requirePipelineVar DOCKER_TRUST_PRIVATE_KEY_SIGNER
+    requirePipelineVar VAULT_ADDR
+    requirePipelineVar CI_JOB_JWT
+
+    #Temp file location for docker private keys retrieved from Vault
+    keys_temp_file=$(mktemp)
+
+    #Retreive the vault token to authenticate for vault secrets
+    VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=pingdevops jwt="${CI_JOB_JWT}")"
+    test -z "${VAULT_TOKEN}" && VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=pingdevops-tag jwt="${CI_JOB_JWT}")"
+    test -z "${VAULT_TOKEN}" && echo "Error: Vault token was not retrieved" && exit 1
+    export VAULT_TOKEN
+
+    #Retreive the vault secret
+    vault kv get -field=Signing_Key_Base64 pingdevops/Base64_key > "${keys_temp_file}"
+    test $? -ne 0 && echo "Error: Failed to retrieve private docker keys from vault" && exit 1
+
+    #Use private key file with DockerHub
+    mkdir -p "${docker_config_hub_dir}/trust/private"
+    (cd "${docker_config_hub_dir}/trust/private" && base64 --decode "${keys_temp_file}" | tar -xz)
+    docker --config "${docker_config_hub_dir}" trust key load "${docker_config_hub_dir}/trust/private/${DOCKER_TRUST_PRIVATE_KEY}" --name "${DOCKER_TRUST_PRIVATE_KEY_SIGNER}"
+
+    #Use private key file with Artifactory
+    mkdir -p "${docker_config_default_dir}/trust/private"
+    (cd "${docker_config_default_dir}/trust/private" && base64 --decode "${keys_temp_file}" | tar -xz)
+    docker --config "${docker_config_default_dir}" trust key load "${docker_config_default_dir}/trust/private/${DOCKER_TRUST_PRIVATE_KEY}" --name "${DOCKER_TRUST_PRIVATE_KEY_SIGNER}"
+
+    rm -f "${keys_temp_file}"
+
+    #Provide Root CA Certificate for Artifactory Notary Server
+    requirePipelineFile ARTIFACTORY_ROOT_CA_FILE
+    echo "Using root CA certificate file'${ARTIFACTORY_ROOT_CA_FILE}'"
+    cp "${ARTIFACTORY_ROOT_CA_FILE}" "/usr/local/share/ca-certificates/root-ca.crt"
+    update-ca-certificates
+
+    requirePipelineVar ARTIFACTORY_NOTARY_SERVER_IP
+    echo "Using notary server IP value'${ARTIFACTORY_NOTARY_SERVER_IP}'"
+    echo "${ARTIFACTORY_NOTARY_SERVER_IP} notaryserver" >> /etc/hosts
+
+    GIT_REV_SHORT=$(git rev-parse --short=4 "$CI_COMMIT_SHA")
+    GIT_REV_LONG=$(git rev-parse "$CI_COMMIT_SHA")
+    CI_TAG="${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHORT_SHA}"
+else
+    #we are on local
+    IS_LOCAL_BUILD=true
+    export IS_LOCAL_BUILD
+    FOUNDATION_REGISTRY="pingidentity"
+    DEPS_REGISTRY="${DEPS_REGISTRY_OVERRIDE}"
+    gitBranch=$(git rev-parse --abbrev-ref HEAD)
+    GIT_REV_SHORT=$(git rev-parse --short=4 HEAD)
+    GIT_REV_LONG=$(git rev-parse HEAD)
+    CI_TAG="${gitBranch}-${GIT_REV_SHORT}"
+fi
 ARCH="$(uname -m)"
 export ARCH
 export FOUNDATION_REGISTRY
@@ -182,3 +545,17 @@ export GIT_REV_SHORT
 export GIT_REV_LONG
 export gitBranch
 export CI_TAG
+
+#
+# Stop execution of ci_script if ARCH (i.e. aarch64) is not included in BUILD_ARCH
+#
+if test -n "${BUILD_ARCH}"; then
+    grep "\b${ARCH}\b" <<< "${BUILD_ARCH}" > /dev/null
+    if test $? -eq 1; then
+        echo "This architecture (${ARCH}) is not in list of BUILD_ARCHs (${BUILD_ARCH})"
+        echo "Exiting with a 0"
+        exit 0
+    fi
+    echo "This architecture (${ARCH}) found in BUILD_ARCHs (${BUILD_ARCH})"
+    echo "Continuing"
+fi

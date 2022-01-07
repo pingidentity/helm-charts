@@ -15,10 +15,10 @@ aws --version
 #type az
 #az --version
 
-# type docker
-# docker info
-# type docker-compose
-# docker-compose version
+type docker
+docker info
+type docker-compose
+docker-compose version
 type envsubst
 envsubst --version
 
