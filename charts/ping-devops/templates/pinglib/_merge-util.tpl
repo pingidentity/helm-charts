@@ -14,7 +14,7 @@ These will create
     {{- $prodName := index . 1 -}}
     {{- $resourceType := index . 2 -}}
 
-    {{- $mergedValues := merge (index $top.Values $prodName) $top.Values.global -}}
+    {{- $mergedValues := mergeOverwrite $top.Values.global (index $top.Values $prodName) -}}
     {{- if or $mergedValues.enabled (eq $prodName "global") -}}
         {{- $paramList := list $top $mergedValues -}}
 
