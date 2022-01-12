@@ -14,7 +14,9 @@ These will create
     {{- $prodName := index . 1 -}}
     {{- $resourceType := index . 2 -}}
 
-    {{- $mergedValues := deepCopy (index $top.Values $prodName) | mergeOverwrite $top.Values.global -}}
+    {{- $globalValues := deepCopy $top.Values.global -}}
+    {{- $prodValues := deepCopy (index $top.Values $prodName) -}}
+    {{- $mergedValues := mergeOverwrite $globalValues $prodValues -}}
     {{- if or $mergedValues.enabled (eq $prodName "global") -}}
         {{- $paramList := list $top $mergedValues -}}
 
