@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
-git clone git@gitlab.corp.pingidentity.com:devops-program/helm-charts.git
+git clone "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
 cd helm-charts || exit
+git config user.email "devops_program@pingidentity.com"
+git config user.name "devops_program"
+
 ct lint --validate-maintainers=false
