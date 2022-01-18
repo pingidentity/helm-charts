@@ -5,4 +5,4 @@ cd helm-charts || exit
 git config user.email "devops_program@pingidentity.com"
 git config user.name "devops_program"
 
-ct lint --validate-maintainers=false
+helm lint charts/ping-devops
