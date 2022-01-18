@@ -81,7 +81,6 @@ intel.i.checks:
 intel.i.chartlinter:
   stage: initialization
   script:
-    - ci_scripts/lint_test.sh
     - ci_scripts/helm_chart_linter.sh
     - ci_scripts/release_charts.sh
   except:
