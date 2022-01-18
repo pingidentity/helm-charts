@@ -24,7 +24,7 @@ cd helm-charts || exit
 # allow overwriting cr binary
 CR="docker run -v ${CHARTS_HOME}:/cr quay.io/helmpack/chart-releaser:v${CR_VERSION} cr"
 
-function release::ensure_dir() {
+function ensure_dir() {
     local dir=$1
     if [[ -d ${dir} ]]; then
         rm -rf ${dir}
@@ -32,32 +32,32 @@ function release::ensure_dir() {
     mkdir -p ${dir}
 }
 
-function release::find_changed_charts() {
+function find_changed_charts() {
     local charts_dir=$1
     echo $(git diff --find-renames --name-only "$latest_tag_rev" -- ${charts_dir} | cut -d '/' -f 2 | uniq)
 }
 
-function release::package_chart() {
+function package_chart() {
     local chart=$1
     echo "Packaging chart '$chart'..."
     helm package ${CHARTS_HOME}/charts/$chart --destination ${CHARTS_PKGS}
 }
 
-function release::upload_packages() {
+function upload_packages() {
     ${CR} upload --git-repo ${REPO} -t ${GITHUB_TOKEN} --package-path /cr/.chart-packages
 }
 
-function release::update_chart_index() {
+function update_chart_index() {
     ${CR} index -r ${REPO} -t "${GITHUB_TOKEN}" -c ${CHARTS_REPO} --index-path /cr/.chart-index --package-path /cr/.chart-packages
 }
 
-function release::git_setup() {
+function git_setup() {
     git config user.email "devops_program@pingidentity.com"
     git config user.name "devops_program"
 }
 
-function release::publish_charts() {
-    release::git_setup
+function publish_charts() {
+    git_setup
     #change this to the real repo
     git clone "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/wesleymccollam/helm-charts-test.git"
     cd helm-charts
@@ -90,13 +90,13 @@ if [[ "$latest_tag_rev" == "$head_rev" ]]; then
     exit
 fi
 
-release::ensure_dir ${CHARTS_PKGS}
-release::ensure_dir ${CHARTS_INDEX}
+ensure_dir ${CHARTS_PKGS}
+ensure_dir ${CHARTS_INDEX}
 
-for chart in $(release::find_changed_charts charts); do
-    release::package_chart ${chart}
+for chart in $(find_changed_charts charts); do
+    package_chart ${chart}
 done
 
-release::upload_packages
-release::update_chart_index
-release::publish_charts
+upload_packages
+update_chart_index
+publish_charts

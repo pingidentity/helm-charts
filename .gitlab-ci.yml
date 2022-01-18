@@ -82,6 +82,14 @@ intel.i.chartlinter:
   stage: initialization
   script:
     - ci_scripts/helm_chart_linter.sh
+  except:
+    variables:
+      - $CI_COMMIT_REF_NAME =~ /^workspace.*/
+      - $CI_COMMIT_MESSAGE =~ /\[skip build\]/
+
+intel.i.chartreleaser:
+  stage: initialization
+  script:
     - ci_scripts/release_charts.sh
   except:
     variables:
