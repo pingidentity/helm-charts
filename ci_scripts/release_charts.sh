@@ -18,7 +18,6 @@
 # under the License.
 #
 
-
 git clone -b "$CI_COMMIT_BRANCH" "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
 cd helm-charts || exit
 
@@ -53,8 +52,8 @@ function release::update_chart_index() {
 }
 
 function release::git_setup() {
-  git config user.email "devops_program@pingidentity.com"
-  git config user.name "devops_program"
+    git config user.email "devops_program@pingidentity.com"
+    git config user.name "devops_program"
 }
 
 function release::publish_charts() {
@@ -67,9 +66,9 @@ function release::publish_charts() {
     git add docs/index.yaml
     git commit --message="Release ${RELEASE_VERSION}" --signoff
     if [[ "x${PUBLISH_CHARTS}" == "xtrue" ]]; then
-      git push --set-upstream origin
+        git push --set-upstream origin
     else
-      git push --dry-run --set-upstream origin asf-site
+        git push --dry-run --set-upstream origin helm-charts
     fi
 }
 
