@@ -33,11 +33,6 @@ function ensure_dir() {
     mkdir -p ${dir}
 }
 
-function find_changed_charts() {
-    local charts_dir=$1
-    echo $(git diff --find-renames --name-only "$latest_tag_rev" -- ${charts_dir} | cut -d '/' -f 2 | uniq)
-}
-
 function package_chart() {
     local chart=$1
     echo "Packaging chart '$chart'..."
@@ -77,19 +72,7 @@ function publish_charts() {
 # hack::ensure_cr
 docker pull quay.io/helmpack/chart-releaser:v${CR_VERSION}
 
-latest_tag=$(git::find_latest_tag)
-echo "Latest tag: $latest_tag"
-
-latest_tag_rev=$(git::get_revision "$latest_tag")
-echo "$latest_tag_rev $latest_tag (latest tag)"
-
-head_rev=$(git::get_revision HEAD)
-echo "$head_rev HEAD"
-
-for chart in $(find_changed_charts charts); do
-    package_chart ${chart}
-done
-
+package_chart ${chart}
 upload_packages
 update_chart_index
 publish_charts
