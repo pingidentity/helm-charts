@@ -6,7 +6,7 @@ name: ping-devops
 ########################################################################
 # 0.8.2 - Refer to http://helm.pingidentity.com/release-notes/#release-082-dec-17-2021
 ########################################################################
-version: 0.8.2
+#version: 0.8.2
 description: Ping Identity helm charts - 12/17/21
 type: application
 home: https://helm.pingidentity.com/
