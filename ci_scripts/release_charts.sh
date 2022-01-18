@@ -18,12 +18,12 @@
 # under the License.
 #
 
-git clone -b "$CI_COMMIT_BRANCH" "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
-cd helm-charts || exit
-
 # allow overwriting cr binary
 CR="docker run -v ${CHARTS_HOME}:/cr quay.io/helmpack/chart-releaser:v${CR_VERSION} cr"
 REPO="https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
+
+git clone -b "$CI_COMMIT_BRANCH" "$REPO"
+cd helm-charts || exit
 
 function ensure_dir() {
     local dir=$1
@@ -36,7 +36,7 @@ function ensure_dir() {
 function package_chart() {
     local chart=$1
     echo "Packaging chart '$chart'..."
-    helm package ${CHARTS_HOME}/charts/$chart --destination ${CHARTS_PKGS}
+    helm package ${CHARTS_HOME}/charts/$chart --destination /cr/.chart-packages
 }
 
 function upload_packages() {
@@ -56,7 +56,7 @@ function publish_charts() {
     git_setup
     #change this to the real repo
     git clone "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/wesleymccollam/helm-charts-test.git"
-    cd helm-charts
+    cd helm-charts-test
     git checkout -b ${RELEASE_VERSION} || exit
     cp --force ${CHARTS_INDEX}/index.yaml docs/index.yaml
     git add docs/index.yaml
@@ -64,7 +64,7 @@ function publish_charts() {
     if [[ "x${PUBLISH_CHARTS}" == "xtrue" ]]; then
         git push --set-upstream origin
     else
-        git push --dry-run --set-upstream origin helm-charts
+        git push --dry-run --set-upstream origin helm-charts-test
     fi
 }
 
