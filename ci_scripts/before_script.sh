@@ -30,3 +30,5 @@ type git
 git --version
 type notary
 notary version
+
+brew install chart-testing
