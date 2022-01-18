@@ -21,9 +21,11 @@
 # allow overwriting cr binary
 CR="docker run -v ${CHARTS_HOME}:/cr quay.io/helmpack/chart-releaser:v${CR_VERSION} cr"
 REPO="https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
+chart="charts/ping-devops"
 
 git clone -b "$CI_COMMIT_BRANCH" "$REPO"
 cd helm-charts || exit
+pwd=$(pwd)
 
 function ensure_dir() {
     local dir=$1
@@ -34,9 +36,8 @@ function ensure_dir() {
 }
 
 function package_chart() {
-    local chart=$1
     echo "Packaging chart '$chart'..."
-    helm package ${CHARTS_HOME}/charts/$chart --destination /cr/.chart-packages
+    helm package $pwd/$chart --destination /cr/.chart-packages
 }
 
 function upload_packages() {
