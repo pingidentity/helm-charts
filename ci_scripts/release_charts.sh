@@ -23,6 +23,7 @@ cd helm-charts || exit
 
 # allow overwriting cr binary
 CR="docker run -v ${CHARTS_HOME}:/cr quay.io/helmpack/chart-releaser:v${CR_VERSION} cr"
+REPO="https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
 
 function ensure_dir() {
     local dir=$1
@@ -84,14 +85,6 @@ echo "$latest_tag_rev $latest_tag (latest tag)"
 
 head_rev=$(git::get_revision HEAD)
 echo "$head_rev HEAD"
-
-if [[ "$latest_tag_rev" == "$head_rev" ]]; then
-    echo "Do nothing. Exiting ..."
-    exit
-fi
-
-ensure_dir ${CHARTS_PKGS}
-ensure_dir ${CHARTS_INDEX}
 
 for chart in $(find_changed_charts charts); do
     package_chart ${chart}
