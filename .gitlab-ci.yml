@@ -59,14 +59,14 @@ intel.i.checks:
       - $CI_COMMIT_REF_NAME =~ /^workspace.*/
       # - $CI_COMMIT_MESSAGE =~ /\[skip build\]/
 
- intel.i.unmerged:
-   stage: initialization
-   script:
-     - ci_scripts/unmerged_changes.sh
-   except:
-     variables:
-       - $CI_COMMIT_REF_NAME =~ /^workspace.*/
-       - $CI_COMMIT_MESSAGE =~ /\[skip build\]/
+intel.i.unmerged:
+  stage: initialization
+  script:
+    - ci_scripts/unmerged_changes.sh
+  except:
+    variables:
+      - $CI_COMMIT_REF_NAME =~ /^workspace.*/
+      - $CI_COMMIT_MESSAGE =~ /\[skip build\]/
 
 # intel.i.shellcheck:
 #   stage: initialization
