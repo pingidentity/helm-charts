@@ -23,21 +23,22 @@ CR="docker run -v ${CHARTS_HOME}:/cr quay.io/helmpack/chart-releaser:v${CR_VERSI
 REPO="https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
 chart="charts/ping-devops"
 
-git clone -b "$CI_COMMIT_BRANCH" "$REPO"
+#git clone -b "$CI_COMMIT_BRANCH" "$REPO"
+git clone -b "pipeline-build" "$REPO"
 cd helm-charts || exit
 pwd=$(pwd)
 
-function ensure_dir() {
-    local dir=$1
-    if [[ -d ${dir} ]]; then
-        rm -rf ${dir}
-    fi
-    mkdir -p ${dir}
-}
+# function ensure_dir() {
+#     local dir=$1
+#     if [[ -d ${dir} ]]; then
+#         rm -rf ${dir}
+#     fi
+#     mkdir -p ${dir}
+# }
 
 function package_chart() {
-    echo "Packaging chart '$chart'..."
-    helm package $pwd/$chart --destination /cr/.chart-packages
+    echo "Packaging chart '${chart}'..."
+    helm package ${pwd}/${chart} --destination /cr/.chart-packages
 }
 
 function upload_packages() {
@@ -48,25 +49,20 @@ function update_chart_index() {
     ${CR} index -r ${REPO} -t "${GITHUB_TOKEN}" -c ${CHARTS_REPO} --index-path /cr/.chart-index --package-path /cr/.chart-packages
 }
 
-function git_setup() {
+function publish_charts() {
     git config user.email "devops_program@pingidentity.com"
     git config user.name "devops_program"
-}
-
-function publish_charts() {
-    git_setup
     #change this to the real repo
     git clone "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/wesleymccollam/helm-charts-test.git"
     cd helm-charts-test
     git checkout -b ${RELEASE_VERSION} || exit
-    cp --force ${CHARTS_INDEX}/index.yaml docs/index.yaml
+    cp --force ${pwd}/index.yaml docs/index.yaml
     git add docs/index.yaml
     git commit --message="Release ${RELEASE_VERSION}" --signoff
-    if [[ "x${PUBLISH_CHARTS}" == "xtrue" ]]; then
-        git push --set-upstream origin
-    else
-        git push --dry-run --set-upstream origin helm-charts-test
+    if test -n "$CI_COMMIT_TAG"; then
+        git push gh_location "$CI_COMMIT_TAG"
     fi
+    git push gh_location origin master
 }
 
 # install cr

@@ -72,7 +72,6 @@ intel.i.unmerged:
 #   stage: initialization
 #   script:
 #     - ci_scripts/shellcheck.sh
-#     - ci_scripts/lint_test.sh
 #   except:
 #     variables:
 #       - $CI_COMMIT_REF_NAME =~ /^workspace.*/
@@ -87,14 +86,14 @@ intel.i.chartlinter:
       - $CI_COMMIT_REF_NAME =~ /^workspace.*/
       - $CI_COMMIT_MESSAGE =~ /\[skip build\]/
 
-#intel.i.chartreleaser:
-#  stage: initialization
-#  script:
-#    - ci_scripts/release_charts.sh
-#  except:
-#    variables:
-#      - $CI_COMMIT_REF_NAME =~ /^workspace.*/
-#      - $CI_COMMIT_MESSAGE =~ /\[skip build\]/
+intel.i.chartreleaser:
+ stage: initialization
+ script:
+   - ci_scripts/release_charts.sh
+ except:
+   variables:
+     - $CI_COMMIT_REF_NAME =~ /^workspace.*/
+     - $CI_COMMIT_MESSAGE =~ /\[skip build\]/
 
 intel.i.shfmt:
   stage: initialization
