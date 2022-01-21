@@ -112,73 +112,181 @@ intel.i.shfmt:
 intel.t.pingaccess:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingaccess --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_smoke.sh --product pingaccess
+  retry: 2
+
+arm.t.pingaccess:
+  stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingaccess
   retry: 2
 
 intel.t.pingauthorize:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingauthorize --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_smoke.sh --product pingauthorize
+  retry: 2
+
+arm.t.pingauthorize:
+  stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingauthorize
   retry: 2
 
 intel.t.pingauthorizepap:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingauthorizepap --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_smoke.sh --product pingauthorizepap
+  retry: 2
+
+arm.t.pingauthorizepap:
+  stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingauthorizepap
   retry: 2
 
 intel.t.pingdataconsole:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingdataconsole --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_smoke.sh --product pingdataconsole
+  retry: 2
+
+arm.t.pingdataconsole:
+  stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingdataconsole
   retry: 2
 
 intel.t.pingdatagovernance:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingdatagovernance --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_smoke.sh --product pingdatagovernance
+  retry: 2
+
+arm.t.pingdatagovernance:
+  stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingdatagovernance
   retry: 2
 
 intel.t.pingdatagovernancepap:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingdatagovernancepap --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_smoke.sh --product pingdatagovernancepap
+  retry: 2
+
+arm.t.pingdatagovernancepap:
+  stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingdatagovernancepap
   retry: 2
 
 intel.t.pingdatasync:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingdatasync --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_smoke.sh --product pingdatasync
+  retry: 2
+
+arm.t.pingdatasync:
+  stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingdatasync
   retry: 2
 
 intel.t.pingdelegator:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingdelegator --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_smoke.sh --product pingdelegator
+  retry: 2
+
+arm.t.pingdelegator:
+  stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingdelegator
   retry: 2
 
 intel.t.pingdirectory:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingdirectory --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_smoke.sh --product pingdirectory
+  retry: 2
+
+arm.t.pingdirectory:
+  stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingdirectory
   retry: 2
 
 intel.t.pingdirectoryproxy:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingdirectoryproxy --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_smoke.sh --product pingdirectoryproxy
+  retry: 2
+
+arm.t.pingdirectoryproxy:
+  stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingdirectoryproxy
   retry: 2
 
 intel.t.pingfederate:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingfederate --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_smoke.sh --product pingfederate
+  retry: 2
+
+arm.t.pingfederate:
+  stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingfederate
   retry: 2
 
 intel.t.pingtoolkit:
   stage: test.smoke
   script:
-    - ci_scripts/run_helm_tests.sh --helm-test smoke-tests/pingtoolkit --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_smoke.sh --product pingtoolkit
+  retry: 2
+
+arm.t.pingtoolkit:
+  stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingtoolkit
   retry: 2
 
 ################################################
