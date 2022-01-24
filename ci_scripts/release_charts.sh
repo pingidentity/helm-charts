@@ -28,28 +28,25 @@ git clone -b "pipeline-build" "$REPO"
 cd helm-charts || exit
 pwd=$(pwd)
 
-# function ensure_dir() {
-#     local dir=$1
-#     if [[ -d ${dir} ]]; then
-#         rm -rf ${dir}
-#     fi
-#     mkdir -p ${dir}
-# }
-
 function package_chart() {
     echo "Packaging chart '${chart}'..."
-    helm package ${pwd}/${chart} --destination /cr/.chart-packages
+    dir="${pwd}/cr"
+    if [ -d "${dir}" ]; then
+        mkdir cr
+    fi
+    helm package ${pwd}/${chart} --destination ./cr/.chart-packages
 }
 
 function upload_packages() {
-    ${CR} upload --git-repo ${REPO} -t ${GITHUB_TOKEN} --package-path /cr/.chart-packages
+    ${CR} upload -o ${GITLAB_USER} --git-repo ${REPO} -t ${GITLAB_TOKEN} --package-path ./cr/.chart-packages
 }
 
 function update_chart_index() {
-    ${CR} index -r ${REPO} -t "${GITHUB_TOKEN}" -c ${CHARTS_REPO} --index-path /cr/.chart-index --package-path /cr/.chart-packages
+    ${CR} index -o ${GITLAB_USER} -r ${REPO} -t "${GITHUB_TOKEN}" -c ${REPO} --index-path ./cr/.chart-index --package-path ./cr/.chart-packages
 }
 
 function publish_charts() {
+    git remote add gh_location "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/wesleymccollam/helm-charts-test.git"
     git config user.email "devops_program@pingidentity.com"
     git config user.name "devops_program"
     #change this to the real repo
