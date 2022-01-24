@@ -19,7 +19,7 @@
 #
 
 # allow overwriting cr binary
-CR="docker run -v ${CHARTS_HOME}:/cr quay.io/helmpack/chart-releaser:v${CR_VERSION} cr"
+CR="docker run -v ${pwd}:/cr quay.io/helmpack/chart-releaser:v${CR_VERSION} cr"
 REPO="https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
 chart="charts/ping-devops"
 
@@ -42,7 +42,7 @@ function upload_packages() {
 }
 
 function update_chart_index() {
-    ${CR} index -o ${GITLAB_USER} -r ${REPO} -t "${GITHUB_TOKEN}" -c ${REPO} --index-path ./cr/.chart-index --package-path ./cr/.chart-packages
+    ${CR} index -o ${GITLAB_USER} -r ${REPO} -t "${GITLAB_TOKEN}" -c ${REPO} --index-path ./cr/.chart-index --package-path ./cr/.chart-packages
 }
 
 function publish_charts() {
