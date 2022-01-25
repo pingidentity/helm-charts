@@ -25,7 +25,7 @@ GITLAB_REPO="https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devop
 GITHUB_REPO="helm-charts-test"
 chart="charts/ping-devops"
 
-git clone -b "$CI_COMMIT_BRANCH" "$REPO"
+git clone -b "$CI_COMMIT_BRANCH" "${GITLAB_REPO}"
 cd helm-charts || exit
 
 function package_chart() {
