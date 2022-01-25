@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#
+set -x
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -19,14 +19,14 @@
 #
 
 # allow overwriting cr binary
+pwd=$(pwd)
 CR="docker run -v ${pwd}:/cr quay.io/helmpack/chart-releaser:v${CR_VERSION} cr"
-REPO="https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
+GITLAB_REPO="https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
+GITHUB_REPO="helm-charts-test"
 chart="charts/ping-devops"
 
-#git clone -b "$CI_COMMIT_BRANCH" "$REPO"
-git clone -b "pipeline-build" "$REPO"
+git clone -b "$CI_COMMIT_BRANCH" "$REPO"
 cd helm-charts || exit
-pwd=$(pwd)
 
 function package_chart() {
     echo "Packaging chart '${chart}'..."
@@ -34,33 +34,34 @@ function package_chart() {
     if [ -d "${dir}" ]; then
         mkdir cr
     fi
-    helm package ${pwd}/${chart} --destination ./cr/.chart-packages
+    helm package ${pwd}/${chart} --destination ${pwd}/cr/.chart-packages
 }
 
 function upload_packages() {
-    ${CR} upload -o ${GITLAB_USER} --git-repo ${REPO} -t ${GITLAB_TOKEN} --package-path ./cr/.chart-packages
+    #TODO Change owner to GITHUB_OWNER and GITHUB_REPO variable to helm-charts
+    ${CR} upload -o wesleymccollam -r helm-charts-test --token ${GITHUB_TOKEN} --package-path ${pwd}/cr/.chart-packages
 }
 
 function update_chart_index() {
-    ${CR} index -o ${GITLAB_USER} -r ${REPO} -t "${GITLAB_TOKEN}" -c ${REPO} --index-path ./cr/.chart-index --package-path ./cr/.chart-packages
+    ${CR} index -o wesleymccollam --index-path ${pwd}/cr/.chart-index/index.yaml --package-path ${pwd}/cr/.chart-packages --push
 }
 
-function publish_charts() {
-    git remote add gh_location "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/wesleymccollam/helm-charts-test.git"
-    git config user.email "devops_program@pingidentity.com"
-    git config user.name "devops_program"
-    #change this to the real repo
-    git clone "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/wesleymccollam/helm-charts-test.git"
-    cd helm-charts-test
-    git checkout -b ${RELEASE_VERSION} || exit
-    cp --force ${pwd}/index.yaml docs/index.yaml
-    git add docs/index.yaml
-    git commit --message="Release ${RELEASE_VERSION}" --signoff
-    if test -n "$CI_COMMIT_TAG"; then
-        git push gh_location "$CI_COMMIT_TAG"
-    fi
-    git push gh_location origin master
-}
+# function publish_charts() {
+#     git remote add gh_location "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/wesleymccollam/helm-charts-test.git"
+#     git config user.email "devops_program@pingidentity.com"
+#     git config user.name "devops_program"
+#     #change this to the real repo
+#     git clone "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/wesleymccollam/helm-charts-test.git"
+#     cd helm-charts-test
+#     git checkout -b ${RELEASE_VERSION} || exit
+#     yes | cp  ${pwd}/index.yaml docs/index.yaml
+#     git add docs/index.yaml
+#     git commit -m="Release ${RELEASE_VERSION}" --signoff
+#     if test -n "$CI_COMMIT_TAG"; then
+#         git push gh_location "$CI_COMMIT_TAG"
+#     fi
+#     git push gh_location origin master
+# }
 
 # install cr
 # hack::ensure_cr
@@ -68,5 +69,7 @@ docker pull quay.io/helmpack/chart-releaser:v${CR_VERSION}
 
 package_chart ${chart}
 upload_packages
-update_chart_index
-publish_charts
+#update_chart_index
+# publish_charts
+# pwd
+# rm -rf ./helm-charts
