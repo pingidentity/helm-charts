@@ -39,11 +39,11 @@ function package_chart() {
 
 function upload_packages() {
     #TODO Change owner to GITHUB_OWNER and GITHUB_REPO variable to helm-charts
-    ${CR} upload -o wesleymccollam -r helm-charts-test --token ${GITHUB_TOKEN} --package-path ${pwd}/cr/.chart-packages
+    cr upload -o ${GITHUB_OWNER} -r helm-charts-test --token ${GITHUB_TOKEN} --package-path ${pwd}/cr/.chart-packages
 }
 
 function update_chart_index() {
-    ${CR} index -o wesleymccollam --index-path ${pwd}/cr/.chart-index/index.yaml --package-path ${pwd}/cr/.chart-packages --push
+    ${CR} index -o ${GITHUB_OWNER} --index-path ${pwd}/cr/.chart-index/index.yaml --package-path ${pwd}/cr/.chart-packages --push
 }
 
 # function publish_charts() {
