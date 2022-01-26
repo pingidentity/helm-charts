@@ -18,14 +18,14 @@ set -x
 # under the License.
 #
 
-# allow overwriting cr binary
 pwd=$(pwd)
-CR="docker run -v ${pwd}:/cr quay.io/helmpack/chart-releaser:v${CR_VERSION} cr"
+CR="docker run -v ${pwd}/cr:/cr quay.io/helmpack/chart-releaser:v${CR_VERSION}"
 GITLAB_REPO="https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
 GITHUB_REPO="helm-charts-test"
+HELM_REPO="https://github.com/pingidentity/helm-charts"
 chart="charts/ping-devops"
 
-git clone -b "$CI_COMMIT_BRANCH" "${GITLAB_REPO}"
+git clone -b "${CI_COMMIT_BRANCH}" "${GITLAB_REPO}"
 cd helm-charts || exit
 
 function package_chart() {
@@ -34,16 +34,16 @@ function package_chart() {
     if [ -d "${dir}" ]; then
         mkdir cr
     fi
-    helm package ${pwd}/${chart} --destination ${pwd}/cr/.chart-packages
+    helm package ${pwd}/${chart} --destination ${pwd}/cr/.chart-packages || exit
 }
 
 function upload_packages() {
     #TODO Change owner to GITHUB_OWNER and GITHUB_REPO variable to helm-charts
-    cr upload -o ${GITHUB_OWNER} -r helm-charts-test --token ${GITHUB_TOKEN} --package-path ${pwd}/cr/.chart-packages
+    ${CR} upload -o ${GITHUB_OWNER} -r helm-charts-test --token ${GITHUB_TOKEN} --package-path /cr/.chart-packages
 }
 
 function update_chart_index() {
-    ${CR} index -o ${GITHUB_OWNER} --index-path ${pwd}/cr/.chart-index/index.yaml --package-path ${pwd}/cr/.chart-packages --push
+    ${CR} index -o ${GITHUB_OWNER} -r helm-charts-test -c ${HELM_REPO} --token ${GITHUB_TOKEN} --index-path /docs/index.yaml --package-path /cr/.chart-packages
 }
 
 # function publish_charts() {
@@ -64,12 +64,9 @@ function update_chart_index() {
 # }
 
 # install cr
-# hack::ensure_cr
 docker pull quay.io/helmpack/chart-releaser:v${CR_VERSION}
 
 package_chart ${chart}
 upload_packages
-#update_chart_index
+update_chart_index
 # publish_charts
-# pwd
-# rm -rf ./helm-charts
