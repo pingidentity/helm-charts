@@ -49,9 +49,9 @@ function publish_charts() {
     yes | cp ${pwd}/docs/index.yaml helm-charts-test/docs/index.yaml
     cd helm-charts-test
     git add docs/index.yaml
-    git commit -m="Release $CI_COMMIT_BRANCH"
     git config user.email "${GITHUB_OWNER}@pingidentity.com"
     git config user.name "${GITHUB_OWNER}"
+    git commit -m="Release $CI_COMMIT_BRANCH"
     git remote add gh_location "https://${GITHUB_OWNER}:${GITHUB_TOKEN}@github.com/wesleymccollam/helm-charts-test.git"
     if test -n "$CI_COMMIT_TAG"; then
         git push gh_location "$CI_COMMIT_TAG"
