@@ -44,6 +44,7 @@ function upload_packages() {
 
 function update_chart_index() {
     ${CR} index -o ${GITHUB_OWNER} -r helm-charts-test -c ${HELM_REPO} --token ${GITHUB_TOKEN} --index-path /docs/index.yaml --package-path /cr/.chart-packages
+    git status
 }
 
 # function publish_charts() {
