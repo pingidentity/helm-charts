@@ -22,7 +22,7 @@ pwd=$(pwd)
 CR="docker run -v ${pwd}/docs:/cr quay.io/helmpack/chart-releaser:v${CR_VERSION}"
 GITLAB_REPO="https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
 GITHUB_REPO="helm-charts-test"
-HELM_REPO="https://github.com/wesleymccollam/helm-charts-test"
+HELM_REPO="https://helm.pingidentity.com/"
 chart="charts/ping-devops"
 
 git clone -b "${CI_COMMIT_BRANCH}" "${GITLAB_REPO}"
@@ -42,7 +42,7 @@ function upload_packages() {
 }
 
 function update_chart_index() {
-    ${CR} index -o ${GITHUB_OWNER} -r helm-charts-test -c ${HELM_REPO} --index-path /cr/index.yaml --package-path /cr/.chart-packages || exit
+    ${CR} index -o ${GITHUB_OWNER} -r helm-charts-test -c ${HELM_REPO} --token ${GITHUB_TOKEN} --index-path /cr/index.yaml --package-path /cr/.chart-packages --pr || exit
     git status
 }
 
