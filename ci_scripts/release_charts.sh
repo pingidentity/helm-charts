@@ -48,7 +48,6 @@ function publish_charts() {
     git clone "https://${GITHUB_OWNER}:${GITHUB_TOKEN}@github.com/wesleymccollam/helm-charts-test.git"
     git config user.email "${GITHUB_OWNER}@pingidentity.com"
     git config user.name "${GITHUB_OWNER}"
-    git checkout -b $CI_COMMIT_BRANCH || exit
     yes | cp ${pwd}/docs/index.yaml helm-charts-test/docs/index.yaml
     cd helm-charts-test
     git add docs/index.yaml
