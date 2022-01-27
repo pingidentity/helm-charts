@@ -1365,6 +1365,47 @@ pingaccess-engine:
           - pingaccess-engine._defaultDomain_
 
 #############################################################
+# @param    pingcentral PingCentral values
+#
+# @param    pingcentral.enabled Enable PingCentral deployment
+# @default  false
+#############################################################
+pingcentral:
+  enabled: false
+  name: pingcentral
+  image:
+    name: pingcentral
+
+  container:
+    resources:
+      requests:
+        cpu: 0
+        memory: .5Gi
+      limits:
+        cpu: 2
+        memory: 2Gi
+
+  services:
+    https:
+      containerPort: 9022
+      servicePort: 9022
+      ingressPort: 443
+      dataService: true
+
+  ingress:
+    hosts:
+      - host: pingcentral._defaultDomain_
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            serviceName: https
+    tls:
+      - secretName: _defaultTlsSecret_
+        hosts:
+          - pingcentral._defaultDomain_
+
+#############################################################
 # @param    pingdataconsole PingDataConsole values
 #
 # @param    pingdataconsole.enabled Enable PingDataConsole deployment
