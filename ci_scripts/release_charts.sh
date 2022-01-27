@@ -46,17 +46,18 @@ function update_chart_index() {
 function publish_charts() {
     #change this to the real repo
     git clone "https://${GITHUB_OWNER}:${GITHUB_TOKEN}@github.com/wesleymccollam/helm-charts-test.git"
-    cd helm-charts-test
     git config user.email "${GITHUB_OWNER}@pingidentity.com"
     git config user.name "${GITHUB_OWNER}"
     git checkout -b $CI_COMMIT_BRANCH || exit
-    yes | cp ${pwd}/docs/index.yaml docs/index.yaml
+    yes | cp ${pwd}/docs/index.yaml helm-charts-test/docs/index.yaml
+    cd helm-charts-test
     git add docs/index.yaml
-    git commit -m="Release $CI_COMMIT_BRANCH" --signoff
+    git commit -m="Release $CI_COMMIT_BRANCH"
+    git remote add gh_location "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/wesleymccollam/helm-charts-test.git"
     if test -n "$CI_COMMIT_TAG"; then
-        git push "$CI_COMMIT_TAG"
+        git push gh_location "$CI_COMMIT_TAG"
     fi
-    git push origin master
+    git push gh_location master
 }
 
 # install cr
