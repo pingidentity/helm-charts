@@ -22,7 +22,7 @@ pwd=$(pwd)
 CR="docker run -v ${pwd}/cr:/cr quay.io/helmpack/chart-releaser:v${CR_VERSION}"
 GITLAB_REPO="https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
 GITHUB_REPO="helm-charts-test"
-HELM_REPO="https://github.com/pingidentity/helm-charts"
+HELM_REPO="https://github.com/wesleymccollam/helm-charts-test"
 chart="charts/ping-devops"
 
 git clone -b "${CI_COMMIT_BRANCH}" "${GITLAB_REPO}"
