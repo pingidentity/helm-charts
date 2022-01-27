@@ -47,6 +47,7 @@ function update_chart_index() {
 function publish_charts() {
     echo "$CI_COMMIT_MESSAGE"
     release_version=$(echo "$CI_COMMIT_MESSAGE" | awk '{print $1}' | sed -e 's/ *$//')
+    echo "$release_version"
     (echo "${release_version}" | grep -Eq ^'\d.\d.\d'$) && echo "Release version passed formatting check, proceeding to GitHub push..." || echo "Release version DID NOT pass format check..." && exit 1
     git config user.email "wesleymccollam@pingidentity.com"
     git config user.name "wesleymccollam"
