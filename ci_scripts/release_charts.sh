@@ -19,7 +19,7 @@ set -x
 #
 
 pwd=$(pwd)
-CR="docker run -v ${pwd}/cr:/cr quay.io/helmpack/chart-releaser:v${CR_VERSION}"
+CR="docker run -v ${pwd}/docs:/cr quay.io/helmpack/chart-releaser:v${CR_VERSION}"
 GITLAB_REPO="https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
 GITHUB_REPO="helm-charts-test"
 HELM_REPO="https://github.com/wesleymccollam/helm-charts-test"
@@ -34,16 +34,15 @@ function package_chart() {
     if [ -d "${dir}" ]; then
         mkdir cr
     fi
-    helm package ${pwd}/${chart} --destination ${pwd}/cr/.chart-packages || exit
+    helm package ${pwd}/${chart} --destination ${pwd}/docs/.chart-packages || exit
 }
 
 function upload_packages() {
-    #TODO Change owner to GITHUB_OWNER and GITHUB_REPO variable to helm-charts
-    ${CR} upload -o ${GITHUB_OWNER} -r helm-charts-test --token ${GITHUB_TOKEN} --package-path /cr/.chart-packages
+    ${CR} upload -o ${GITHUB_OWNER} -r helm-charts-test --token ${GITHUB_TOKEN} --package-path /cr/.chart-packages || exit
 }
 
 function update_chart_index() {
-    ${CR} index -o ${GITHUB_OWNER} -r helm-charts-test -c ${HELM_REPO} --index-path /docs/index.yaml --package-path /cr/.chart-packages
+    ${CR} index -o ${GITHUB_OWNER} -r helm-charts-test -c ${HELM_REPO} --index-path /cr/index.yaml --package-path /cr/.chart-packages || exit
     git status
 }
 
