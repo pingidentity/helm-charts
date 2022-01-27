@@ -50,9 +50,9 @@ function publish_charts() {
     git config user.email "${GITHUB_OWNER}@pingidentity.com"
     git config user.name "${GITHUB_OWNER}"
     git checkout -b $CI_COMMIT_BRANCH || exit
-    git add docs/index.yaml
     yes | cp ${pwd}/docs/index.yaml docs/index.yaml
-    git commit -m="Release ${release_version}" --signoff
+    git add docs/index.yaml
+    git commit -m="Release $CI_COMMIT_BRANCH" --signoff
     if test -n "$CI_COMMIT_TAG"; then
         git push "$CI_COMMIT_TAG"
     fi
