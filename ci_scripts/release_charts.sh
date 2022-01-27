@@ -17,7 +17,6 @@ set -x
 # specific language governing permissions and limitations
 # under the License.
 #
-echo $CI_COMMIT_MESSAGE
 
 pwd=$(pwd)
 cr="docker run -v ${pwd}/docs:/cr quay.io/helmpack/chart-releaser:v${CR_VERSION}"
@@ -45,13 +44,10 @@ function update_chart_index() {
 }
 
 function publish_charts() {
-    git config user.email "wesleymccollam@pingidentity.com"
-    git config user.name "wesleymccollam"
     #change this to the real repo
-    git clone "https://wesleymccollam:${GITHUB_TOKEN}@github.com/wesleymccollam/helm-charts-test.git"
+    git clone "https://${GITHUB_OWNER}:${GITHUB_TOKEN}@github.com/wesleymccollam/helm-charts-test.git"
     cd helm-charts-test
-    git remote add gh_location "https://wesleymccollam:${GITHUB_TOKEN}@github.com/wesleymccollam/helm-charts-test.git"
-    git checkout -b "$CI_COMMIT_BRANCH" || exit
+    git checkout -b $CI_COMMIT_BRANCH || exit
     git add docs/index.yaml
     yes | cp ${pwd}/docs/index.yaml docs/index.yaml
     git commit -m="Release ${release_version}" --signoff
