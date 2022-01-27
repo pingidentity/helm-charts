@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -x
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -46,15 +47,14 @@ function update_chart_index() {
 
 function publish_charts() {
     echo "$CI_COMMIT_MESSAGE"
-    branch=$(echo "$CI_COMMIT_MESSAGE" | awk '{print $2}')
     release_version=$(echo "$CI_COMMIT_MESSAGE" | awk '{print $2}')
     (echo "${release_version}" | grep -Eq ^'\d.\d.\d'$) && echo "Release version passed formatting check, proceeding to GitHub push..." || echo "Release version DID NOT pass format check..." && exit 1
     git config user.email "wesleymccollam@pingidentity.com"
     git config user.name "wesleymccollam"
     #change this to the real repo
     git clone "https://wesleymccollam:${GITHUB_TOKEN}@github.com/wesleymccollam/helm-charts-test.git"
-    git remote add gh_location "https://wesleymccollam:${GITHUB_TOKEN}@github.com/wesleymccollam/helm-charts-test.git"
     cd helm-charts-test
+    git remote add gh_location "https://wesleymccollam:${GITHUB_TOKEN}@github.com/wesleymccollam/helm-charts-test.git"
     git add docs/index.yaml
     git checkout -b ${release_version} || exit
     yes | cp ${pwd}/docs/index.yaml docs/index.yaml
