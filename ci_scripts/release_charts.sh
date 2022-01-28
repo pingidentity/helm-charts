@@ -44,19 +44,16 @@ function update_chart_index() {
 }
 
 function publish_charts() {
-    #change this to the real repo
-    git clone "https://${GITHUB_OWNER}:${GITHUB_TOKEN}@github.com/wesleymccollam/helm-charts-test.git"
-    yes | cp ${pwd}/docs/index.yaml helm-charts-test/docs/index.yaml
-    cd helm-charts-test
+    release_tag=$(cat ${pwd}/charts/ping-devops/Chart.yaml | grep "version" | awk '{print $2}')
+    git tag ${release_tag}
     git add docs/index.yaml
     git config user.email "${GITHUB_OWNER}@pingidentity.com"
     git config user.name "${GITHUB_OWNER}"
-    git commit -m="Release $CI_COMMIT_BRANCH"
-    git remote add gh_location "https://${GITHUB_OWNER}:${GITHUB_TOKEN}@github.com/wesleymccollam/helm-charts-test.git"
+    git commit -m"Release ${release_tag}"
     if test -n "$CI_COMMIT_TAG"; then
-        git push gh_location "$CI_COMMIT_TAG"
+        git push origin "$CI_COMMIT_TAG"
     fi
-    git push gh_location master
+    git push origin 0.8.5
 }
 
 # install cr
