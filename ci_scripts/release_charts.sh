@@ -44,16 +44,15 @@ function update_chart_index() {
 }
 
 function publish_charts() {
-    release_tag=$(cat ${pwd}/charts/ping-devops/Chart.yaml | grep "version" | awk '{print $2}')
-    git tag ${release_tag}
     git add docs/index.yaml
-    git config user.email "${GITLAB_USER}@pingidentity.com"
-    git config user.name "${GITLAB_USER}"
+    git tag ${release_tag}
+    release_tag=$(cat ${pwd}/charts/ping-devops/Chart.yaml | grep "version" | awk '{print $2}')
     git commit -m"Release ${release_tag}"
     if test -n "$CI_COMMIT_TAG"; then
         git push origin "$CI_COMMIT_TAG"
     fi
-    git push origin "${CI_COMMIT_BRANCH}"
+    git push -o ci-skip "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts" HEAD:master
+    git push tags "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts" HEAD:master
 }
 
 # install cr
