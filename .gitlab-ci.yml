@@ -2,6 +2,7 @@ stages:
   - initialization
   - test.smoke
   - publish
+  - push
   - final
 
 default:
