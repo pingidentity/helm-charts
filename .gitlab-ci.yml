@@ -193,6 +193,9 @@ p.charts:
 
 p.github:
   stage: push
+  before_script:
+    - git config --global user.name "${GITLAB_USER}"
+    - git config --global user.email "${GITLAB_USER}@pingidentity.com"
   script:
     - git --version
     - ci_scripts/push_to_github.sh

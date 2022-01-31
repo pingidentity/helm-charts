@@ -22,8 +22,6 @@ mkdir -p ~/tmp/build && cd ~/tmp/build || exit 9
 
 git clone "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
 cd helm-charts || exit 97
-git config user.email "devops_program@pingidentity.com"
-git config user.name "devops_program"
 
 git remote add gh_location "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/wesleymccollam/helm-charts-test.git"
 
