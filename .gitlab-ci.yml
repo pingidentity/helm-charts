@@ -86,18 +86,6 @@ intel.i.chartlinter:
       - $CI_COMMIT_REF_NAME =~ /^workspace.*/
       - $CI_COMMIT_MESSAGE =~ /\[skip build\]/
 
-intel.i.chartreleaser:
-  stage: initialization
-  before_script:
-    - git config --global user.name "${GITLAB_USER}"
-    - git config --global user.email "${GITLAB_USER}@pingidentity.com"
-  script:
-    - ci_scripts/release_charts.sh
-  except:
-    variables:
-    - $CI_COMMIT_REF_NAME =~ /^workspace.*/
-    - $CI_COMMIT_MESSAGE =~ /\[skip build\]/
-
 intel.i.shfmt:
   stage: initialization
   script:
@@ -205,6 +193,9 @@ p.charts:
 
 p.github:
   stage: push
+  before_script:
+    - git config --global user.name "${GITLAB_USER}"
+    - git config --global user.email "${GITLAB_USER}@pingidentity.com"
   script:
     - git --version
     - ci_scripts/push_to_github.sh
