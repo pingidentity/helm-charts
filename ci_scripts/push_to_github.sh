@@ -26,7 +26,7 @@ cd helm-charts || exit 97
 git remote add gh_location "https://${GITHUB_OWNER}:${GITHUB_TOKEN}@github.com/wesleymccollam/helm-charts-test.git"
 
 if test -n "$CI_COMMIT_TAG"; then
-    git push gh_location "$CI_COMMIT_TAG"
+    git push --force gh_location "$CI_COMMIT_TAG"
 fi
 
-git push gh_location master
+git push --force gh_location master
