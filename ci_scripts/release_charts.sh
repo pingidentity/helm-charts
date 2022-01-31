@@ -18,8 +18,8 @@ set -x
 # under the License.
 #
 
-pwd=$(pwd)
-cr="docker run -v ${pwd}/docs:/cr quay.io/helmpack/chart-releaser:v${CR_VERSION}"
+dir=$(pwd)
+cr="docker run -v ${dir}/docs:/cr quay.io/helmpack/chart-releaser:v${CR_VERSION}"
 gitlab_repo="https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
 github_repo="helm-charts-test"
 helm_repo="https://helm.pingidentity.com/"
@@ -30,35 +30,41 @@ cd helm-charts || exit
 
 function package_chart() {
     echo "Packaging chart '${chart}'..."
-    helm package ${pwd}/${chart} --destination ${pwd}/docs/.chart-packages || exit 1
+    helm package "${dir}"/"${chart}" --destination "${dir}"/docs/.chart-packages || exit 1
 }
 
 function upload_packages() {
     echo "Uploading chart packages for ${chart}..."
-    ${cr} upload -o ${GITHUB_OWNER} -r ${github_repo} --token ${GITHUB_TOKEN} --package-path /cr/.chart-packages || exit 1
+    ${cr} upload -o "${GITHUB_OWNER}" -r "${github_repo}" --token "${GITHUB_TOKEN}" --package-path /cr/.chart-packages || exit 1
 }
 
 function update_chart_index() {
     echo "Generating chart index for ${chart}..."
-    ${cr} index -o ${GITHUB_OWNER} -r ${github_repo} -c ${helm_repo} --token ${GITHUB_TOKEN} --index-path /cr/index.yaml --package-path /cr/.chart-packages || exit 1
+    ${cr} index -o "${GITHUB_OWNER}" -r "${github_repo}" -c "${helm_repo}" --token "${GITHUB_TOKEN}" --index-path /cr/index.yaml --package-path /cr/.chart-packages || exit 1
 }
 
-function publish_charts() {
+function publish_repo() {
     git add docs/index.yaml
-    git tag ${release_tag}
-    release_tag=$(cat ${pwd}/charts/ping-devops/Chart.yaml | grep "version" | awk '{print $2}')
-    git commit -m"Release ${release_tag}"
-    if test -n "$CI_COMMIT_TAG"; then
-        git push origin "$CI_COMMIT_TAG"
+    release_tag=$(cat "${dir}"/charts/ping-devops/Chart.yaml | grep "version" | awk '{print $2}')
+    echo "Release ${release_tag} desired. Checking for conflicts..."
+    curl --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" "https://${INTERNAL_GITLAB_URL}/api/v4/projects/7116/repository/tags/${release_tag}" > tag.txt || exit
+    check_tag=$(cat tag.txt | grep -o "\"404" | head -1 | sed 's/"//g')
+    if [[ ${check_tag} == 404 ]]; then
+        echo "${release_tag} release tag is available, creating tag..."
+        git tag "${release_tag}"
+    else
+        echo "Release tag ${release_tag} already exists..."
+        exit 1
     fi
+    git commit --message "Release ${release_tag}"
     git push -o ci-skip "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts" HEAD:master
-    git push tags "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts" HEAD:master
+    git push --tags "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts" HEAD:master
 }
 
 # install cr
-docker pull quay.io/helmpack/chart-releaser:v${CR_VERSION}
+docker pull quay.io/helmpack/chart-releaser:v"${CR_VERSION}"
 
 package_chart ${chart}
 upload_packages
 update_chart_index
-publish_charts
+publish_repo
