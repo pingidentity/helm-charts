@@ -1,5 +1,6 @@
 # Release Notes
 
+## Release Test (Dec 17, 2021)
 ## Release 0.8.2 (Dec 17, 2021)
 
 * [Issue #238](https://github.com/pingidentity/helm-charts/issues/238) Added support for running a utility sidecar alongside a product workload
