@@ -194,13 +194,16 @@ intel.t.pingtoolkit:
 
 p.charts:
   stage: publish
-  #rules:
-  #  - if: $CI_COMMIT_TAG =~ /rel\d.\d.\d/
+  before_script:
+    - git config --global user.name "${GITLAB_USER}"
+    - git config --global user.email "${GITLAB_USER}@pingidentity.com"
   script:
     - ci_scripts/release_charts.sh
+  rules:
+    - if: $RELEASE == "true"
 
 p.github:
-  stage: publish
+  stage: push
   script:
     - git --version
     - ci_scripts/push_to_github.sh
