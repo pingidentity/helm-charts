@@ -1,6 +1,20 @@
 # Release Notes
 
-## Release Test (Dec 17, 2021)
+## Release 0.8.4 (Jan 7, 2022)
+
+* Fix an issue that caused installation to fail when enabling `pingtoolkit`
+
+## Release 0.8.3 (Jan 6, 2022)
+
+### Features ###
+- Document [supported values](https://helm.pingidentity.com/config/supported-values)
+### Issues Resolved ###
+* [Issue #233](https://github.com/pingidentity/helm-charts/issues/235) Ingress - semverCompare now retrieves correct K8 version for applying the correct apiVersion
+  ```
+  {{- if semverCompare ">=1.19.x" $top.Capabilities.KubeVersion.Version }}
+  ```
+
+* [Issue #254](https://github.com/pingidentity/helm-charts/issues/254) Update default global.image.tag to 2112
 ## Release 0.8.2 (Dec 17, 2021)
 
 * [Issue #238](https://github.com/pingidentity/helm-charts/issues/238) Added support for running a utility sidecar alongside a product workload

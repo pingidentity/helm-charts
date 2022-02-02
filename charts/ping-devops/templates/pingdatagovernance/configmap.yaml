@@ -1,6 +1,0 @@
-{{- include "pinglib.configmap" (list . "pingdatagovernance") -}}
-
-
-
-{{- define "pingdatagovernance.configmap" -}}
-{{- end -}}

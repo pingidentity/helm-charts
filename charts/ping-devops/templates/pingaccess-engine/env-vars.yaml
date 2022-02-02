@@ -1,0 +1,8 @@
+{{- include "pinglib.env-vars" (list . "pingaccess-engine") -}}
+
+
+
+{{- define "pingaccess-engine.env-vars" -}}
+data:
+  OPERATIONAL_MODE: CLUSTERED_ENGINE
+{{- end -}}

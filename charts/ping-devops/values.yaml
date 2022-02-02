@@ -12,18 +12,20 @@
 ############################################################
 
 ############################################################
-# Global values
+# @section Global values
 ############################################################
 global:
   ############################################################
-  # annotations - Annotations listed, will be added to the
-  #               kubernetes resource
+  # @param    global.annotations Annotations listed, will be
+  # @desc     added to the kubernetes resource
+  # @default  {}
   ############################################################
   annotations: {}
 
   ############################################################
-  # envs - Environment variables listed will be added to the
-  #        global-env-vars configmap.
+  # @param    global.envs Environment variables listed will be
+  # @desc     added to the global-env-vars configmap
+  # @default  {}
   #
   # NOTE: Environment variables listed at the global: level
   #       will actually end up being listed twice in the
@@ -32,8 +34,9 @@ global:
   envs: {}
 
   ############################################################
-  #  addReleaseNameToResource: Provides global ability to add
-  #                            names to kubernetes resources
+  # @param    global.addReleaseNameToResource Provides global ability
+  # @desc     to add names to kubernetes resources. One of `{none, append, prepend}`
+  # @default  prepend
   #                      none: No use of Release.Name
   #                    append: Appends the Release.Name
   #                   prepend: Prepends the Release.Name ** DEFAULT **
@@ -43,10 +46,22 @@ global:
   ############################################################
   # Ingress
   #
-  #          ingress.enabled: {true | false}
-  # ingress.addReleaseToHost: {prepend | append | subdomain | none}
-  #    ingress.defaultDomain: Replaces with "_defaultDomain_" in host fields
-  # ingress.defaultTlsSecret: Replaces with "_defaultTlsSecret_" in tls.secretName
+  # @param    global.ingress.enabled
+  # @default  false
+  #
+  # @param    global.ingress.addReleaseToHost Add release to host.
+  # @desc     One of `{prepend, append, subdomain, none}`
+  # @default  subdomain
+  #
+  # @param    global.ingress.defaultDomain Replaces with
+  # @desc     "_defaultDomain_" in host fields
+  # @default  example.com
+  #
+  # @param    global.ingress.defaultTlsSecret Replaces with
+  # @desc     "_defaultTlsSecret_" in tls.secretName
+  #
+  # @param    global.ingress.annotations
+  # @default  {}
   ############################################################
   ingress:
     enabled: false
@@ -61,20 +76,18 @@ global:
   ############################################################
   # Internal Certificates
   #
-  # If set to true, then an internal certificate secret will
-  # be created along with mount of the certificate in
-  # /run/secrets/internal-cert (creates a tls.crt and tls.key)
+  # @param    global.privateCert.generate If true, then an internal certificate
+  # @desc     secret will be created along with mount of the certificate in
+  # @desc     /run/secrets/internal-cert (creates a tls.crt and tls.key).
+  # @desc     By default the Issuer of the cert will be the service name
+  # @desc     created by the Helm Chart.  Additionally, the ingress hosts,
+  # @desc     if enabled, will be added to the list of X509v3 Subject Alternative Name
+  # @default  false
   #
-  # By default the Issuer of the cert will be the service name
-  # created by the Helm Chart.  Additionally, the ingress hosts,
-  # if enabled, will be added to the list of X509v3 Subject Alternative Name
-  #
-  # Use the additionalHosts and additionalIPs if additional custom
-  # names and ips are needed.
-  #
-  #      privateCert.generate: {true | false}
-  #      privateCert.additionalHosts: {optional array of hosts}
-  #      privateCert.additionalIPs: {optional array of IP Addresses}
+  # @param global.privateCert.additionalHosts Additional hosts for the cert
+  # @default []
+  # @param global.privateCert.additionalIPs Additional IP addresses for the cert
+  # @default []
   ############################################################
   privateCert:
     generate: false
@@ -84,14 +97,17 @@ global:
   ############################################################
   # Master Password Generation
   #
-  # Uses Helm function derivePassword, which uses the master password
-  # specification: https://masterpassword.app/masterpassword-algorithm.pdf
+  # @param    global.masterPassword Uses Helm function derivePassword,
+  # @desc     which uses the master password specification:
+  # @desc     https://masterpassword.app/masterpassword-algorithm.pdf
   #
-  #      masterPassword.enabled: {true | false}
-  #      masterPassword.strength: {master password template: long | maximum}
-  #      masterPassword.name: {defaults to .Release.Name}
-  #      masterPassword.site: {defaults to .Chart.Name}
-  #      masterPassword.secret: {defaults to .Release.Namespace}
+  # @param    global.masterPassword.enabled Enable master password
+  # @default  false
+  #
+  # @param    global.masterPassword.strength Master password template. One of `{long, maximum}`
+  # @param    global.masterPassword.name Defaults to release name
+  # @param    global.masterPassword.site Defaults to chart name
+  # @param    global.masterPassword.secret Defaults to release namespace
   #
   #      masterPassword:
   #        enabled: true
@@ -104,12 +120,18 @@ global:
     enabled: false
 
   ############################################################
-  # Fields used to annotate secret hashicorp vault information
+  # @param    global.vault Hashicorp Vault configuration
   #
-  # These annotations names will be automatically be
-  # appended to the 'vault.hashicorp.com/'
+  # @param    global.vault.enabled Enable Vault
+  # @default  false
+  #
+  # @param    global.vault.hashicorp.annotations Annotation names, which will
+  # @desc     be appended to 'vault.hashicorp.com/' in the annotation
   #
   # https://www.vaultproject.io/docs/platform/k8s/injector/annotations
+  #
+  # @param    global.vault.secrets Vault secrets to pull in
+  # @default  {}
   ############################################################
   vault:
     enabled: false
@@ -135,31 +157,39 @@ global:
   # By default the images uses will be indicated by these
   # variables.  An example might look like:
   #
-  #   pingidentity/pingdataconsole:2111 (November, 2021)
+  #   pingidentity/pingdataconsole:2112 (December, 2021)
   #
   # NOTE: image.name MUST be set in child chart
   #   Example: image.name: pingfederate
+  #
+  # @param    global.image.repository Default image repository
+  # @default  pingidentity
+  #
+  # @param    global.image.tag Default image tag
+  # @default  2112
+  #
+  # @param    global.image.pullPolicy Default image pull policy
+  # @default  IfNotPresent
   ############################################################
   image:
     repository: pingidentity
     name:
-    tag: "2111.1"
+    tag: "2112"
     pullPolicy: IfNotPresent
 
   ############################################################
   # External Images (typically for initContainers)
   #
-  # Provides ability to use external images for various purposes
-  # such as using curl, waitfor, ...  Example below is for use
-  # of the pingtoolkit image used as a waitFor and generation of
-  # private cert initContainers.
-  #
-  # Values found within each external image are copied directly
-  # to the container/initContainer.
+  # @param    global.externalImage Provides ability to use external images
+  # @desc     for various purposes such as using curl, waitfor, etc. A pingtoolkit
+  # @desc     image is included by default for running waitFor and generating
+  # @desc     private cert initContainers. Any values specified on the image
+  # @desc     will be copied directly to the k8s spec for the container.
+  # @default  {pingtoolkit}
   ############################################################
   externalImage:
     pingtoolkit:
-      image: pingidentity/pingtoolkit:2111.1
+      image: pingidentity/pingtoolkit:2112
       imagePullPolicy: IfNotPresent
       resources:
         limits:
@@ -181,32 +211,32 @@ global:
   ############################################################
   # Services
   #
-  # Creates services mapping a port to a targetPort on the
-  # corresponding container.
+  # @param    global.services Services mapping a port to a targetPort on the
+  # @desc     corresponding container
+  # @default  {}
   #
-  # dataService    - If set to true, a ClusterIP service is
-  #                  created reachable within the cluster.
-  #                  A single IP is provided and the service
-  #                  will round-robin across the backend containers.
+  # @param    global.services.clusterExternalDNSHostname
+  # @desc     Value for the external-dns.alpha.kubernetes.io/hostname annotation
+  # @default
   #
-  # clusterService - If set to true, a "headless" service is
-  #                  explicitly specifying "None" for the
-  #                  clusterIP.  DNS requests to this service
-  #                  will provide one of the IPs of the backend
-  #                  containers.
+  # @param    global.services.clusterServiceName If set, then this name will
+  # @desc     be used as the cluster service name (i.e clusterService == true).
   #
-  # containerPort  - Port that is used on the kubernetes container.
+  # @param    global.services.serviceName.dataService If true, a ClusterIP service is
+  # @desc     created reachable within the cluster. A single IP is provided and the
+  # @desc     service will round-robin across the backend containers
   #
-  # servicePort    - Port that is available from the kubernetes service
-  #                  Note: if clusterService=true this port on the
-  #                        cluster service is not really
-  #                        used as headless service always maps through
-  #                        to the container port
+  # @param    global.services.serviceName.clusterService If true, a headless service is
+  # @desc     created, explicitly specifying "None" for the clusterIP.  DNS requests to
+  # @desc     this service will provide one of the IPs of the backend containers
   #
-  # ingressPort    - Port that is available from the kubernetes ingress
+  # @param    global.services.serviceName.containerPort Port on the kubernetes container
   #
-  # clusterServiceName - If set, then this name will be used as the cluster
-  #                      service name (i.e clusterService == true).
+  # @param    global.services.serviceName.servicePort Port available from the kubernetes service.
+  # @desc     If clusterService=true this port on the cluster service is not really
+  # @desc     used, as the headless service always maps through to the container port
+  #
+  # @param    global.services.serviceName.ingressPort Port available from the kubernetes ingress
   #
   # https://kubernetes.io/docs/concepts/services-networking/service/
   ############################################################
@@ -229,31 +259,31 @@ global:
 
 
   ############################################################
-  # Workload
+  # @section Workload values - Deployment and StatefulSet
   #
   # Two workloads supported:
   #  - Deployment
   #  - StatefulSet
   ############################################################
   workload:
-    # Can be Deployment or StatefulSet
+    # @param    global.workload Can be Deployment or StatefulSet
+    # @default  Deployment
     type: Deployment
 
+    # @param global.workload.annotations Workload annotations
     annotations: {}
 
     ############################################################
-    # schedulerName
-    #
-    # Provide the kubernetes default-scheduler, and allow for override
+    # @param    global.workload.schedulerName K8s scheduler
+    # @default  default-scheduler
     #
     # https://kubernetes.io/docs/tasks/extend-kubernetes/configure-multiple-schedulers/
     ############################################################
     schedulerName: default-scheduler
 
     ############################################################
-    # shareProcessNamespace
-    #
-    # Share process namespace between containers in a pod. Disabled by default.
+    # @param    global.workload.shareProcessNamespace Set shareProcessNamespace in the pod spec
+    # @default  false
     #
     # https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/
     ############################################################
@@ -262,8 +292,20 @@ global:
     ############################################################
     # Deployments
     #
-    # Detailed information used to create a deployment specific
-    # workload.
+    # @param    global.workload.deployment Deployment workload configuration
+    #
+    # @param    global.workload.deployment.strategy Deployment pod replacement strategy
+    #
+    # @param    global.workload.deployment.strategy.type Strategy type
+    # @default  RollingUpdate
+    #
+    # @param    global.workload.deployment.strategy.rollingUpdate.maxSurge Max surge,
+    # @desc     only applicable for RollingUpdate type
+    # @default  1
+    #
+    # @param    global.workload.deployment.strategy.rollingUpdate.maxUnavailable Max unavailable,
+    # @desc     only applicable for RollingUpdate type
+    # @default  0
     #
     # https://kubernetes.io/docs/concepts/workloads/controllers/deployment
     ############################################################
@@ -278,23 +320,35 @@ global:
     ############################################################
     # StatefulSets
     #
-    # Detailed information used to create a statefulSet specific
-    # workload.
+    # @param global.workload.statefulSet StatefulSet workload configuration
     #
     # https://kubernetes.io/docs/concepts/workloads/controllers/statefulset
     ############################################################
     statefulSet:
-      # Used for canary testing if n>0
+      # @param    global.workload.statefulSet.partition Used for canary testing if n>0
+      # @default  0
       partition: 0
 
       ############################################################
       # Persistent Volumes
       #
-      # For every volume defined in the volumes list, 3 items will be
-      # created in the StatefulSet
-      #   1. container.volumeMounts - name and mountPath
-      #   2. template.spec.volume - name and persistentVolumeClaim.claimName
-      #   3. spec.volumeClaimTemplates - persistentVolumeClaim
+      # @param    global.workload.statefulSet.persistentvolume.enabled
+      # @desc     Enable persistent volumes
+      # @default  true
+      #
+      # @param    global.workload.statefulSet.persistentvolume.volumes
+      # @desc     For every volume defined in the volumes list, 3 items will be
+      # @desc     created in the StatefulSet:
+      # @desc     1. container.volumeMounts - name and mountPath.
+      # @desc     2. template.spec.volume - name and persistentVolumeClaim.claimName.
+      # @desc     3. spec.volumeClaimTemplates - persistentVolumeClaim.
+      # @default  {out-dir}
+      #
+      # @param    global.workload.statefulSet.persistentvolume.volumes.volumeName.mountPath
+      # @desc     Mount path for the volume
+      #
+      # @param    global.workload.statefulSet.persistentvolume.volumes.volumeName.persistentVolumeClaim
+      # @desc     volumeClaimTemplate
       #
       # https://kubernetes.io/docs/concepts/storage/persistent-volumes/
       ############################################################
@@ -312,14 +366,14 @@ global:
                   storage: 4Gi
 
     ############################################################
-    # securityContext
+    # @param    global.workload.securityContext securityContext for the workload.
+    # @desc     The securityContext defined will be inserted directly into the spec.
+    # @desc     The user (9031) and group (0) represent the current user and group used
+    # @desc     with PingIdentity images (except PingDelegator). The fsGroup is
+    # @desc     required for any workloads that volumeMount a pvc (i.e. StatefulSets)
+    # @default  fsGroup 0, runAsUser 9031, runAsGroup 0
     #
-    # Note: The user (9031) and group (0) represent the current user
-    #       and group used with PingIdentity images (except PingDelegator).
-    #       The fsGroup is set to same as group, however, it can be set to
-    #       any gid number.
-    #       The fsGroup is required for any workloads that volumeMount
-    #       a pvc (i.e. StatefulSets)
+    # Note:
     ############################################################
     securityContext:
       fsGroup: 0
@@ -333,14 +387,18 @@ global:
   ############################################################
   # Container Information
   #
+  # @param global.container Configure the container in the workload Pod spec
+  #
   # https://kubernetes.io/docs/concepts/workloads/controllers/
   ############################################################
   container:
-    # replicaCount - Instructs Deployment/StatefulSet now many containers to run
+    # @param global.container.replicaCount Number of replicas for workload
+    # @default 1
     replicaCount: 1
 
     # resources - Request  0 cpu/0 GB
     #             Limit    4 cpu/0 GB
+    # @param global.container.resources container resources yaml to insert into Pod spec
     resources:
       requests:
         cpu: 0
@@ -348,11 +406,21 @@ global:
       limits:
         cpu: 0
         memory: 0
+    # @param global.container.nodeSelector nodeSelector yaml to insert into Pod spec
+    # @default {}
     nodeSelector: {}
+    # @param global.container.tolerations tolerations yaml to insert into Pod spec
+    # @default []
     tolerations: []
+    # @param global.container.affinity affinity yaml to insert into Pod spec
+    # @default {}
     affinity: {}
+    # @param global.container.terminationGracePeriodSeconds termination grace period
+    # @default 30
     terminationGracePeriodSeconds: 30
 
+    # @param global.container.envFrom envFrom yaml to insert into Pod spec
+    # @default []
     envFrom: []
     # Additional envFrom configmap/secret references can be added
     # envFrom:
@@ -367,6 +435,8 @@ global:
     # container life handlers, allowing for lifecycle events such
     # as postStart and preStop events
     #
+    # @param global.container.lifecycle lifecycle yaml to insert into Pod spec
+    #
     # https://kubernetes.io/docs/tasks/configure-pod-container/attach-handler-lifecycle-event
     ############################################################
     lifecycle: {}
@@ -378,6 +448,9 @@ global:
 
     ############################################################
     # Probes
+    #
+    # @param    global.container.probes probes yaml to insert into Pod spec
+    # @default  liveness, readiness, and startup probes defined
     #
     # Probes have a number of fields that you can use to more precisely control the
     # behavior of liveness and readiness checks.
@@ -412,13 +485,12 @@ global:
         failureThreshold: 90
 
   ############################################################
+  # @section Other global defaults
   # Licensing
   #
-  # license.secret.devOps
-  #    Identify the k8s secret to keep the DevOps USER/KEY if used during deployment.
-  #
-  # NOTE: licenseSecretName can be set in deploying chart values to specify a secret
-  #       with actual product license.  This would override the DevOps secret.
+  # @param    global.license.secret.devOps Identify the k8s secret containing the DevOps
+  # @desc     USER/KEY if used during deployment. pingctl can be used to generate the devops-secret
+  # @default  devops-secret
   #
   # Using pingctl utility (brew install pingctl):
   #    pingctl k8s generate devops-secret | kubectl apply -f -
@@ -427,8 +499,16 @@ global:
     secret:
       devOps: devops-secret
 
-  # Deploy a utility sidecar for running command-line tools.
-  # This does not need to be listed in the includeSidecars value.
+  # @param    global.utilitySidecar Deploy a utility sidecar for running command-line tools.
+  # @desc     This sidecar is useful for command line utilities like collect-support-data. The sidecar
+  # @desc     will remain running alongside the workload, even when the sidecar isn't being used.
+  # @desc     It does not need to be listed in the includeSidecars value.
+  #
+  # @param    global.utilitySidecar.enabled Enable the utility sidecar
+  # @default  false
+  #
+  # @param    global.utilitySidecar.resources Set k8s resources yaml for the sidecar spec
+  # @defaul   1 CPU and 2g memory request and limit
   utilitySidecar:
     enabled: false
     # CSD and other command line tools can require a lot of resources.
@@ -447,22 +527,33 @@ global:
   # At both global and product level, includes of sidecars,
   # initContainers and volumes can be provided.  By default,
   # none are included.
+  #
+  # @param    global.includeSidecars names of sidecars to include, from the top-level `sidecars` value
+  # @default  []
+  #
+  # @param    global.includeInitContainers names of sidecars to include, from the top-level `initContainers` value
+  # @default  []
+  #
+  # @param    global.includeVolumes names of sidecars to include, from the top-level `volumes` value
+  # @default  []
   #############################################################
   includeSidecars: []
   includeInitContainers: []
   includeVolumes: []
 
 #############################################################
+# @section Shared utilities
 # Sidecar Definitions
 #
-# Available sidecar definitions available to product
+# @param    sidecars Sidecar yaml definitions available to product workload spec
+# @default  {}
 #############################################################
 sidecars: {}
 # Example:
 # sidecars:
 #   logger:
 #     name: log-container
-#     image: pingidentity/pingtoolkit:2111
+#     image: pingidentity/pingtoolkit:2112
 #     volumeMounts:
 #       - mountPath: /tmp/logs/
 #         name: logger
@@ -471,21 +562,23 @@ sidecars: {}
 #############################################################
 # InitContainer Definitions
 #
-# Available initContainer definitions available to product
+# @param    initContainers initContainer yaml definitions available to product workload spec
+# @default  {}
 #############################################################
 initContainers: {}
 # Example:
 # initContainers:
 #   init-example:
 #     name: 01-init
-#     image: pingidentity/pingtoolkit:2111
+#     image: pingidentity/pingtoolkit:2112
 #     command: ['sh', '-c', 'echo "InitContainer 1"']
 
 #############################################################
 # Volume Definitions
 #
-# Available volume definitions available to be used within
-# sidecars, initContainers or main product containers
+# @param    volumes volume yaml definitions available to product workload spec
+# @desc     for sidecars, initContainers, or main product containers
+# @default  {}
 #############################################################
 volumes: {}
 # Examples:
@@ -496,8 +589,9 @@ volumes: {}
 #############################################################
 # ConfigMap Definitions
 #
-# Custom ConfigMaps that can be mounted to product containers
-# or sidecar containers.
+# @param    configMaps configMap yaml definitions available to product workload spec
+# @desc     for sidecars or main product containers
+# @default  {}
 #############################################################
 configMaps: {}
 # Example:
@@ -509,11 +603,14 @@ configMaps: {}
 #         ...
 
 #############################################################
-# Image/Product values
+# @section Image/Product values
 #############################################################
 
 #############################################################
-# ldap-sdk-tools values
+# @param    ldap-sdk-tools LDAP SDK tools values
+#
+# @param    ldap-sdk-tools.enabled Enable LDAP SDK tools deployment
+# @default  false
 #############################################################
 ldap-sdk-tools:
   enabled: false
@@ -539,7 +636,10 @@ ldap-sdk-tools:
             - echo
 
 #############################################################
-# pingfederate-admin values
+# @param    pingfederate-admin PingFederate admin values
+#
+# @param    pingfederate-admin.enabled Enable PingFederate admin deployment
+# @default  false
 #############################################################
 pingfederate-admin:
   enabled: false
@@ -617,7 +717,10 @@ pingfederate-admin:
           - pingfederate-admin._defaultDomain_
 
 #############################################################
-# pingfederate-engine values
+# @param    pingfederate-engine PingFederate engine values
+#
+# @param    pingfederate-engine.enabled Enable PingFederate engine deployment
+# @default  false
 #############################################################
 pingfederate-engine:
   enabled: false
@@ -646,9 +749,29 @@ pingfederate-engine:
   # By default this is disabled, since there dependencies to the containers
   # CPU and/or Memory limits.
   #
-  # If enabled, ensure that a proper container.resource.request.cpu limit is set
-  # and coordinated with the a targetCPUUtilizationPercentage or
-  # targetMemoryUtilizationPercentage
+  # @param    pingfederate-engine.clustering.autoscaling Configure Horizontal Pod Autoscaling
+  #
+  # @param    pingfederate-engine.clustering.autoscaling.enabled Enable Horizontal Pod Autoscaling.
+  # @desc     If enabled, ensure that proper pingfederate.container.resources values are set and
+  # @desc     coordinated with the targetCPUUtilizationPercentage or targetMemoryUtilizationPercentage
+  # @default  false
+  #
+  # @param    pingfederate-engine.clustering.autoscaling.minReplicas Autoscaler minimum replicas
+  # @default  1
+  #
+  # @param    pingfederate-engine.clustering.autoscaling.maxReplicas Autoscaler maximum replicas
+  # @default  4
+  #
+  # @param    pingfederate-engine.clustering.autoscaling.targetCPUUtilizationPercentage Target CPU utilization
+  # @default  75
+  #
+  # @param    pingfederate-engine.clustering.autoscaling.targetMemoryUtilizationPercentage Target memory utilization
+  #
+  # @param    pingfederate-engine.clustering.autoscaling.behavior Custom HPA behavior yaml
+  # @default  {}
+  #
+  # @param    pingfederate-engine.clustering.autoscalingMetricsTemplate Custom HPA metrics yaml
+  # @default  []
   #############################################################
   clustering:
     autoscaling:
@@ -718,13 +841,27 @@ pingfederate-engine:
           - pingfederate-engine._defaultDomain_
 
 #############################################################
-# pingdirectory values
+# @param    pingdirectory PingDirectory values
+#
+# @param    pingdirectory.enabled Enable PingDirectory deployment
+# @default  false
 #############################################################
 pingdirectory:
-  # cronjobs run a kubectl exec command to run commands on
-  # a utility sidecar container.
-  # They will also create the necessary ServiceAccount, Role,
-  # and RoleBinding to run the jobs.
+  # @param    pingdirectory.cronjob CronJobs run a kubectl exec command to run commands on
+  # @desc     a utility sidecar container. They will also create the necessary ServiceAccount, Role,
+  # @desc     and RoleBinding to run the jobs
+  #
+  # @param    pingdirectory.cronjob.enabled Enable the PingDirectory CronJob
+  # @default  false
+  #
+  # @param    pingdirectory.cronjob.spec yaml to insert into the created CronJob spec. The jobTemplate
+  # @desc     should not be included. A schedule value must be provided
+  #
+  # @param    pingdirectory.cronjob.image Image to run the Jobs. The image must include kubectl
+  # @default  bitname/kubectl:latest
+  #
+  # @param    pingdirectory.cronjob.args Job arguments
+  # @default  []
   cronjob:
     enabled: false
     spec:
@@ -833,7 +970,10 @@ pingdirectory:
 
 
 #############################################################
-# pingdirectoryproxy values
+# @param    pingdirectoryproxy PingDirectoryProxy values
+#
+# @param    pingdirectoryproxy.enabled Enable PingDirectoryProxy deployment
+# @default  false
 #############################################################
 pingdirectoryproxy:
   enabled: false
@@ -862,7 +1002,10 @@ pingdirectoryproxy:
     clusterServiceName: pingdirectoryproxy-cluster
 
 #############################################################
-# pingdelegator values
+# @param    pingdelegator PingDelegator values
+#
+# @param    pingdelegator.enabled Enable PingDelegator deployment
+# @default  false
 #############################################################
 pingdelegator:
   enabled: false
@@ -909,7 +1052,10 @@ pingdelegator:
           - pingdelegator._defaultDomain_
 
 #############################################################
-# pingdatasync values
+# @param    pingdatasync PingDataSync values
+#
+# @param    pingdatasync.enabled Enable PingDataSync deployment
+# @default  false
 #############################################################
 pingdatasync:
   enabled: false
@@ -938,7 +1084,10 @@ pingdatasync:
     clusterServiceName: pingdatasync-cluster
 
 #############################################################
-# pingauthorize values
+# @param    pingauthorize PingAuthorize values
+#
+# @param    pingauthorize.enabled Enable PingAuthorize deployment
+# @default  false
 #############################################################
 pingauthorize:
   enabled: false
@@ -981,7 +1130,10 @@ pingauthorize:
           - pingauthorize._defaultDomain_
 
 #############################################################
-# pingauthorizepap values
+# @param    pingauthorizepap PingAuthorizePAP values
+#
+# @param    pingauthorizepap.enabled Enable PingAuthorizePAP deployment
+# @default  false
 #############################################################
 pingauthorizepap:
   enabled: false
@@ -1022,7 +1174,10 @@ pingauthorizepap:
           - pingauthorizepap._defaultDomain_
 
 #############################################################
-# pingdatagovernance values
+# @param    pingdatagovernance PingDataGovernance values
+#
+# @param    pingdatagovernance.enabled Enable PingDataGovernance deployment
+# @default  false
 #############################################################
 pingdatagovernance:
   enabled: false
@@ -1065,7 +1220,10 @@ pingdatagovernance:
           - pingdatagovernance._defaultDomain_
 
 #############################################################
-# pingdatagovernancepap values
+# @param    pingdatagovernancepap PingDataGovernancePAP values
+#
+# @param    pingdatagovernancepap.enabled Enable PingDataGovernancePAP deployment
+# @default  false
 #############################################################
 pingdatagovernancepap:
   enabled: false
@@ -1105,7 +1263,10 @@ pingdatagovernancepap:
           - pingdatagovernancepap._defaultDomain_
 
 #############################################################
-# pingaccess-admin values
+# @param    pingaccess-admin PingAccess admin values
+#
+# @param    pingaccess-admin.enabled Enable PingAccess admin deployment
+# @default  false
 #############################################################
 pingaccess-admin:
   enabled: false
@@ -1159,7 +1320,10 @@ pingaccess-admin:
           - pingaccess-admin._defaultDomain_
 
 #############################################################
-# pingaccess-engine values
+# @param    pingaccess-engine PingAccess engine values
+#
+# @param    pingaccess-engine.enabled Enable PingAccess engine deployment
+# @default  false
 #############################################################
 pingaccess-engine:
   enabled: false
@@ -1201,7 +1365,51 @@ pingaccess-engine:
           - pingaccess-engine._defaultDomain_
 
 #############################################################
-# pingdataconsole values
+# @param    pingcentral PingCentral values
+#
+# @param    pingcentral.enabled Enable PingCentral deployment
+# @default  false
+#############################################################
+pingcentral:
+  enabled: false
+  name: pingcentral
+  image:
+    name: pingcentral
+
+  container:
+    resources:
+      requests:
+        cpu: 0
+        memory: .5Gi
+      limits:
+        cpu: 2
+        memory: 2Gi
+
+  services:
+    https:
+      containerPort: 9022
+      servicePort: 9022
+      ingressPort: 443
+      dataService: true
+
+  ingress:
+    hosts:
+      - host: pingcentral._defaultDomain_
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            serviceName: https
+    tls:
+      - secretName: _defaultTlsSecret_
+        hosts:
+          - pingcentral._defaultDomain_
+
+#############################################################
+# @param    pingdataconsole PingDataConsole values
+#
+# @param    pingdataconsole.enabled Enable PingDataConsole deployment
+# @default  false
 #############################################################
 pingdataconsole:
   enabled: false
@@ -1218,6 +1426,16 @@ pingdataconsole:
         cpu: 2
         memory: 2Gi
 
+  # @param    pingdataconsole.defaultLogin Default login details for the console
+  #
+  # @param    pingdataconsole.defaultLogin.server.host Default hostname
+  # @default  pingdirectory-cluster
+  #
+  # @param    pingdataconsole.defaultLogin.server.port Default port
+  # @default  636
+  #
+  # @param    pingdataconsole.defaultLogin.username Default username
+  # @default  administrator
   defaultLogin:
     server:
       host: pingdirectory-cluster
@@ -1245,7 +1463,10 @@ pingdataconsole:
           - pingdataconsole._defaultDomain_
 
 #############################################################
-# pd-replication-timing values
+# @param    pd-replication-timing PingDirectory replication timing values
+#
+# @param    pd-replication-timing.enabled Enable PingDirectory replication timing deployment
+# @default  false
 #############################################################
 pd-replication-timing:
   enabled: false
@@ -1260,7 +1481,10 @@ pd-replication-timing:
     STARTUP_BACKGROUND_OPTS: ""
 
 #############################################################
-# pingtoolkit values
+# @param    pingtoolkit PingToolkit values
+#
+# @param    pingtoolkit.enabled Enable PingToolkit deployment
+# @default  false
 #############################################################
 pingtoolkit:
   enabled: false

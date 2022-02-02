@@ -1,6 +1,0 @@
-{{- include "pinglib.configmap" (list . "pingdatasync") -}}
-
-
-{{- define "pingdatasync.configmap" -}}
-data:
-{{- end -}}

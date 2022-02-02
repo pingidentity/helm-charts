@@ -9,7 +9,7 @@ are created depending on configuration values.
 
 ## Global Section
 
-Default yaml defined in the global ingress section.
+Default yaml defined in the global container section:
 
 ```yaml
 global:
@@ -59,8 +59,8 @@ global:
 
 ## Probes Configuration
 
-[Kubernetes Probes resources](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
-to be added to workloads (i.e. Deployments/StatefulSets).
+[Kubernetes Probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+defined in the `container:` section will be added to workloads (i.e. Deployments/StatefulSets).
 
-The definition of parameters can be found at
-[probe definitions](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes)
+Fields used to configure probes can be found
+[here](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes).
