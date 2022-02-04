@@ -50,24 +50,6 @@ variables:
 #
 ################################################
 # Note: Platform agnostic
-intel.i.checks:
-  stage: initialization
-  script:
-    - ci_scripts/if_readme_only.sh
-  except:
-    variables:
-      - $CI_COMMIT_REF_NAME =~ /^workspace.*/
-      # - $CI_COMMIT_MESSAGE =~ /\[skip build\]/
-
-intel.i.unmerged:
-  stage: initialization
-  script:
-    - ci_scripts/unmerged_changes.sh
-  except:
-    variables:
-      - $CI_COMMIT_REF_NAME =~ /^workspace.*/
-      - $CI_COMMIT_MESSAGE =~ /\[skip build\]/
-
 # intel.i.shellcheck:
 #   stage: initialization
 #   script:
@@ -236,7 +218,8 @@ p.github:
   script:
     - git --version
     - ci_scripts/push_to_github.sh
-    #- ci_scripts/deploy_docs.sh
+  only:
+    - master
 
 ################################################
 #   ______ _____ _   _          _
