@@ -5,6 +5,10 @@
 ###############################################################################
 pingdatagovernancepap:
   enabled: true
+  image:
+    repository: pingidentity
+    name: pingdatagovernancepap
+    tag: "latest"
   container:
     resources:
       requests:
