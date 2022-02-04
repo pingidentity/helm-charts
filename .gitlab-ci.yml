@@ -91,10 +91,10 @@ intel.i.shfmt:
   stage: initialization
   script:
     - ci_scripts/shfmt.sh --diff
-  except:
-    variables:
-      - $CI_COMMIT_REF_NAME =~ /^workspace.*/
-      - $CI_COMMIT_MESSAGE =~ /\[skip build\]/
+  rules:
+    - changes:
+        - ci_scripts/*
+      when: always
 
 ################################################
 #                  SMOKE TESTS
