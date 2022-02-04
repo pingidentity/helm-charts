@@ -97,10 +97,10 @@ if test -n "${file}"; then
     format_file "${file}"
     test $? -ne 0 && num_files_fail_shfmt=$((num_files_fail_shfmt + 1))
 else
-    # For each file in the project, if it starts with a shebang, add it to a list in tmp.
+    # For each file in the project, if it has a ".sh" file extension, add it to a list in tmp.
     # This is used in favor of "shfmt -f ." as shfmt does not consider files with extension
     # .pre, .post, etc. as shell.
-    find "$(pwd)" -type f -not -path '*/\.*' -exec awk 'FNR==1 {if ($0~/^#!/){print FILENAME}}' {} + > tmp
+    find "$(pwd)" -type f -not -path '*/\.*' | grep '.*\.sh$' > tmp
 
     test "${VERBOSE}" = "true" && echo "Files in use:" && cat tmp
 
