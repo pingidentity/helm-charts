@@ -93,6 +93,7 @@ arm.t.pingaccess:
   except:
     variables:
       - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
 
 arm.t.pingauthorize:
   stage: test.smoke
@@ -105,6 +106,7 @@ arm.t.pingauthorize:
   except:
     variables:
       - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
 
 arm.t.pingauthorizepap:
   stage: test.smoke
@@ -117,6 +119,7 @@ arm.t.pingauthorizepap:
   except:
     variables:
       - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
 
 arm.t.pingdataconsole:
   stage: test.smoke
@@ -129,6 +132,7 @@ arm.t.pingdataconsole:
   except:
     variables:
       - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
 
 arm.t.pingdatagovernance:
   stage: test.smoke
@@ -141,6 +145,7 @@ arm.t.pingdatagovernance:
   except:
     variables:
       - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
 
 arm.t.pingdatagovernancepap:
   stage: test.smoke
@@ -153,6 +158,7 @@ arm.t.pingdatagovernancepap:
   except:
     variables:
       - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
 
 arm.t.pingdatasync:
   stage: test.smoke
@@ -177,6 +183,7 @@ arm.t.pingdelegator:
   except:
     variables:
       - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
 
 arm.t.pingdirectory:
   stage: test.smoke
@@ -189,6 +196,7 @@ arm.t.pingdirectory:
   except:
     variables:
       - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
 
 arm.t.pingdirectoryproxy:
   stage: test.smoke
@@ -201,6 +209,7 @@ arm.t.pingdirectoryproxy:
   except:
     variables:
       - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
 
 arm.t.pingfederate:
   stage: test.smoke
@@ -213,6 +222,7 @@ arm.t.pingfederate:
   except:
     variables:
       - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
 
 arm.t.pingtoolkit:
   stage: test.smoke
@@ -225,6 +235,7 @@ arm.t.pingtoolkit:
   except:
     variables:
       - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
 ################################################
 #   _____       _     _ _     _
 #  |  __ \     | |   | (_)   | |
