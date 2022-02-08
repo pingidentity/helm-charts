@@ -171,6 +171,7 @@ arm.t.pingdatasync:
   except:
     variables:
       - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
 
 arm.t.pingdelegator:
   stage: test.smoke
