@@ -35,7 +35,7 @@ function package_chart() {
 
 function upload_packages() {
     echo "Uploading chart packages for ${chart}..."
-    ${cr} upload -o "${GITHUB_OWNER}" -r "${github_repo}" --token "${GITHUB_TOKEN}" --package-path /cr/.chart-packages && sleep 5|| exit 1
+    ${cr} upload -o "${GITHUB_OWNER}" -r "${github_repo}" --token "${GITHUB_TOKEN}" --package-path /cr/.chart-packages && sleep 5 || exit 1
 }
 
 function update_chart_index() {
