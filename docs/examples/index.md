@@ -6,6 +6,7 @@ using the Ping Devops Helm Chart. Please review the [Getting Started Page](../ge
 | Config                           | Description                                          | .yaml                                                                                         |
 | -----------------------------    | ----------------------------------------------       | ------------------------------------------------------------------------                      |
 | Everything                       | Example with most products integrated together       | [everything.yaml](everything.yaml)                                                            |
+| PingCentral                      | PingCentral                                          | [pingcentral.yaml](pingcentral.yaml)                                                          |
 | PingFederate                     | PingFederate Admin Console & Engine                  | [pingfederate.yaml](pingfederate.yaml)                                                        |
 | Simple Sync                      | PingDataSync and PingDirectory                       | [simple-sync.yaml](simple-sync.yaml)                                                          |
 | PingDirectory Backup and Sidecar | PingDirectory with periodic backup and sidecar       | [pingdirectory-periodic-backup.yaml](pingdirectory-backup/pingdirectory-periodic-backup.yaml) |
