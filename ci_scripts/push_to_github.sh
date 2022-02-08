@@ -23,7 +23,7 @@ mkdir -p ~/tmp/build && cd ~/tmp/build || exit 9
 git clone "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
 cd helm-charts || exit 97
 
-git remote add gh_location "https://${GITHUB_OWNER}:${GITHUB_TOKEN}@github.com/pingidentity/helm-charts.git"
+git remote add gh_location "https://${GITHUB_OWNER}:${GITHUB_TOKEN}@github.com/${GITHUB_TARGET_REPO}.git"
 
 if test -n "$CI_COMMIT_TAG"; then
     git push --force gh_location "$CI_COMMIT_TAG"
