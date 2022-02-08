@@ -44,6 +44,7 @@ function update_chart_index() {
 }
 
 function publish_repo() {
+    git status
     git add docs/index.yaml
     release_tag=$(cat "${dir}"/charts/ping-devops/Chart.yaml | grep "version" | awk '{print $2}')
     echo "Release ${release_tag} desired. Checking for conflicts..."
