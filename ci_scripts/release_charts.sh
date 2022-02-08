@@ -40,7 +40,7 @@ function upload_packages() {
 
 function update_chart_index() {
     echo "Generating chart index for ${chart}..."
-    ${cr} index -o "${GITHUB_OWNER}" -r "${github_repo}" -c "${helm_repo}" --token "${GITHUB_TOKEN}" --index-path /cr/index.yaml --package-path /cr/.chart-packages && sleep 5 || exit 1
+    ${cr} index -o "${GITHUB_OWNER}" -r "${github_repo}" -c "${helm_repo}" --token "${GITHUB_TOKEN}" --index-path /cr/index.yaml --package-path /cr/.chart-packages && sleep 10 || exit 1
     rm -rf docs/.chart-packages
 }
 
