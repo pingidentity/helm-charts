@@ -82,114 +82,149 @@ intel.i.shfmt:
 #                  SMOKE TESTS
 ################################################
 
-intel.t.pingaccess:
+arm.t.pingaccess:
   stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
   script:
     - ci_scripts/run_helm_smoke.sh --product pingaccess
   retry: 2
   except:
     variables:
-        - $CI_COMMIT_TAG
+      - $CI_COMMIT_TAG
 
-intel.t.pingauthorize:
+arm.t.pingauthorize:
   stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
   script:
     - ci_scripts/run_helm_smoke.sh --product pingauthorize
   retry: 2
   except:
     variables:
-        - $CI_COMMIT_TAG
+      - $CI_COMMIT_TAG
 
-intel.t.pingauthorizepap:
+arm.t.pingauthorizepap:
   stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
   script:
     - ci_scripts/run_helm_smoke.sh --product pingauthorizepap
   retry: 2
   except:
     variables:
-        - $CI_COMMIT_TAG
+      - $CI_COMMIT_TAG
 
-intel.t.pingdataconsole:
+arm.t.pingdataconsole:
   stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
   script:
     - ci_scripts/run_helm_smoke.sh --product pingdataconsole
   retry: 2
   except:
     variables:
-        - $CI_COMMIT_TAG
+      - $CI_COMMIT_TAG
 
-intel.t.pingdatagovernance:
+arm.t.pingdatagovernance:
   stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
   script:
     - ci_scripts/run_helm_smoke.sh --product pingdatagovernance
   retry: 2
   except:
     variables:
-        - $CI_COMMIT_TAG
+      - $CI_COMMIT_TAG
 
-intel.t.pingdatagovernancepap:
+arm.t.pingdatagovernancepap:
   stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
   script:
     - ci_scripts/run_helm_smoke.sh --product pingdatagovernancepap
   retry: 2
   except:
     variables:
-        - $CI_COMMIT_TAG
+      - $CI_COMMIT_TAG
 
-intel.t.pingdatasync:
+arm.t.pingdatasync:
   stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
   script:
     - ci_scripts/run_helm_smoke.sh --product pingdatasync
   retry: 2
   except:
     variables:
-        - $CI_COMMIT_TAG
+      - $CI_COMMIT_TAG
 
-intel.t.pingdelegator:
+arm.t.pingdelegator:
   stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
   script:
     - ci_scripts/run_helm_smoke.sh --product pingdelegator
   retry: 2
   except:
     variables:
-        - $CI_COMMIT_TAG
+      - $CI_COMMIT_TAG
 
-intel.t.pingdirectory:
+arm.t.pingdirectory:
   stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
   script:
     - ci_scripts/run_helm_smoke.sh --product pingdirectory
   retry: 2
   except:
     variables:
-        - $CI_COMMIT_TAG
+      - $CI_COMMIT_TAG
 
-intel.t.pingdirectoryproxy:
+arm.t.pingdirectoryproxy:
   stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
   script:
     - ci_scripts/run_helm_smoke.sh --product pingdirectoryproxy
   retry: 2
   except:
     variables:
-        - $CI_COMMIT_TAG
+      - $CI_COMMIT_TAG
 
-intel.t.pingfederate:
+arm.t.pingfederate:
   stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
   script:
     - ci_scripts/run_helm_smoke.sh --product pingfederate
   retry: 2
   except:
     variables:
-        - $CI_COMMIT_TAG
+      - $CI_COMMIT_TAG
 
-intel.t.pingtoolkit:
+arm.t.pingtoolkit:
   stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
   script:
     - ci_scripts/run_helm_smoke.sh --product pingtoolkit
   retry: 2
   except:
     variables:
-        - $CI_COMMIT_TAG
-
+      - $CI_COMMIT_TAG
 ################################################
 #   _____       _     _ _     _
 #  |  __ \     | |   | (_)   | |

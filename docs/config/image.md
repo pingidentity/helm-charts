@@ -11,7 +11,7 @@ global:
   image:
     repository: pingidentity
     name:                                 # Set in product section
-    tag: 2112
+    tag: 2201
     pullPolicy: Always
 ```
 

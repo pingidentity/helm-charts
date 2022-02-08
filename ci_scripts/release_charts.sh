@@ -21,7 +21,7 @@ set -x
 dir=$(pwd)
 cr="docker run -v ${dir}/docs:/cr quay.io/helmpack/chart-releaser:v${CR_VERSION}"
 gitlab_repo="https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
-github_repo="helm-charts-test"
+github_repo="helm-charts"
 helm_repo="https://helm.pingidentity.com/"
 chart="charts/ping-devops"
 
