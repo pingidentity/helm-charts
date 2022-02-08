@@ -45,9 +45,12 @@ function update_chart_index() {
 }
 
 function publish_repo() {
+    cd ..
     git status
     sleep 2
     git add docs/index.yaml
+    git status
+    sleep 2
     release_tag=$(cat "${dir}"/charts/ping-devops/Chart.yaml | grep "version" | awk '{print $2}')
     echo "Release ${release_tag} desired. Checking for conflicts..."
     curl --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" "https://${INTERNAL_GITLAB_URL}/api/v4/projects/7116/repository/tags/${release_tag}" > tag.txt || exit
