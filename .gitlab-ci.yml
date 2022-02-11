@@ -380,6 +380,28 @@ intel.pd-repl.liberica:
 
 ################################################
 # The purpose of the integration test below is
+# to verify replication between two
+# instances of PingDirectory
+arm.pd-repl.liberica:
+  stage: test.integration
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_integration.sh --integration-test pd-replicated --helm-chart charts/ping-devops/
+  retry: 1
+  variables:
+    KUBERNETES_CPU_REQUEST: 1900m
+    KUBERNETES_CPU_LIMIT: 1900m
+    KUBERNETES_MEMORY_REQUEST: 3920000000
+    KUBERNETES_MEMORY_LIMIT: 5880000000
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
+################################################
+# The purpose of the integration test below is
 # to verify PingAccess, PingFederate and PingDirectory
 # integrate together into an end to end test
 intel.pa-pf-pd.liberica:
@@ -392,6 +414,28 @@ intel.pa-pf-pd.liberica:
     KUBERNETES_CPU_LIMIT: 2850m
     KUBERNETES_MEMORY_REQUEST: 3920000000
     KUBERNETES_MEMORY_LIMIT: 3920000000
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
+################################################
+# The purpose of the integration test below is
+# to verify PingAccess, PingFederate and PingDirectory
+# integrate together into an end to end test
+arm.pa-pf-pd.liberica:
+  stage: test.integration
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_integration.sh --integration-test pa-pf-pd --helm-chart charts/ping-devops/
+  retry: 1
+  variables:
+    KUBERNETES_CPU_REQUEST: 1900m
+    KUBERNETES_CPU_LIMIT: 1900m
+    KUBERNETES_MEMORY_REQUEST: 3920000000
+    KUBERNETES_MEMORY_LIMIT: 5880000000
   except:
     variables:
       - $CI_COMMIT_TAG
@@ -418,6 +462,28 @@ intel.pds-pd.liberica:
 
 ################################################
 # The purpose of the integration test below is
+# to verify PingDataSync and PingDirectory
+# integrate together into an end to end test
+arm.pds-pd.liberica:
+  stage: test.integration
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_integration.sh --integration-test pds-pd --helm-chart charts/ping-devops/
+  retry: 1
+  variables:
+    KUBERNETES_CPU_REQUEST: 1900m
+    KUBERNETES_CPU_LIMIT: 1900m
+    KUBERNETES_MEMORY_REQUEST: 3920000000
+    KUBERNETES_MEMORY_LIMIT: 5880000000
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
+################################################
+# The purpose of the integration test below is
 # to verify PingDirectoryProxy and PingDirectory
 # integrate together into an end to end test
 intel.pdp-pd.liberica:
@@ -437,6 +503,28 @@ intel.pdp-pd.liberica:
 
 ################################################
 # The purpose of the integration test below is
+# to verify PingDirectoryProxy and PingDirectory
+# integrate together into an end to end test
+arm.pdp-pd.liberica:
+  stage: test.integration
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_integration.sh --integration-test pdp-pd --helm-chart charts/ping-devops/
+  retry: 1
+  variables:
+    KUBERNETES_CPU_REQUEST: 1900m
+    KUBERNETES_CPU_LIMIT: 1900m
+    KUBERNETES_MEMORY_REQUEST: 3920000000
+    KUBERNETES_MEMORY_LIMIT: 3920000000
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
+################################################
+# The purpose of the integration test below is
 # to verify PingAuthorize and PingDirectory
 # integrate together into an end to end test
 intel.paz-pd.liberica:
@@ -449,6 +537,28 @@ intel.paz-pd.liberica:
     KUBERNETES_CPU_LIMIT: 1900m
     KUBERNETES_MEMORY_REQUEST: 3920000000
     KUBERNETES_MEMORY_LIMIT: 3920000000
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
+################################################
+# The purpose of the integration test below is
+# to verify PingAuthorize and PingDirectory
+# integrate together into an end to end test
+arm.paz-pd.liberica:
+  stage: test.integration
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_integration.sh --integration-test paz-pd --helm-chart charts/ping-devops/
+  retry: 1
+  variables:
+    KUBERNETES_CPU_REQUEST: 1900m
+    KUBERNETES_CPU_LIMIT: 1900m
+    KUBERNETES_MEMORY_REQUEST: 3920000000
+    KUBERNETES_MEMORY_LIMIT: 5880000000
   except:
     variables:
       - $CI_COMMIT_TAG
