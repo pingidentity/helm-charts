@@ -15,9 +15,9 @@ The charts use a secret called `devops-secret` to obtain an evaluation license f
 * Eval License - Use your `PING_IDENTITY_DEVOPS_USER/PING_IDENTITY_DEVOPS_KEY` credentials
   along with your `PING_IDENTITY_ACCEPT_EULA` setting.
   * For more information on obtaining credentials click [here](https://devops.pingidentity.com/get-started/devopsRegistration/).
-  * For more information on using `ping-devops` utility click [here](https://devops.pingidentity.com/get-started/pingDevopsUtil/).
+  * For more information on using `pingctl` utility click [here](https://devops.pingidentity.com/get-started/pingctlUtil/).
 
-        ping-devops generate devops-secret | kubectl apply -f -
+        pingctl k8s generate devops-secret | kubectl apply -f -
 
 ## Install Helm 3
 
