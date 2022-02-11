@@ -47,24 +47,22 @@ function update_chart_index() {
 function publish_repo() {
     cd ..
     git status
-    sleep 2
     git add docs/index.yaml
     git status
-    sleep 2
     release_tag=$(cat "${dir}"/charts/ping-devops/Chart.yaml | grep "version" | awk '{print $2}')
     echo "Release ${release_tag} desired. Checking for conflicts..."
     curl --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" "https://${INTERNAL_GITLAB_URL}/api/v4/projects/7116/repository/tags/${release_tag}" > tag.txt || exit
     check_tag=$(cat tag.txt | grep -o "\"404" | head -1 | sed 's/"//g')
     if [[ ${check_tag} == 404 ]]; then
         echo "${release_tag} release tag is available, creating tag..."
-        #git tag "${release_tag}"
+        git tag "${release_tag}"
     else
         echo "Release tag ${release_tag} already exists..."
         exit 1
     fi
-    #git commit --message "Release ${release_tag}"
-    #git push -o ci-skip "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts" HEAD:master
-    #git push --tags "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts" HEAD:master
+    git commit --message "Release ${release_tag}"
+    git push -o ci-skip "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts" HEAD:master
+    git push --tags "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts" HEAD:master
 }
 
 # install cr
