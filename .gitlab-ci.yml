@@ -92,6 +92,7 @@ intel.t.pingaccess:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 arm.t.pingaccess:
   stage: test.smoke
@@ -105,6 +106,7 @@ arm.t.pingaccess:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 intel.t.pingauthorize:
   stage: test.smoke
@@ -115,6 +117,7 @@ intel.t.pingauthorize:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 arm.t.pingauthorize:
   stage: test.smoke
@@ -128,6 +131,7 @@ arm.t.pingauthorize:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 intel.t.pingauthorizepap:
   stage: test.smoke
@@ -138,6 +142,7 @@ intel.t.pingauthorizepap:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 arm.t.pingauthorizepap:
   stage: test.smoke
@@ -151,6 +156,7 @@ arm.t.pingauthorizepap:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 intel.t.pingdataconsole:
   stage: test.smoke
@@ -161,6 +167,7 @@ intel.t.pingdataconsole:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 arm.t.pingdataconsole:
   stage: test.smoke
@@ -174,6 +181,7 @@ arm.t.pingdataconsole:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 intel.t.pingdatagovernance:
   stage: test.smoke
@@ -184,6 +192,7 @@ intel.t.pingdatagovernance:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 arm.t.pingdatagovernance:
   stage: test.smoke
@@ -197,6 +206,7 @@ arm.t.pingdatagovernance:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 intel.t.pingdatagovernancepap:
   stage: test.smoke
@@ -207,6 +217,7 @@ intel.t.pingdatagovernancepap:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 arm.t.pingdatagovernancepap:
   stage: test.smoke
@@ -220,6 +231,7 @@ arm.t.pingdatagovernancepap:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 intel.t.pingdatasync:
   stage: test.smoke
@@ -230,6 +242,7 @@ intel.t.pingdatasync:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 arm.t.pingdatasync:
   stage: test.smoke
@@ -243,6 +256,7 @@ arm.t.pingdatasync:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 intel.t.pingdelegator:
   stage: test.smoke
@@ -253,6 +267,7 @@ intel.t.pingdelegator:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 arm.t.pingdelegator:
   stage: test.smoke
@@ -266,6 +281,7 @@ arm.t.pingdelegator:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 intel.t.pingdirectory:
   stage: test.smoke
@@ -276,6 +292,7 @@ intel.t.pingdirectory:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 arm.t.pingdirectory:
   stage: test.smoke
@@ -289,6 +306,7 @@ arm.t.pingdirectory:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 intel.t.pingdirectoryproxy:
   stage: test.smoke
@@ -299,6 +317,7 @@ intel.t.pingdirectoryproxy:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 arm.t.pingdirectoryproxy:
   stage: test.smoke
@@ -312,6 +331,7 @@ arm.t.pingdirectoryproxy:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 intel.t.pingfederate:
   stage: test.smoke
@@ -322,6 +342,7 @@ intel.t.pingfederate:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 arm.t.pingfederate:
   stage: test.smoke
@@ -335,6 +356,7 @@ arm.t.pingfederate:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 intel.t.pingtoolkit:
   stage: test.smoke
@@ -345,6 +367,7 @@ intel.t.pingtoolkit:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 arm.t.pingtoolkit:
   stage: test.smoke
@@ -358,6 +381,7 @@ arm.t.pingtoolkit:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 ################################################
 # The purpose of the integration test below is
@@ -377,6 +401,7 @@ intel.pd-repl.liberica:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 ################################################
 # The purpose of the integration test below is
@@ -399,6 +424,7 @@ arm.pd-repl.liberica:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 ################################################
 # The purpose of the integration test below is
@@ -418,6 +444,7 @@ intel.pa-pf-pd.liberica:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 ################################################
 # The purpose of the integration test below is
@@ -440,6 +467,7 @@ arm.pa-pf-pd.liberica:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 ################################################
 # The purpose of the integration test below is
@@ -459,6 +487,7 @@ intel.pds-pd.liberica:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 ################################################
 # The purpose of the integration test below is
@@ -481,6 +510,7 @@ arm.pds-pd.liberica:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 ################################################
 # The purpose of the integration test below is
@@ -500,6 +530,7 @@ intel.pdp-pd.liberica:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 ################################################
 # The purpose of the integration test below is
@@ -522,6 +553,7 @@ arm.pdp-pd.liberica:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 ################################################
 # The purpose of the integration test below is
@@ -541,6 +573,7 @@ intel.paz-pd.liberica:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 ################################################
 # The purpose of the integration test below is
@@ -563,6 +596,7 @@ arm.paz-pd.liberica:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
 
 ################################################
 #   _____       _     _ _     _
