@@ -1,6 +1,7 @@
 stages:
   - initialization
   - test.smoke
+  - test.integration
   - publish
   - push
   - final
@@ -82,6 +83,16 @@ intel.i.shfmt:
 #                  SMOKE TESTS
 ################################################
 
+intel.t.pingaccess:
+  stage: test.smoke
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingaccess
+  retry: 2
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
 arm.t.pingaccess:
   stage: test.smoke
   image: $RUNNER_IMAGE_AARCH64
@@ -89,6 +100,16 @@ arm.t.pingaccess:
     - platform=aarch64
   script:
     - ci_scripts/run_helm_smoke.sh --product pingaccess
+  retry: 2
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
+intel.t.pingauthorize:
+  stage: test.smoke
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingauthorize
   retry: 2
   except:
     variables:
@@ -108,6 +129,16 @@ arm.t.pingauthorize:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
 
+intel.t.pingauthorizepap:
+  stage: test.smoke
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingauthorizepap
+  retry: 2
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
 arm.t.pingauthorizepap:
   stage: test.smoke
   image: $RUNNER_IMAGE_AARCH64
@@ -115,6 +146,16 @@ arm.t.pingauthorizepap:
     - platform=aarch64
   script:
     - ci_scripts/run_helm_smoke.sh --product pingauthorizepap
+  retry: 2
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
+intel.t.pingdataconsole:
+  stage: test.smoke
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingdataconsole
   retry: 2
   except:
     variables:
@@ -134,6 +175,16 @@ arm.t.pingdataconsole:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
 
+intel.t.pingdatagovernance:
+  stage: test.smoke
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingdatagovernance
+  retry: 2
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
 arm.t.pingdatagovernance:
   stage: test.smoke
   image: $RUNNER_IMAGE_AARCH64
@@ -141,6 +192,16 @@ arm.t.pingdatagovernance:
     - platform=aarch64
   script:
     - ci_scripts/run_helm_smoke.sh --product pingdatagovernance
+  retry: 2
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
+intel.t.pingdatagovernancepap:
+  stage: test.smoke
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingdatagovernancepap
   retry: 2
   except:
     variables:
@@ -160,6 +221,16 @@ arm.t.pingdatagovernancepap:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
 
+intel.t.pingdatasync:
+  stage: test.smoke
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingdatasync
+  retry: 2
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
 arm.t.pingdatasync:
   stage: test.smoke
   image: $RUNNER_IMAGE_AARCH64
@@ -167,6 +238,16 @@ arm.t.pingdatasync:
     - platform=aarch64
   script:
     - ci_scripts/run_helm_smoke.sh --product pingdatasync
+  retry: 2
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
+intel.t.pingdelegator:
+  stage: test.smoke
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingdelegator
   retry: 2
   except:
     variables:
@@ -186,6 +267,16 @@ arm.t.pingdelegator:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
 
+intel.t.pingdirectory:
+  stage: test.smoke
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingdirectory
+  retry: 2
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
 arm.t.pingdirectory:
   stage: test.smoke
   image: $RUNNER_IMAGE_AARCH64
@@ -193,6 +284,16 @@ arm.t.pingdirectory:
     - platform=aarch64
   script:
     - ci_scripts/run_helm_smoke.sh --product pingdirectory
+  retry: 2
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
+intel.t.pingdirectoryproxy:
+  stage: test.smoke
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingdirectoryproxy
   retry: 2
   except:
     variables:
@@ -212,6 +313,16 @@ arm.t.pingdirectoryproxy:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
 
+intel.t.pingfederate:
+  stage: test.smoke
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingfederate
+  retry: 2
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
 arm.t.pingfederate:
   stage: test.smoke
   image: $RUNNER_IMAGE_AARCH64
@@ -219,6 +330,16 @@ arm.t.pingfederate:
     - platform=aarch64
   script:
     - ci_scripts/run_helm_smoke.sh --product pingfederate
+  retry: 2
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
+intel.t.pingtoolkit:
+  stage: test.smoke
+  script:
+    - ci_scripts/run_helm_smoke.sh --product pingtoolkit
   retry: 2
   except:
     variables:
@@ -237,6 +358,212 @@ arm.t.pingtoolkit:
     variables:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
+
+################################################
+# The purpose of the integration test below is
+# to verify replication between two
+# instances of PingDirectory
+intel.pd-repl.liberica:
+  stage: test.integration
+  script:
+    - ci_scripts/run_helm_integration.sh --integration-test pd-replicated --helm-chart charts/ping-devops/
+  retry: 1
+  variables:
+    KUBERNETES_CPU_REQUEST: 1900m
+    KUBERNETES_CPU_LIMIT: 1900m
+    KUBERNETES_MEMORY_REQUEST: 3920000000
+    KUBERNETES_MEMORY_LIMIT: 3920000000
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
+################################################
+# The purpose of the integration test below is
+# to verify replication between two
+# instances of PingDirectory
+arm.pd-repl.liberica:
+  stage: test.integration
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_integration.sh --integration-test pd-replicated --helm-chart charts/ping-devops/
+  retry: 1
+  variables:
+    KUBERNETES_CPU_REQUEST: 1900m
+    KUBERNETES_CPU_LIMIT: 1900m
+    KUBERNETES_MEMORY_REQUEST: 3920000000
+    KUBERNETES_MEMORY_LIMIT: 5880000000
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
+################################################
+# The purpose of the integration test below is
+# to verify PingAccess, PingFederate and PingDirectory
+# integrate together into an end to end test
+intel.pa-pf-pd.liberica:
+  stage: test.integration
+  script:
+    - ci_scripts/run_helm_integration.sh --integration-test pa-pf-pd --helm-chart charts/ping-devops/
+  retry: 1
+  variables:
+    KUBERNETES_CPU_REQUEST: 2850m
+    KUBERNETES_CPU_LIMIT: 2850m
+    KUBERNETES_MEMORY_REQUEST: 3920000000
+    KUBERNETES_MEMORY_LIMIT: 3920000000
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
+################################################
+# The purpose of the integration test below is
+# to verify PingAccess, PingFederate and PingDirectory
+# integrate together into an end to end test
+arm.pa-pf-pd.liberica:
+  stage: test.integration
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_integration.sh --integration-test pa-pf-pd --helm-chart charts/ping-devops/
+  retry: 1
+  variables:
+    KUBERNETES_CPU_REQUEST: 1900m
+    KUBERNETES_CPU_LIMIT: 1900m
+    KUBERNETES_MEMORY_REQUEST: 3920000000
+    KUBERNETES_MEMORY_LIMIT: 5880000000
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
+################################################
+# The purpose of the integration test below is
+# to verify PingDataSync and PingDirectory
+# integrate together into an end to end test
+intel.pds-pd.liberica:
+  stage: test.integration
+  script:
+    - ci_scripts/run_helm_integration.sh --integration-test pds-pd --helm-chart charts/ping-devops/
+  retry: 1
+  variables:
+    KUBERNETES_CPU_REQUEST: 1900m
+    KUBERNETES_CPU_LIMIT: 1900m
+    KUBERNETES_MEMORY_REQUEST: 3920000000
+    KUBERNETES_MEMORY_LIMIT: 3920000000
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
+################################################
+# The purpose of the integration test below is
+# to verify PingDataSync and PingDirectory
+# integrate together into an end to end test
+arm.pds-pd.liberica:
+  stage: test.integration
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_integration.sh --integration-test pds-pd --helm-chart charts/ping-devops/
+  retry: 1
+  variables:
+    KUBERNETES_CPU_REQUEST: 1900m
+    KUBERNETES_CPU_LIMIT: 1900m
+    KUBERNETES_MEMORY_REQUEST: 3920000000
+    KUBERNETES_MEMORY_LIMIT: 5880000000
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
+################################################
+# The purpose of the integration test below is
+# to verify PingDirectoryProxy and PingDirectory
+# integrate together into an end to end test
+intel.pdp-pd.liberica:
+  stage: test.integration
+  script:
+    - ci_scripts/run_helm_integration.sh --integration-test pdp-pd --helm-chart charts/ping-devops/
+  retry: 1
+  variables:
+    KUBERNETES_CPU_REQUEST: 1900m
+    KUBERNETES_CPU_LIMIT: 1900m
+    KUBERNETES_MEMORY_REQUEST: 3920000000
+    KUBERNETES_MEMORY_LIMIT: 5880000000
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
+################################################
+# The purpose of the integration test below is
+# to verify PingDirectoryProxy and PingDirectory
+# integrate together into an end to end test
+arm.pdp-pd.liberica:
+  stage: test.integration
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_integration.sh --integration-test pdp-pd --helm-chart charts/ping-devops/
+  retry: 1
+  variables:
+    KUBERNETES_CPU_REQUEST: 1900m
+    KUBERNETES_CPU_LIMIT: 1900m
+    KUBERNETES_MEMORY_REQUEST: 3920000000
+    KUBERNETES_MEMORY_LIMIT: 3920000000
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
+################################################
+# The purpose of the integration test below is
+# to verify PingAuthorize and PingDirectory
+# integrate together into an end to end test
+intel.paz-pd.liberica:
+  stage: test.integration
+  script:
+    - ci_scripts/run_helm_integration.sh --integration-test paz-pd --helm-chart charts/ping-devops/
+  retry: 1
+  variables:
+    KUBERNETES_CPU_REQUEST: 1900m
+    KUBERNETES_CPU_LIMIT: 1900m
+    KUBERNETES_MEMORY_REQUEST: 3920000000
+    KUBERNETES_MEMORY_LIMIT: 3920000000
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
+################################################
+# The purpose of the integration test below is
+# to verify PingAuthorize and PingDirectory
+# integrate together into an end to end test
+arm.paz-pd.liberica:
+  stage: test.integration
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_integration.sh --integration-test paz-pd --helm-chart charts/ping-devops/
+  retry: 1
+  variables:
+    KUBERNETES_CPU_REQUEST: 1900m
+    KUBERNETES_CPU_LIMIT: 1900m
+    KUBERNETES_MEMORY_REQUEST: 3920000000
+    KUBERNETES_MEMORY_LIMIT: 5880000000
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+
 ################################################
 #   _____       _     _ _     _
 #  |  __ \     | |   | (_)   | |

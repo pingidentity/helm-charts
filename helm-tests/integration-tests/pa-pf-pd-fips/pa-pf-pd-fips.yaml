@@ -1,0 +1,98 @@
+###############################################################################
+# Ping Identity Test - PingAccess/PingFederate/PingDirectory FIPS Integration Test
+#
+#
+###############################################################################
+pingdirectory:
+  enabled: true
+  envs:
+    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+    SERVER_PROFILE_PATH: FIPS-integration/pingdirectory
+    MAX_HEAP_SIZE: 1g
+    FIPS_MODE_ON: "true"
+    KEYSTORE_FILE: /opt/staging/.sec/private-key.pem
+    KEYSTORE_TYPE: pem
+    TRUSTSTORE_FILE: /opt/staging/.sec/certificate-chain.pem
+    TRUSTSTORE_TYPE: pem
+    CERTIFICATE_NICKNAME: server-cert
+
+pingfederate-admin:
+  enabled: true
+  envs:
+    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+    SERVER_PROFILE_PATH: FIPS-integration/pingfederate
+    HSM_MODE: BCFIPS
+  container:
+    waitFor:
+      pingdirectory:
+        service: ldaps
+
+pingfederate-engine:
+  enabled: true
+  envs:
+    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+    SERVER_PROFILE_PATH: FIPS-integration/pingfederate
+    HSM_MODE: BCFIPS
+
+pingaccess-admin:
+  enabled: true
+  privateCert:
+    generate: true
+  envs:
+    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+    SERVER_PROFILE_PATH: FIPS-integration/pingaccess
+    FIPS_MODE_ON: "true"
+  container:
+    waitFor:
+      pingfederate-engine:
+        service: https
+        timeoutSeconds: 300
+
+pingaccess-engine:
+  enabled: true
+  envs:
+    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+    SERVER_PROFILE_PATH: FIPS-integration/pingaccess
+    FIPS_MODE_ON: "true"
+  container:
+    waitFor:
+      pingdirectory:
+        service: ldaps
+
+###############################################################################
+# Test Steps
+###############################################################################
+testFramework:
+  enabled: true
+  testConfigMaps:
+    # DEFAULTS (found in helm chart values.yaml)
+    # prefix: ping-devops-test-
+    # volumeMountPath: /var/run/
+    files:
+      - pa-pf-pd-fips-helm.postman-collection.json
+      - generated.postman-environment.json
+
+  testSteps:
+    - name: 01-wait-for
+      waitFor:
+        pingfederate-admin:
+          service: https
+        pingfederate-engine:
+          service: https
+        pingaccess-admin:
+          service: https
+        pingaccess-engine:
+          service: https
+        pingdirectory:
+          service: https
+
+    - name: 02-check-pa-pf-pd-fips
+      image: ${DEPS_REGISTRY}arnaudlacour/newman
+      command:
+        - newman
+        - run
+        - /var/run/pa-pf-pd-fips-helm.postman-collection.json
+        - --environment
+        - /var/run/generated.postman-environment.json
+        - --insecure
+        - --ignore-redirects
