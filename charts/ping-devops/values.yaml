@@ -157,7 +157,7 @@ global:
   # By default the images uses will be indicated by these
   # variables.  An example might look like:
   #
-  #   pingidentity/pingdataconsole:2202 (Fedruary, 2202)
+  #   pingidentity/pingdataconsole:2202 (February, 2202)
   #
   # NOTE: image.name MUST be set in child chart
   #   Example: image.name: pingfederate
