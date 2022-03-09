@@ -70,7 +70,7 @@ spec:
 
         {{/*--------------------- Image -------------------------*/}}
         {{- with $v.image }}
-        image: "{{ .repository }}/{{ .name }}:{{ .tag }}"
+        image: "{{ .repository }}:{{ .tag }}"
         imagePullPolicy: {{ .pullPolicy }}
         {{- end }}
 
@@ -161,7 +161,7 @@ spec:
       {{- if $v.utilitySidecar.enabled }}
       - name: utility-sidecar
         {{- with $v.image }}
-        image: "{{ .repository }}/{{ .name }}:{{ .tag }}"
+        image: "{{ .repository }}:{{ .tag }}"
         imagePullPolicy: {{ .pullPolicy }}
         {{- end }}
         command: ["tail"]
