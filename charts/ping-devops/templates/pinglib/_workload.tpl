@@ -70,7 +70,11 @@ spec:
 
         {{/*--------------------- Image -------------------------*/}}
         {{- with $v.image }}
-        image: "{{ .repository }}:{{ .tag }}"
+        {{- if $v.repositoryFqn }}
+        image: "{{ $v.repositoryFqn }}:{{ .tag }}"
+        {{- else }}
+        image: "{{ .repository }}/{{ .name }}:{{ .tag }}"
+        {{- end }}
         imagePullPolicy: {{ .pullPolicy }}
         {{- end }}
 
@@ -161,7 +165,11 @@ spec:
       {{- if $v.utilitySidecar.enabled }}
       - name: utility-sidecar
         {{- with $v.image }}
-        image: "{{ .repository }}:{{ .tag }}"
+        {{- if $v.repositoryFqn }}
+        image: "{{ $v.repositoryFqn }}:{{ .tag }}"
+        {{- else }}
+        image: "{{ .repository }}/{{ .name }}:{{ .tag }}"
+        {{- end }}
         imagePullPolicy: {{ .pullPolicy }}
         {{- end }}
         command: ["tail"]
