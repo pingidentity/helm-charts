@@ -180,7 +180,7 @@ global:
   # @default  IfNotPresent
   ############################################################
   image:
-    registry: pingidentity
+    repository: pingidentity
     repositoryFqn:
     name:
     tag: "2201"
