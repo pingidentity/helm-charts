@@ -1,4 +1,4 @@
 # Release Notes
-## Release 0.8.6 (Mar 3, 2022)
+## Release 0.8.7 (Mar 11, 2022)
 ### Features ###
-  - Default global image tag updated to 2202
+  - Corrected Default global image tag updated to 2202
