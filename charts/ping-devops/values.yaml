@@ -159,11 +159,19 @@ global:
   #
   #   pingidentity/pingdataconsole:2202 (February, 2202)
   #
-  # NOTE: image.name MUST be set in child chart
-  #   Example: image.name: pingfederate
-  #
-  # @param    global.image.repository Default image repository
+  # @param    global.image.repository Default image registry
+  # @desc     is not the fully-qualified name of the image
+  # @desc     Example: image.repository: pingidentity, docker.io, 123.dkr.ecr.us-west-1.amazonaws.com
   # @default  pingidentity
+  #
+  # @param    global.image.repositoryFqn Repository fully-qualified name
+  # @desc     Overrides image.repository and image.name on the pod image spec
+  # @desc     MUST be set in child chart
+  # @desc     Example: image.repositoryFqn: pingidentity/pingfederate, docker.io/my-pingfederate
+  #
+  # @param    global.image.name Default image name
+  # @desc     MUST be set in child chart
+  # @desc     Example: image.name: pingfederate
   #
   # @param    global.image.tag Default image tag
   # @default  2202
@@ -173,6 +181,7 @@ global:
   ############################################################
   image:
     repository: pingidentity
+    repositoryFqn:
     name:
     tag: "2202"
     pullPolicy: IfNotPresent
