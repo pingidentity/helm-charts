@@ -1,9 +1,13 @@
 # Release Notes
 
+## Release 0.8.7 (Mar 11, 2022)
+### Features ###
+  - Corrected Default global image tag updated to 2202
+
 ## Release 0.8.6 (Mar 3, 2022)
 ### Features ###
   - Default global image tag updated to 2202
-  
+
 ## Release 0.8.5 (Feb 7, 2022)
 ### Features ###
   - PingCentral now supported. Example values application found [here](../examples/pingcentral/pingcentral.yaml)
