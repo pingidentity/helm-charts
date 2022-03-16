@@ -164,10 +164,10 @@ global:
   # @desc     Example: image.repository: pingidentity, docker.io, 123.dkr.ecr.us-west-1.amazonaws.com
   # @default  pingidentity
   #
-  # @param    global.image.repositoryFqn Repository fully-qualified name
+  # @param    global.image.repositoryFqn Repository fully-qualified name including the tag
   # @desc     Overrides image.repository and image.name on the pod image spec
   # @desc     MUST be set in child chart
-  # @desc     Example: image.repositoryFqn: pingidentity/pingfederate, docker.io/my-pingfederate
+  # @desc     Example: image.repositoryFqn: pingidentity/pingfederate:latest, docker.io/my-pingfederate:abc123
   #
   # @param    global.image.name Default image name
   # @desc     MUST be set in child chart
