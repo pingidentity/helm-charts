@@ -71,7 +71,7 @@ spec:
         {{/*--------------------- Image -------------------------*/}}
         {{- with $v.image }}
         {{- if $v.repositoryFqn }}
-        image: "{{ $v.repositoryFqn }}:{{ .tag }}"
+        image: "{{ $v.repositoryFqn }}"
         {{- else }}
         image: "{{ .repository }}/{{ .name }}:{{ .tag }}"
         {{- end }}
@@ -166,7 +166,7 @@ spec:
       - name: utility-sidecar
         {{- with $v.image }}
         {{- if $v.repositoryFqn }}
-        image: "{{ $v.repositoryFqn }}:{{ .tag }}"
+        image: "{{ $v.repositoryFqn }}"
         {{- else }}
         image: "{{ .repository }}/{{ .name }}:{{ .tag }}"
         {{- end }}
