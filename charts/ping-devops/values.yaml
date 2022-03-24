@@ -1072,6 +1072,9 @@ pingdatasync:
   image:
     name: pingdatasync
 
+  workload:
+    type: StatefulSet
+
   container:
     resources:
       requests:
