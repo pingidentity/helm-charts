@@ -165,8 +165,10 @@ spec:
       {{- if $v.utilitySidecar.enabled }}
       - name: utility-sidecar
         {{- with $v.image }}
-        {{- if $v.repositoryFqn }}
-        image: "{{ $v.repositoryFqn }}"
+        {{- if $v.utilitySidecar.repositoryFqn }}
+        image: "{{ $v.utilitySidecar.repositoryFqn }}"
+        {{- else if $v.utilitySidecar.image }}        
+        image: "{{ $v.utilitySidecar.image.repository }}/{{ $v.utilitySidecar.image.name }}:{{ $v.utilitySidecar.image.tag }}"
         {{- else }}
         image: "{{ .repository }}/{{ .name }}:{{ .tag }}"
         {{- end }}

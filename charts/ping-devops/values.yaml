@@ -865,6 +865,9 @@ pingdirectory:
   #
   # @param    pingdirectory.cronjob.spec yaml to insert into the created CronJob spec. The jobTemplate
   # @desc     should not be included. A schedule value must be provided
+  # 
+  # @param    pingdirectory.cronjob.jobspec 
+  # @desc     yaml to override default jobTemplate.
   #
   # @param    pingdirectory.cronjob.image Image to run the Jobs. The image must include kubectl
   # @default  bitname/kubectl:latest
@@ -873,13 +876,15 @@ pingdirectory:
   # @default  []
   cronjob:
     enabled: false
-    spec:
+    spec: {}
       # A schedule must be set for cronjobs.
       # Example running once every six hours:
       # schedule: "0 */6 * * *"
-      successfulJobsHistoryLimit: 0
-      failedJobsHistoryLimit: 1
+      # successfulJobsHistoryLimit: 0
+      # failedJobsHistoryLimit: 1
     # The image can be replaced with any desired image that includes kubectl
+
+    jobspec: {}
     image: bitnami/kubectl:latest
     args: []
   enabled: false
