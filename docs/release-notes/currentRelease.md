@@ -1,4 +1,7 @@
 # Release Notes
-## Release 0.8.9 (Mar 17, 2022)
+## Release 0.9.0 (April 01, 2022)
 ### Features ###
-  - Edit from 0.8.8 release. Previously the image fully qualified name also included the image tag, which was then duplicated upon deployment when "tag" value present.
+  - Customizability on Cronjob and Utility Sidecar
+    -   Override jobTemplate in CronJob now available.
+    -   Override image used in utilitySidecar now available.
+  - Updated the default PingDataSync workload in the Ping devops Helm charts to use a StatefulSet rather than a Deployment. This ensures that the sync-state.ldif file is maintained between pod restarts.
