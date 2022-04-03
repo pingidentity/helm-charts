@@ -17,10 +17,17 @@
 global:
   ############################################################
   # @param    global.annotations Annotations listed, will be
-  # @desc     added to the kubernetes resource
+  # @desc     added to all Kubernetes resource
   # @default  {}
   ############################################################
   annotations: {}
+
+  ############################################################
+  # @param    global.labels Labels listed, will be
+  # @desc     added to all Kubernetes resources
+  # @default  {}
+  ############################################################
+  labels: {}
 
   ############################################################
   # @param    global.envs Environment variables listed will be
@@ -655,6 +662,8 @@ pingfederate-admin:
   name: pingfederate-admin
   image:
     name: pingfederate
+  
+  labels: {}
 
   container:
     resources:
@@ -736,6 +745,8 @@ pingfederate-engine:
   name: pingfederate-engine
   image:
     name: pingfederate
+
+  labels: {}
 
   container:
     resources:
@@ -892,6 +903,8 @@ pingdirectory:
   image:
     name: pingdirectory
 
+  labels: {}
+
   container:
     replicaCount: 1
     resources:
@@ -995,6 +1008,8 @@ pingdirectoryproxy:
   image:
     name: pingdirectoryproxy
 
+  labels: {}
+
   container:
     resources:
       requests:
@@ -1026,6 +1041,8 @@ pingdelegator:
   name: pingdelegator
   image:
     name: pingdelegator
+
+  labels: {}
 
   container:
     resources:
@@ -1077,6 +1094,8 @@ pingdatasync:
   image:
     name: pingdatasync
 
+  labels: {}
+
   workload:
     type: StatefulSet
 
@@ -1111,6 +1130,8 @@ pingauthorize:
   name: pingauthorize
   image:
     name: pingauthorize
+
+  labels: {}
 
   container:
     resources:
@@ -1158,6 +1179,8 @@ pingauthorizepap:
   image:
     name: pingauthorizepap
 
+  labels: {}
+
   container:
     resources:
       requests:
@@ -1201,6 +1224,8 @@ pingdatagovernance:
   name: pingdatagovernance
   image:
     name: pingdatagovernance
+
+  labels: {}
 
   container:
     resources:
@@ -1248,6 +1273,8 @@ pingdatagovernancepap:
   image:
     name: pingdatagovernancepap
 
+  labels: {}
+
   container:
     resources:
       requests:
@@ -1290,6 +1317,8 @@ pingaccess-admin:
   name: pingaccess-admin
   image:
     name: pingaccess
+
+  labels: {}
 
   workload:
     type: StatefulSet
@@ -1348,6 +1377,8 @@ pingaccess-engine:
   image:
     name: pingaccess
 
+  labels: {}
+
   container:
     resources:
       requests:
@@ -1393,6 +1424,8 @@ pingcentral:
   image:
     name: pingcentral
 
+  labels: {}
+
   container:
     resources:
       requests:
@@ -1433,6 +1466,8 @@ pingdataconsole:
   name: pingdataconsole
   image:
     name: pingdataconsole
+
+  labels: {}
 
   container:
     resources:
@@ -1491,6 +1526,8 @@ pd-replication-timing:
   image:
     name: pingtoolkit
 
+  labels: {}
+
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: dsreplication-timing
@@ -1508,6 +1545,8 @@ pingtoolkit:
   name: pingtoolkit
   image:
     name: pingtoolkit
+
+  labels: {}
 
 #############################################################
 # testFramework
