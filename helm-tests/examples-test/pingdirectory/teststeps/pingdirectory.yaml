@@ -1,0 +1,12 @@
+
+###############################################################################
+# Test Steps
+###############################################################################
+testFramework:
+  enabled: true
+
+  testSteps:
+    - name: 01-wait-for
+      waitFor:
+        pingdirectory:
+          service: https

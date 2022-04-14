@@ -1,0 +1,19 @@
+
+###############################################################################
+# Test Steps
+###############################################################################
+testFramework:
+  enabled: true
+
+  testSteps:
+    - name: 01-wait-for
+      waitFor:
+        pingfederate-admin:
+          service: https
+        pingfederate-engine:
+          service: https
+        pingaccess-admin:
+          service: https
+        pingaccess-engine:
+          service: https
+
