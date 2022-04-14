@@ -15,6 +15,10 @@ usage() {
 Usage: ${0} {options}
     where {options} include:
 
+    --test-directory
+        The absolute directory to run helm test off of helm-tests. The directory should contain yaml files containing
+        helm chart values.
+
     --integration-test {integration-test-name}
         The name of the integration test to run.  Should be a directory
         in current directory, relative directory off of helm-tests/integration-tests
@@ -61,6 +65,11 @@ _integration_helm_tests_dir="${CI_PROJECT_DIR}/helm-tests/integration-tests"
 
 while test -n "${1}"; do
     case "${1}" in
+        --test-directory)
+            test -z "${2}" && usage "You must specify a test directory if you specify the ${1} option"
+            shift
+            _integration_helm_tests_dir="${CI_PROJECT_DIR}/helm-tests/${1}"
+            ;;
         --integration-test)
             _integration_to_run=""
             test -z "${2}" && usage "You must specify a test if you specify the ${1} option"
