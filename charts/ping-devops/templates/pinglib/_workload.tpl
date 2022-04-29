@@ -70,8 +70,8 @@ spec:
 
         {{/*--------------------- Image -------------------------*/}}
         {{- with $v.image }}
-        {{- if $v.repositoryFqn }}
-        image: "{{ $v.repositoryFqn }}"
+        {{- if .repositoryFqn }}
+        image: "{{ .repositoryFqn }}:{{ .tag }}"
         {{- else }}
         image: "{{ .repository }}/{{ .name }}:{{ .tag }}"
         {{- end }}
