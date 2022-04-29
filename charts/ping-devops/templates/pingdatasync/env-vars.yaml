@@ -2,5 +2,10 @@
 
 
 {{- define "pingdatasync.env-vars" -}}
+{{- $top := index . 0 -}}
 data:
+  ORCHESTRATION_TYPE: KUBERNETES
+  K8S_STATEFUL_SET_NAME: {{ include "pinglib.fullname" . }}
+  K8S_STATEFUL_SET_SERVICE_NAME: {{ include "pinglib.fullclusterservicename" . }}
+  LDAPS_PORT: {{ $top.Values.pingdatasync.services.ldaps.containerPort | quote }}
 {{- end -}}
