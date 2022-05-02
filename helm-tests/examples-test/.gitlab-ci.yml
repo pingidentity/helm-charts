@@ -9,6 +9,7 @@ intel.everything.example:
     - cat pingidentity-devops-getting-started/30-helm/everything.yaml helm-tests/examples-test/everything/teststeps/everythingteststeps.yaml > helm-tests/examples-test/everything/everything.yaml
   script:
     - ci_scripts/run_helm_integration.sh --test-directory examples-test --integration-test everything --helm-chart charts/ping-devops/
+  retry: 2
   variables:
     KUBERNETES_CPU_REQUEST: 1900m
     KUBERNETES_CPU_LIMIT: 1900m
@@ -24,7 +25,7 @@ intel.pd-backup-sidecar.example:
     - cat pingidentity-devops-getting-started/30-helm/pingdirectory-backup/pingdirectory-periodic-backup.yaml helm-tests/examples-test/pd-backup-sidecar/teststeps/pd-backup-sidecar.yaml > helm-tests/examples-test/pd-backup-sidecar/pd-backup-sidecar.yaml
   script:
     - ci_scripts/run_helm_integration.sh --test-directory examples-test --integration-test pd-backup-sidecar --helm-chart charts/ping-devops/
-  retry: 1
+  retry: 2
   variables:
     KUBERNETES_CPU_REQUEST: 1900m
     KUBERNETES_CPU_LIMIT: 1900m
@@ -41,7 +42,7 @@ intel.pingaccess-cluster.example:
     - perl -i -p -e 's/"insert domain name here"/ping-devops.com/g' helm-tests/examples-test/pingaccess-cluster/pingaccess-cluster.yaml
   script:
     - ci_scripts/run_helm_integration.sh --test-directory examples-test --integration-test pingaccess-cluster --helm-chart charts/ping-devops/
-  retry: 1
+  retry: 2
   variables:
     KUBERNETES_CPU_REQUEST: 1900m
     KUBERNETES_CPU_LIMIT: 1900m
@@ -57,7 +58,7 @@ intel.pingdirectory.example:
     - cat pingidentity-devops-getting-started/30-helm/pingdirectory.yaml helm-tests/examples-test/pingdirectory/teststeps/pingdirectory.yaml > helm-tests/examples-test/pingdirectory/pingdirectory.yaml
   script:
     - ci_scripts/run_helm_integration.sh --test-directory examples-test --integration-test pingdirectory --helm-chart charts/ping-devops/
-  retry: 1
+  retry: 2
   variables:
     KUBERNETES_CPU_REQUEST: 1900m
     KUBERNETES_CPU_LIMIT: 1900m
