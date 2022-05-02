@@ -6,7 +6,7 @@ intel.pd-repl.liberica:
   stage: test.integration
   script:
     - ci_scripts/run_helm_integration.sh --integration-test pd-replicated --helm-chart charts/ping-devops/
-  retry: 1
+  retry: 2
   variables:
     KUBERNETES_CPU_REQUEST: 1900m
     KUBERNETES_CPU_LIMIT: 1900m
@@ -29,7 +29,7 @@ arm.pd-repl.liberica:
     - platform=aarch64
   script:
     - ci_scripts/run_helm_integration.sh --integration-test pd-replicated --helm-chart charts/ping-devops/
-  retry: 1
+  retry: 2
   variables:
     KUBERNETES_CPU_REQUEST: 1900m
     KUBERNETES_CPU_LIMIT: 1900m
@@ -49,7 +49,7 @@ intel.pa-pf-pd.liberica:
   stage: test.integration
   script:
     - ci_scripts/run_helm_integration.sh --integration-test pa-pf-pd --helm-chart charts/ping-devops/
-  retry: 1
+  retry: 2
   variables:
     KUBERNETES_CPU_REQUEST: 2850m
     KUBERNETES_CPU_LIMIT: 2850m
@@ -72,7 +72,7 @@ arm.pa-pf-pd.liberica:
     - platform=aarch64
   script:
     - ci_scripts/run_helm_integration.sh --integration-test pa-pf-pd --helm-chart charts/ping-devops/
-  retry: 1
+  retry: 2
   variables:
     KUBERNETES_CPU_REQUEST: 1900m
     KUBERNETES_CPU_LIMIT: 1900m
@@ -92,7 +92,7 @@ intel.pds-pd.liberica:
   stage: test.integration
   script:
     - ci_scripts/run_helm_integration.sh --integration-test pds-pd --helm-chart charts/ping-devops/
-  retry: 1
+  retry: 2
   variables:
     KUBERNETES_CPU_REQUEST: 1900m
     KUBERNETES_CPU_LIMIT: 1900m
@@ -115,7 +115,7 @@ arm.pds-pd.liberica:
     - platform=aarch64
   script:
     - ci_scripts/run_helm_integration.sh --integration-test pds-pd --helm-chart charts/ping-devops/
-  retry: 1
+  retry: 2
   variables:
     KUBERNETES_CPU_REQUEST: 1900m
     KUBERNETES_CPU_LIMIT: 1900m
@@ -135,7 +135,7 @@ intel.pdp-pd.liberica:
   stage: test.integration
   script:
     - ci_scripts/run_helm_integration.sh --integration-test pdp-pd --helm-chart charts/ping-devops/
-  retry: 1
+  retry: 2
   variables:
     KUBERNETES_CPU_REQUEST: 1900m
     KUBERNETES_CPU_LIMIT: 1900m
@@ -158,7 +158,7 @@ arm.pdp-pd.liberica:
     - platform=aarch64
   script:
     - ci_scripts/run_helm_integration.sh --integration-test pdp-pd --helm-chart charts/ping-devops/
-  retry: 1
+  retry: 2
   variables:
     KUBERNETES_CPU_REQUEST: 1900m
     KUBERNETES_CPU_LIMIT: 1900m
@@ -178,7 +178,7 @@ intel.paz-pd.liberica:
   stage: test.integration
   script:
     - ci_scripts/run_helm_integration.sh --integration-test paz-pd --helm-chart charts/ping-devops/
-  retry: 1
+  retry: 2
   variables:
     KUBERNETES_CPU_REQUEST: 1900m
     KUBERNETES_CPU_LIMIT: 1900m
@@ -201,7 +201,7 @@ arm.paz-pd.liberica:
     - platform=aarch64
   script:
     - ci_scripts/run_helm_integration.sh --integration-test paz-pd --helm-chart charts/ping-devops/
-  retry: 1
+  retry: 2
   variables:
     KUBERNETES_CPU_REQUEST: 1900m
     KUBERNETES_CPU_LIMIT: 1900m
@@ -222,7 +222,7 @@ intel.pa-pf-pd-fips.liberica:
   stage: test.integration
   script:
     - ci_scripts/run_helm_integration.sh --integration-test pa-pf-pd-fips --helm-chart charts/ping-devops/
-  retry: 1
+  retry: 2
   variables:
     KUBERNETES_CPU_REQUEST: 2850m
     KUBERNETES_CPU_LIMIT: 2850m
