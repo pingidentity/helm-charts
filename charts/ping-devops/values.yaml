@@ -1011,8 +1011,22 @@ pingdirectoryproxy:
     https:
       servicePort: 443
       containerPort: 1443
+      ingressPort: 443
       dataService: true
     clusterServiceName: pingdirectoryproxy-cluster
+
+  ingress:
+    hosts:
+      - host: pingdirectoryproxy._defaultDomain_
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            serviceName: https
+    tls:
+      - secretName: _defaultTlsSecret_
+        hosts:
+          - pingdirectoryproxy._defaultDomain_
 
 #############################################################
 # @param    pingdelegator PingDelegator values
@@ -1096,8 +1110,22 @@ pingdatasync:
     https:
       servicePort: 443
       containerPort: 1443
+      ingressPort: 443
       dataService: true
     clusterServiceName: pingdatasync-cluster
+
+  ingress:
+    hosts:
+      - host: pingdatasync._defaultDomain_
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            serviceName: https
+    tls:
+      - secretName: _defaultTlsSecret_
+        hosts:
+          - pingdatasync._defaultDomain_
 
 #############################################################
 # @param    pingauthorize PingAuthorize values

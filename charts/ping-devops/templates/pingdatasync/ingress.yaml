@@ -1,0 +1,8 @@
+{{- if (merge (index .Values "pingdatasync") .Values.global).ingress.enabled }}
+{{- include "pinglib.ingress" (list . "pingdatasync") -}}
+{{- end -}}
+
+
+
+{{- define "pingdatasync.ingress" -}}
+{{- end -}}
