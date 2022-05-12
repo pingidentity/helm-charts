@@ -994,6 +994,12 @@ pingdirectoryproxy:
   image:
     name: pingdirectoryproxy
 
+  workload:
+    type: "StatefulSet"
+    statefulSet:
+      persistentvolume:
+        enabled: false
+
   container:
     resources:
       requests:
