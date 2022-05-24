@@ -6,3 +6,6 @@ site/
 
 # mac
 .DS_Store
+
+# IDE
+.idea
