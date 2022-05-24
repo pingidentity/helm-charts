@@ -378,7 +378,8 @@ global:
     # @desc     The securityContext defined will be inserted directly into the spec.
     # @desc     The user (9031) and group (0) represent the current user and group used
     # @desc     with PingIdentity images (except PingDelegator). The fsGroup is
-    # @desc     required for any workloads that volumeMount a pvc (i.e. StatefulSets)
+    # @desc     required for any workloads that volumeMount a pvc (i.e. StatefulSets).
+    # @desc     Set as securityContext: null when no generated securityContext is desired.
     # @default  fsGroup 0, runAsUser 9031, runAsGroup 0
     #
     # Note:
