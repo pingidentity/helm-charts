@@ -192,7 +192,9 @@ spec:
       {{- end }}
 
       {{/*---------------- Security Context -------------*/}}
+      {{- if $v.workload.securityContext }}
       securityContext: {{ toYaml $v.workload.securityContext | nindent 8 }}
+      {{- end }}
 
       {{/*--------------------- Volumes ------------------*/}}
       volumes:
