@@ -69,15 +69,7 @@ spec:
 
 
         {{/*--------------------- Image -------------------------*/}}
-        {{- with $v.image }}
-        {{- if .repositoryFqn }}
-        image: "{{ .repositoryFqn }}:{{ .tag }}"
-        {{- else }}
-        image: "{{ .repository }}/{{ .name }}:{{ .tag }}"
-        {{- end }}
-        imagePullPolicy: {{ .pullPolicy }}
-        {{- end }}
-
+        {{- include "pinglib.workload.image" $v.image | nindent 8 -}}
 
         {{/*--------------------- Command -----------------------*/}}
         {{- with $v.container.command }}
@@ -164,16 +156,13 @@ spec:
 
       {{- if $v.utilitySidecar.enabled }}
       - name: utility-sidecar
-        {{- with $v.image }}
-        {{- if $v.utilitySidecar.repositoryFqn }}
-        image: "{{ $v.utilitySidecar.repositoryFqn }}"
-        {{- else if $v.utilitySidecar.image }}        
-        image: "{{ $v.utilitySidecar.image.repository }}/{{ $v.utilitySidecar.image.name }}:{{ $v.utilitySidecar.image.tag }}"
-        {{- else }}
-        image: "{{ .repository }}/{{ .name }}:{{ .tag }}"
-        {{- end }}
-        imagePullPolicy: {{ .pullPolicy }}
-        {{- end }}
+        {{- if not (empty $v.utilitySidecar.image) -}}
+        {{- $pdImageValues := deepCopy $v.image -}}
+        {{- $mergedImageValues := mergeOverwrite $pdImageValues $v.utilitySidecar.image -}}
+        {{ include "pinglib.workload.image" $mergedImageValues | nindent 8 }}
+        {{ else -}}
+        {{ include "pinglib.workload.image" $v.image | nindent 8 }}
+        {{ end -}}
         command: ["tail"]
         args: ["-f", "/dev/null"]
         {{- if $v.utilitySidecar.resources }}
@@ -262,7 +251,14 @@ spec:
     {{- $timeout := printf "-t %d" (int (default 300 $val.timeoutSeconds )) -}}
     {{- $server := printf "%s:%s" $host $port }}
 - name: {{ print (default "wait-for" $containerName) "-" $prod }}
-  {{ toYaml $v.externalImage.pingtoolkit | nindent 2 }}
+  {{- $globalImageValues := deepCopy $top.Values.global.image -}}
+  {{- $ptkImageValues := deepCopy (index $top.Values "pingtoolkit").image -}}
+  {{- if not (empty $v.externalImage.pingtoolkit.image) }}
+  {{- $ptkImageValues = deepCopy $v.externalImage.pingtoolkit.image -}}
+  {{- end -}}
+  {{- $mergedImageValues := mergeOverwrite $globalImageValues $ptkImageValues -}}
+  {{- include "pinglib.workload.image" $mergedImageValues | nindent 2 -}}
+  {{ toYaml (omit $v.externalImage.pingtoolkit "image") | nindent 2 }}
   command: ['sh', '-c', 'echo "Waiting for {{ $server }}..." && wait-for {{ $server }} {{ $timeout }} -- echo "{{ $server }} running"']
     {{- end }}
   {{- end }}
@@ -273,9 +269,55 @@ spec:
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
 {{- if $v.privateCert.generate }}
+{{- $globalImageValues := deepCopy $top.Values.global.image -}}
 - name: generate-private-cert-init
-  {{ toYaml $v.externalImage.pingtoolkit | nindent 2 }}
   command: ["/bin/sh"]
+  {{- if eq (lower $v.privateCert.format) "pingaccess-fips-pem" }}
+  {{- $paImageValues := deepCopy (index $top.Values "pingaccess-admin").image -}}
+  {{- if not (empty $v.externalImage.pingaccess.image) }}
+  {{- $paImageValues = deepCopy $v.externalImage.pingaccess.image -}}
+  {{- end -}}
+  {{- $mergedImageValues := mergeOverwrite $globalImageValues $paImageValues -}}
+  {{- include "pinglib.workload.image" $mergedImageValues | nindent 2 -}}
+  {{ toYaml (omit $v.externalImage.pingaccess "image") | nindent 2 }}
+  envFrom:
+  - secretRef:
+      name: {{ $v.license.secret.devOps }}
+      optional: true
+  {{/*
+    To generate a PEM certificate with the correct encryption for FIPS mode,
+    use a temporary PingAccess container. The container will pull a license
+    and start up with no server profile. The /keyPairs/generate admin API
+    endpoint will be used to generate a self-signed certificate, and the
+    /keyPairs/{id}/pem endpoint will be used to export that certificate in
+    a format that can be imported by PingAccess when running in FIPS mode.
+  */}}
+  args:
+    - -c
+    - >-
+        _certEnv=/run/secrets/private-keystore/keystore.env &&
+        echo "Generating ${_certEnv}" &&
+        PRIVATE_KEYSTORE_TYPE=pem &&
+        PRIVATE_KEYSTORE_PIN=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32) &&
+        /opt/staging/hooks/01-start-server.sh &&
+        /opt/staging/hooks/10-start-sequence.sh &&
+        ( /opt/out/instance/bin/run.sh > /tmp/pa-output & ) &&
+        ( tail -f /tmp/pa-output & ) | grep -q "PingAccess running" &&
+        curl --silent --show-error --write-out '%{http_code}' --location --connect-timeout 2 --retry 6 --retry-max-time 30 --retry-delay 3 --retry-connrefused --insecure --user "administrator:${PA_ADMIN_PASSWORD_INITIAL}" --header "X-Xsrf-Header: PingAccess" --data "{\"alias\":\"private hostname cert\",\"commonName\":\"{{ $top.Release.Name }}-pingaccess-admin\",\"country\":\"US\",\"keyAlgorithm\":\"RSA\",\"organization\":\"Ping Identity\",\"validDays\":\"365\",\"keySize\":\"2048\"}" --output /tmp/pa.api.request.out https://localhost:9000/pa-admin-api/v3/keyPairs/generate &&
+        _generatedKeyId=$(jq '.id' /tmp/pa.api.request.out) &&
+        curl --silent --show-error --write-out '%{http_code}' --location --connect-timeout 2 --retry 6 --retry-max-time 30 --retry-delay 3 --retry-connrefused --insecure --user "administrator:${PA_ADMIN_PASSWORD_INITIAL}" --header "X-Xsrf-Header: PingAccess" --data "{\"password\":{\"value\":\"${PRIVATE_KEYSTORE_PIN}\"}}" --output /tmp/pa.api.request.out https://localhost:9000/pa-admin-api/v3/keyPairs/${_generatedKeyId}/pem &&
+        PRIVATE_KEYSTORE=$(cat /tmp/pa.api.request.out | base64 | tr -d \\n) &&
+        echo "PRIVATE_KEYSTORE_TYPE=${PRIVATE_KEYSTORE_TYPE}">>${_certEnv} &&
+        echo "PRIVATE_KEYSTORE_PIN=${PRIVATE_KEYSTORE_PIN}">>${_certEnv} &&
+        echo "PRIVATE_KEYSTORE=${PRIVATE_KEYSTORE}">>${_certEnv}
+  {{- else }}
+  {{- $ptkImageValues := deepCopy (index $top.Values "pingtoolkit").image -}}
+  {{- if not (empty $v.externalImage.pingtoolkit.image) }}
+  {{- $ptkImageValues = deepCopy $v.externalImage.pingtoolkit.image -}}
+  {{- end -}}
+  {{- $mergedImageValues := mergeOverwrite $globalImageValues $ptkImageValues -}}
+  {{- include "pinglib.workload.image" $mergedImageValues | nindent 2 -}}
+  {{ toYaml (omit $v.externalImage.pingtoolkit "image") | nindent 2 }}
   args:
     - -c
     - >-
@@ -288,6 +330,7 @@ spec:
         echo "PRIVATE_KEYSTORE_TYPE=${PRIVATE_KEYSTORE_TYPE}">>${_certEnv} &&
         echo "PRIVATE_KEYSTORE_PIN=${PRIVATE_KEYSTORE_PIN}">>${_certEnv} &&
         echo "PRIVATE_KEYSTORE=${PRIVATE_KEYSTORE}">>${_certEnv}
+  {{- end }}
   {{/*--------------------- Resources ------------------*/}}
   volumeMounts:
   - name: private-cert
@@ -350,4 +393,13 @@ spec:
 {{- end }}
 {{- end }}
 {{- end }}
+{{- end -}}
+
+{{- define "pinglib.workload.image" -}}
+{{- if .repositoryFqn }}
+image: "{{ .repositoryFqn }}:{{ .tag }}"
+{{- else }}
+image: "{{ .repository }}/{{ .name }}:{{ .tag }}"
+{{- end }}
+imagePullPolicy: {{ .pullPolicy }}
 {{- end -}}
