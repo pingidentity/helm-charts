@@ -4,6 +4,8 @@
 #
 ###############################################################################
 pingaccess-admin:
+  envs:
+    OPERATIONAL_MODE: "STANDALONE"
   enabled: true
   privateCert:
     generate: true
@@ -17,6 +19,8 @@ pingaccess-admin:
         memory: 2Gi
 
 pingaccess-engine:
+  envs:
+    OPERATIONAL_MODE: "STANDALONE"
   enabled: true
   container:
     resources:
