@@ -62,3 +62,10 @@
     {{- printf "%s" $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
+
+{{/**********************************************************************
+   ** Fail template rendering and dump variable value for debugging.
+   **********************************************************************/}}
+{{- define "pinglib.var_dump" -}}
+{{- . | mustToPrettyJson | printf "\nJSON dumped variable: \n%s" | fail }}
+{{- end -}}

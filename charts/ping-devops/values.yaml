@@ -84,6 +84,12 @@ global:
   # @desc     if enabled, will be added to the list of X509v3 Subject Alternative Name
   # @default  false
   #
+  # @param    global.privateCert.format The format of the certificate to be
+  # @desc     generated. Used "pingaccess-fips-pem" to generate a valid certificate
+  # @desc     for running PingAccess in FIPS mode. Any other value will generate a
+  # @desc     PKCS12 keystore with the generated certificate.
+  # @default  PKCS12
+  #
   # @param global.privateCert.additionalHosts Additional hosts for the cert
   # @default []
   # @param global.privateCert.additionalIPs Additional IP addresses for the cert
@@ -91,6 +97,7 @@ global:
   ############################################################
   privateCert:
     generate: false
+    format: "PKCS12"
     additionalHosts: []
     additionalIPs: []
 
@@ -191,14 +198,19 @@ global:
   # @param    global.externalImage Provides ability to use external images
   # @desc     for various purposes such as using curl, waitfor, etc. A pingtoolkit
   # @desc     image is included by default for running waitFor and generating
-  # @desc     private cert initContainers. Any values specified on the image
-  # @desc     will be copied directly to the k8s spec for the container.
-  # @default  {pingtoolkit}
+  # @desc     private cert initContainers. A pingaccess image is also included by
+  # @desc     default to allow generating an encrypted PEM-formatted cert that is
+  # @desc     compatible with FIPS mode. Any values specified on the image
+  # @desc     will be copied directly to the k8s spec for the container, except
+  # @desc     for the externalImage.{name}.image section, which follows the
+  # @desc     format of the global.image section. If no image section is specified (the default),
+  # @desc     the corresponding value from the product values section will be used.
+  # @desc     For example, if externalImage.pingtoolkit.image is empty,
+  # @desc     the values from the top-level pingtoolkit.image section will be used.
+  # @default  {pingtoolkit, pingaccess}
   ############################################################
   externalImage:
     pingtoolkit:
-      image: pingidentity/pingtoolkit:2204
-      imagePullPolicy: IfNotPresent
       resources:
         limits:
           cpu: 500m
@@ -212,6 +224,19 @@ global:
           drop:
           - ALL
         readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        runAsUser: 9031
+        runAsGroup: 0
+    pingaccess:
+      resources:
+        limits:
+          cpu: 2
+          memory: 4Gi
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
         runAsNonRoot: true
         runAsUser: 9031
         runAsGroup: 0
