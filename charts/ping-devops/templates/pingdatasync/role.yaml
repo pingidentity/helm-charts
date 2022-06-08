@@ -1,0 +1,4 @@
+{{- include "pinglib.rbac.role" (list . "pingdatasync") -}}
+
+{{- define "pingdatasync.rbac.role" -}}
+{{- end -}}

@@ -1,0 +1,4 @@
+{{- include "pinglib.rbac.role-binding" (list . "ldap-sdk-tools") -}}
+
+{{- define "ldap-sdk-tools.rbac.role-binding" -}}
+{{- end -}}

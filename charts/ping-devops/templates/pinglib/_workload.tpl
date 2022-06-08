@@ -40,6 +40,19 @@ spec:
         {{ include "pinglib.selector.labels" . | nindent 8 }}
       annotations:
         {{ include "pinglib.annotations.vault" $v.vault | nindent 8 }}
+        {{/* When a serviceaccount is being generated (either globally or for this specific workload) prefer that
+              account to an account specified in the Vault values. */}}
+        {{- if $v.vault.enabled }}
+          {{- if and (or $top.Values.global.rbac.generateGlobalServiceAccount $v.rbac.generateServiceAccount) $v.rbac.applyServiceAccountToWorkload }}
+        vault.hashicorp.com/serviceAccountName: {{ include "pinglib.rbac.service-account-name" (append . $v.rbac.serviceAccountName) }}
+          {{/* Always set a serviceAccountName annotation for this workload yaml if Vault is enabled. */}}
+          {{- else }}
+            {{- if eq $v.vault.hashicorp.annotations.serviceAccountName "_defaultServiceAccountName_" }}
+              {{- fail "When Vault is enabled and you are not generating a ServiceAccount, you must specify a service account for Vault at vault.hashicorp.annotations.serviceAccountName" }}
+            {{- end }}
+        vault.hashicorp.com/serviceAccountName: {{ include "pinglib.rbac.service-account-name" (append . $v.vault.hashicorp.annotations.serviceAccountName) }}
+          {{- end }}
+        {{- end }}
         {{ $prodChecksum := (include (print $top.Template.BasePath "/" $v.name "/env-vars.yaml") $top | fromYaml).data | toYaml | sha256sum }}
         {{ $globChecksum := (include (print $top.Template.BasePath "/global/env-vars.yaml") $top | fromYaml).data | toYaml | sha256sum }}
         checksum/config: {{ print $prodChecksum $globChecksum | sha256sum }}
@@ -48,8 +61,13 @@ spec:
         {{- end }}
     spec:
       terminationGracePeriodSeconds: {{ $v.container.terminationGracePeriodSeconds }}
-      {{- if $v.vault.enabled }}
-      serviceAccountName: {{ $v.vault.hashicorp.annotations.serviceAccountName }}
+      {{/* When a serviceaccount is being generated (either globally or for this specific workload) prefer that
+            account to an account specified in the Vault values. */}}
+      {{- if and (or $top.Values.global.rbac.generateGlobalServiceAccount $v.rbac.generateServiceAccount) $v.rbac.applyServiceAccountToWorkload }}
+      serviceAccountName: {{ include "pinglib.rbac.service-account-name" (append . $v.rbac.serviceAccountName) }}
+      {{/* Always set a service account for this workload yaml if Vault is enabled. */}}
+      {{- else if $v.vault.enabled }}
+      serviceAccountName: {{ include "pinglib.rbac.service-account-name" (append . $v.vault.hashicorp.annotations.serviceAccountName) }}
       {{- end }}
       nodeSelector: {{ toYaml $v.container.nodeSelector | nindent 8 }}
       tolerations: {{ toYaml $v.container.tolerations | nindent 8 }}
