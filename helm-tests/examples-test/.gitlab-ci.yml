@@ -66,3 +66,19 @@ intel.pingdirectory.example:
     KUBERNETES_MEMORY_LIMIT: 3920000000
   rules:
     - if: $NIGHTLY == "true"
+
+intel.rbac.example:
+  stage: test.examples
+  before_script:
+    - git clone https://github.com/pingidentity/pingidentity-devops-getting-started.git
+    - cat pingidentity-devops-getting-started/30-helm/rbac.yaml helm-tests/examples-test/rbac/teststeps/rbac.yaml > helm-tests/examples-test/rbac/rbac.yaml
+  script:
+    - ci_scripts/run_helm_integration.sh --test-directory examples-test --integration-test rbac --helm-chart charts/ping-devops/
+  retry: 2
+  variables:
+    KUBERNETES_CPU_REQUEST: 1900m
+    KUBERNETES_CPU_LIMIT: 1900m
+    KUBERNETES_MEMORY_REQUEST: 3920000000
+    KUBERNETES_MEMORY_LIMIT: 3920000000
+  rules:
+    - if: $NIGHTLY == "true"
