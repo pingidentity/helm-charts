@@ -1,0 +1,4 @@
+{{- include "pinglib.rbac.role-binding" (list . "pingfederate-engine") -}}
+
+{{- define "pingfederate-engine.rbac.role-binding" -}}
+{{- end -}}

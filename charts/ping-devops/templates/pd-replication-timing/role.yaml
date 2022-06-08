@@ -1,0 +1,4 @@
+{{- include "pinglib.rbac.role" (list . "pd-replication-timing") -}}
+
+{{- define "pd-replication-timing.rbac.role" -}}
+{{- end -}}

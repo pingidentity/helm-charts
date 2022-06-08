@@ -1,0 +1,4 @@
+{{- include "pinglib.rbac.role-binding" (list . "pingaccess-admin") -}}
+
+{{- define "pingaccess-admin.rbac.role-binding" -}}
+{{- end -}}

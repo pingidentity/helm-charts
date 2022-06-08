@@ -19,7 +19,7 @@ vault.hashicorp.com/preserve-secret-case:  {{ ( index . "preserve-secret-case" )
 vault.hashicorp.com/secret-volume-path:  {{ index . "secret-volume-path" | quote }}
 #----------------------------------------------------
 # Additional Vault configuration annotations
-{{- range $annotation, $val := .annotations }}
+{{- range $annotation, $val := (omit .annotations "serviceAccountName") }}
 vault.hashicorp.com/{{ $annotation }}: {{ $val | quote }}
 {{- end -}}
 #----------------------------------------------------

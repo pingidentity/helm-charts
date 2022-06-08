@@ -133,7 +133,10 @@ global:
   # @default  false
   #
   # @param    global.vault.hashicorp.annotations Annotation names, which will
-  # @desc     be appended to 'vault.hashicorp.com/' in the annotation
+  # @desc     be appended to 'vault.hashicorp.com/' in the annotation.
+  # @desc     The vault.hashicorp.annotations.serviceAccountName value will
+  # @desc     be overwritten by the service account generated for the workload
+  # @desc     if there is one.
   #
   # https://www.vaultproject.io/docs/platform/k8s/injector/annotations
   #
@@ -151,7 +154,7 @@ global:
         preserve-secret-case: true
         role: k8s-default
         secret-volume-path: /run/secrets
-        serviceAccountName: vault-auth
+        serviceAccountName: _defaultServiceAccountName_
   #   secrets:
   #     {secret-name}:
   #       {secret-key | to-json}:
@@ -191,6 +194,61 @@ global:
     name:
     tag: "2205"
     pullPolicy: IfNotPresent
+
+  ############################################################
+  # RBAC
+  #
+  # @param    global.rbac.generateServiceAccount
+  # @desc     Set to true to generate a service account for the workload.
+  # @default  false
+  #
+  # @param    global.rbac.serviceAccountName
+  # @desc     Name of the service account that will be generated. The default
+  # @desc     value of "_defaultServiceAccountName_" will result in a service
+  # @desc     account named based on the Helm installation and the specific
+  # @desc     workload being deployed. If generateServiceAccount and
+  # @desc     generateGlobalServiceAccount are false, this value can also refer
+  # @desc     to a service account created outside of Helm.
+  # @default  _defaultServiceAccountName_
+  #
+  # @param    global.rbac.generateRoleAndRoleBinding
+  # @desc     Set to true to generate a Role and RoleBinding corresponding
+  # @desc     to the workload service account.
+  # @default  false
+  #
+  # @param    global.rbac.generateGlobalServiceAccount
+  # @desc     Set to true to generate a service account for the entire installation.
+  # @desc     This global service account will be used for workloads that do not
+  # @desc     generate their own service account.
+  # @default  false
+  #
+  # @param    global.rbac.generateGlobalRoleAndRoleBinding
+  # @desc     Set to true to generate a Role and RoleBinding corresponding
+  # @desc     to the global service account for the entire installation.
+  # @default  false
+  #
+  # @param    global.rbac.applyServiceAccountToWorkload
+  # @desc     Set to true (the default) to apply to service account to the workload.
+  # @default  true
+  #
+  # @param    global.rbac.role
+  # @desc     This yaml will be directly inserted into the generated Role when
+  # @desc     generateRoleAndRoleBinding and/or generateGlobalRoleAndRoleBinding are true.
+  # @desc     The rules for the Role can be set here.
+  # @default  get, watch, and list verbs for the pods resource
+  ############################################################
+  rbac:
+    generateServiceAccount: false
+    serviceAccountName: _defaultServiceAccountName_
+    generateRoleAndRoleBinding: false
+    applyServiceAccountToWorkload: true
+    generateGlobalServiceAccount: false
+    generateGlobalRoleAndRoleBinding: false
+    role:
+      rules:
+      - apiGroups: [""]
+        resources: ["pods"]
+        verbs: ["get", "watch", "list"]
 
   ############################################################
   # External Images (typically for initContainers)
