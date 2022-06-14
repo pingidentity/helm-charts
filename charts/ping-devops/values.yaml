@@ -23,6 +23,13 @@ global:
   annotations: {}
 
   ############################################################
+  # @param    global.labels Labels listed, will be
+  # @desc     added to all Kubernetes resources.
+  # @default  {}
+  ############################################################
+  labels: {}
+
+  ############################################################
   # @param    global.envs Environment variables listed will be
   # @desc     added to the global-env-vars configmap
   # @default  {}
