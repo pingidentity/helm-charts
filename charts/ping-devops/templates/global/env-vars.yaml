@@ -21,6 +21,7 @@ data:
   {{ include "global.private.host.port" (list $top $v "PDP_ENGINE" "pingdirectoryproxy") }}
   {{ include "global.private.host.port" (list $top $v "PF_ENGINE" "pingfederate-engine") }}
   {{ include "global.private.host.port" (list $top $v "PF_ADMIN" "pingfederate-admin") }}
+  {{ include "global.private.host.port" (list $top $v "PI_ASE" "pingintelligence") }}
 
   {{ include "global.public.host.port" (list $top $v "PA_ADMIN" "pingaccess-admin") }}
   {{ include "global.public.host.port" (list $top $v "PA_ENGINE" "pingaccess-engine") }}
@@ -35,4 +36,5 @@ data:
   {{ include "global.public.host.port" (list $top $v "PDP_ENGINE" "pingdirectoryproxy") }}
   {{ include "global.public.host.port" (list $top $v "PF_ENGINE" "pingfederate-engine") }}
   {{ include "global.public.host.port" (list $top $v "PF_ADMIN" "pingfederate-admin") }}
+  {{ include "global.public.host.port" (list $top $v "PI_ASE" "pingintelligence") }}
 {{- end -}}
