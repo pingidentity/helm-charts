@@ -1,0 +1,6 @@
+{{- include "pinglib.env-vars" (list . "pingintelligence") -}}
+
+
+
+{{- define "pingintelligence.env-vars" -}}
+{{- end -}}

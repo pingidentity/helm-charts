@@ -1604,6 +1604,53 @@ pingdataconsole:
           - pingdataconsole._defaultDomain_
 
 #############################################################
+# @param    PingIntelligence values
+#
+# @param    pingintelligence.enabled Enable PingIntelligence deployment
+# @default  false
+#############################################################
+pingintelligence:
+  enabled: false
+  name: pingintelligence
+  image:
+    name: pingintelligence
+  volumes:
+    - name: dshm
+      emptyDir:
+        medium: Memory
+  volumeMounts:
+    - mountPath: /dev/shm
+      name: dshm
+  container:
+    resources:
+      requests:
+        cpu: 0
+        memory: .5Gi
+      limits:
+        cpu: 2
+        memory: 2Gi
+
+  services:
+    https:
+      containerPort: 8010
+      servicePort: 8010
+      ingressPort: 443
+      dataService: true
+
+  ingress:
+    hosts:
+      - host: pingintelligence._defaultDomain_
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              serviceName: https
+    tls:
+      - secretName: _defaultTlsSecret_
+        hosts:
+          - pingintelligence._defaultDomain_
+
+#############################################################
 # @param    pd-replication-timing PingDirectory replication timing values
 #
 # @param    pd-replication-timing.enabled Enable PingDirectory replication timing deployment
