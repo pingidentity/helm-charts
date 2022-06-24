@@ -8,6 +8,10 @@ Helm is a package deployment tool for Kubernetes. It can be used with PingDevops
 * Helm 3
 * Ping Identity DevOps User/Key
 
+!!! info "Openshift support"
+    Ping Helm charts support Openshift.  To see how to configure the values.yaml file to do so, see [this page](config/openshift.md)
+
+
 ## Create Ping DevOps Secret
 
 The charts use a secret called `devops-secret` to obtain an evaluation license for running images.

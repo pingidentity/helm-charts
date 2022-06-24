@@ -190,6 +190,11 @@
     padding-top: 10px;
 }
 
+/* remove bottom navigation */
+.md-footer__inner:not([hidden]) {
+    display: none
+}
+
 div.banner,
 div.iconbox {
     border-color: var(--md-icon-box-border-color);
