@@ -16,6 +16,7 @@ using the Ping Devops Helm Chart. Please review the [Getting Started Page](../ge
 | Ingress                          | Expose an application outside of the cluster   | [ingress.yaml](https://raw.githubusercontent.com/pingidentity/pingidentity-devops-getting-started/master/30-helm/ingress.yaml)                                                                  |
 | Vault                            | Example vault values section                   | [vault.yaml](https://raw.githubusercontent.com/pingidentity/pingidentity-devops-getting-started/master/30-helm/vault.yaml)                                                                      |
 | Cluster Metrics                  | Example values using various open source tools | See .yaml files in [cluster-metrics](https://github.com/pingidentity/pingidentity-devops-getting-started/tree/master/30-helm/cluster-metrics)                                               |
+| RBAC                             | Enable RBAC for workloads                      | [rbac.yaml](https://raw.githubusercontent.com/pingidentity/pingidentity-devops-getting-started/master/30-helm/rbac.yaml)                                               |
 
 ## To Deploy
 
