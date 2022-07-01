@@ -174,7 +174,7 @@ global:
   # By default the images uses will be indicated by these
   # variables.  An example might look like:
   #
-  #   pingidentity/pingdataconsole:2205 (May, 2022)
+  #   pingidentity/pingdataconsole:2206 (June, 2022)
   #
   # @param    global.image.repository Default image registry
   # @desc     is not the fully-qualified name of the image
@@ -190,7 +190,7 @@ global:
   # @desc     Example: image.name: pingfederate
   #
   # @param    global.image.tag Default image tag
-  # @default  2205
+  # @default  2206
   #
   # @param    global.image.pullPolicy Default image pull policy
   # @default  IfNotPresent
@@ -199,7 +199,7 @@ global:
     repository: pingidentity
     repositoryFqn:
     name:
-    tag: "2205"
+    tag: "2206"
     pullPolicy: IfNotPresent
 
   ############################################################
@@ -652,7 +652,7 @@ sidecars: {}
 # sidecars:
 #   logger:
 #     name: log-container
-#     image: pingidentity/pingtoolkit:2205
+#     image: pingidentity/pingtoolkit:2206
 #     volumeMounts:
 #       - mountPath: /tmp/logs/
 #         name: logger
@@ -669,7 +669,7 @@ initContainers: {}
 # initContainers:
 #   init-example:
 #     name: 01-init
-#     image: pingidentity/pingtoolkit:2205
+#     image: pingidentity/pingtoolkit:2206
 #     command: ['sh', '-c', 'echo "InitContainer 1"']
 
 #############################################################
