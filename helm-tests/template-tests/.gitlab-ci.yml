@@ -1,0 +1,12 @@
+################################################
+#            HELM TEMPLATE TESTS
+################################################
+intel.t.helmtemplatetest:
+  stage: test.template
+  script:
+    - ci_scripts/run_helm_template_tests.sh
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+      - $RELEASE == "true"

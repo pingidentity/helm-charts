@@ -1,0 +1,43 @@
+# This test verifies that you can remove the securityContext
+# from the pod spec by setting it to null in your values.
+# This is necessary to deploy the Helm charts on OpenShift
+
+### SECTION:PARAMETERS ###
+skipTest: false
+### SECTION:VALUES ###
+# This is not specific to any particular product
+pingdirectory:
+  enabled: true
+  workload:
+    securityContext: null
+### SECTION:UNEXPECTED ###
+# Validate that no securityContext fields are set on the StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: openshift-securitycontext-pingdirectory
+spec:
+  template:
+    spec:
+      securityContext:
+        fsGroup: 0
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: openshift-securitycontext-pingdirectory
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsGroup: 0
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: openshift-securitycontext-pingdirectory
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsUser: 9031
