@@ -1,0 +1,60 @@
+# This test is meant to show a simple example of how to format
+# a test file for the test_helm_template.py script.
+
+### SECTION:PARAMETERS ###
+# If the releaseName parameter is not set, then a default release name
+# matching the name of the file (without the extension) will be used.
+releaseName: sampletest
+# Set skipTest to true to make the script skip this test
+skipTest: false
+### SECTION:VALUES ###
+# Set typical Helm values here
+pingdataconsole:
+  enabled: true
+### SECTION:EXPECTED ###
+# Validate that one replica is created in the PDC Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sampletest-pingdataconsole
+spec:
+  replicas: 1
+---
+# Validate that the correct port is included in the PDC Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: sampletest-pingdataconsole
+spec:
+  ports:
+  - name: https
+    port: 8443
+    protocol: TCP
+    targetPort: 8443
+---
+### SECTION:UNEXPECTED ###
+# Validate that the PDC container does not have imagePullPolicy set to Always
+
+# Note that for Unexpected sections you should ensure that the apiVersion, kind,
+# and metadata.name are correct. Otherwise you won't actually be testing that
+# the other fields are not present.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sampletest-pingdataconsole
+spec:
+  template:
+    spec:
+      containers:
+      - imagePullPolicy: Always
+---
+# Validate that the Deployment security context does not use runAsUser: 0
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sampletest-pingdataconsole
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsUser: 0

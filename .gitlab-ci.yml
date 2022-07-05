@@ -1,10 +1,12 @@
 include:
+  - local: helm-tests/template-tests/.gitlab-ci.yml
   - local: helm-tests/integration-tests/.gitlab-ci.yml
   - local: helm-tests/smoke-tests/.gitlab-ci.yml
   - local: helm-tests/examples-test/.gitlab-ci.yml
 
 stages:
   - initialization
+  - test.template
   - test.smoke
   - test.integration
   - test.examples
