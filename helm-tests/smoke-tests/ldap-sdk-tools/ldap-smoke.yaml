@@ -23,10 +23,3 @@ testFramework:
       waitFor:
         ldap-sdk-tools:
           service: https
-
-    - name: 02-ldapsearch
-        command: [ "/bin/sh" ]
-        args:
-          - -c
-          - >-
-            /opt/tools/ldapsearch --help
