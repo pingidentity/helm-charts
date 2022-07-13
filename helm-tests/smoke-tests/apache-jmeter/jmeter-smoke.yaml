@@ -19,7 +19,10 @@ testFramework:
       - global-init-test.sh
 
   testSteps:
-    - name: 01-wait-for
-      waitFor:
-        apache-jmeter:
-          service: https
+    - name: 01-jmeter
+        image: ${DEPS_REGISTRY}pingidentity/apache-jmeter
+        command: [ "/bin/sh" ]
+        args:
+          - -c
+          - >-
+            /opt/out/instance/bin/run.sh --help
