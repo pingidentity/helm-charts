@@ -51,6 +51,22 @@ intel.pingaccess-cluster.example:
   rules:
     - if: $NIGHTLY == "true"
 
+intel.pingauthorize-pingdirectory.example:
+  stage: test.examples
+  before_script:
+    - git clone https://github.com/pingidentity/pingidentity-devops-getting-started.git
+    - cat pingidentity-devops-getting-started/30-helm/pingauthorize-pingdirectory.yaml helm-tests/examples-test/pingauthorize-pingdirectory/teststeps/pingauthorize-pingdirectory.yaml > helm-tests/examples-test/pingauthorize-pingdirectory/pingauthorize-pingdirectory.yaml
+  script:
+    - ci_scripts/run_helm_integration.sh --test-directory examples-test --integration-test pingauthorize-pingdirectory --helm-chart charts/ping-devops/
+  retry: 2
+  variables:
+    KUBERNETES_CPU_REQUEST: 1900m
+    KUBERNETES_CPU_LIMIT: 1900m
+    KUBERNETES_MEMORY_REQUEST: 3920000000
+    KUBERNETES_MEMORY_LIMIT: 3920000000
+  rules:
+    - if: $NIGHTLY == "true"
+
 intel.pingdirectory.example:
   stage: test.examples
   before_script:
@@ -58,6 +74,22 @@ intel.pingdirectory.example:
     - cat pingidentity-devops-getting-started/30-helm/pingdirectory.yaml helm-tests/examples-test/pingdirectory/teststeps/pingdirectory.yaml > helm-tests/examples-test/pingdirectory/pingdirectory.yaml
   script:
     - ci_scripts/run_helm_integration.sh --test-directory examples-test --integration-test pingdirectory --helm-chart charts/ping-devops/
+  retry: 2
+  variables:
+    KUBERNETES_CPU_REQUEST: 1900m
+    KUBERNETES_CPU_LIMIT: 1900m
+    KUBERNETES_MEMORY_REQUEST: 3920000000
+    KUBERNETES_MEMORY_LIMIT: 3920000000
+  rules:
+    - if: $NIGHTLY == "true"
+
+intel.pingdatasync-failover.example:
+  stage: test.examples
+  before_script:
+    - git clone https://github.com/pingidentity/pingidentity-devops-getting-started.git
+    - cat pingidentity-devops-getting-started/30-helm/pingdatasync-failover.yaml helm-tests/examples-test/pingdatasync-failover/teststeps/pingdatasync-failover.yaml > helm-tests/examples-test/pingdatasync-failover/pingdatasync-failover.yaml
+  script:
+    - ci_scripts/run_helm_integration.sh --test-directory examples-test --integration-test pingdatasync-failover --helm-chart charts/ping-devops/
   retry: 2
   variables:
     KUBERNETES_CPU_REQUEST: 1900m
