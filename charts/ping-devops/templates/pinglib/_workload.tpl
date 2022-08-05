@@ -43,7 +43,7 @@ spec:
         {{/* When a serviceaccount is being generated (either globally or for this specific workload) prefer that
               account to an account specified in the Vault values. */}}
         {{- if $v.vault.enabled }}
-          {{- if and (or $top.Values.global.rbac.generateGlobalServiceAccount $v.rbac.generateServiceAccount) $v.rbac.applyServiceAccountToWorkload }}
+          {{- if include "pinglib.rbac.should-apply-service-account" . }}
         vault.hashicorp.com/serviceAccountName: {{ include "pinglib.rbac.service-account-name" (append . $v.rbac.serviceAccountName) }}
           {{/* Always set a serviceAccountName annotation for this workload yaml if Vault is enabled. */}}
           {{- else }}
@@ -63,7 +63,7 @@ spec:
       terminationGracePeriodSeconds: {{ $v.container.terminationGracePeriodSeconds }}
       {{/* When a serviceaccount is being generated (either globally or for this specific workload) prefer that
             account to an account specified in the Vault values. */}}
-      {{- if and (or $top.Values.global.rbac.generateGlobalServiceAccount $v.rbac.generateServiceAccount) $v.rbac.applyServiceAccountToWorkload }}
+      {{- if include "pinglib.rbac.should-apply-service-account" . }}
       serviceAccountName: {{ include "pinglib.rbac.service-account-name" (append . $v.rbac.serviceAccountName) }}
       {{/* Always set a service account for this workload yaml if Vault is enabled. */}}
       {{- else if $v.vault.enabled }}
