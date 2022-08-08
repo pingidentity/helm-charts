@@ -28,6 +28,19 @@ chart="charts/ping-devops"
 git clone -b "${CI_COMMIT_BRANCH}" "${gitlab_repo}"
 cd helm-charts || exit
 
+function check_for_existing_tag() {
+    release_tag=$(cat "${dir}"/charts/ping-devops/Chart.yaml | grep "version" | awk '{print $2}')
+    echo "Release ${release_tag} desired. Checking for conflicts..."
+    curl --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" "https://${INTERNAL_GITLAB_URL}/api/v4/projects/7116/repository/tags/${release_tag}" > tag.txt || exit
+    check_tag=$(cat tag.txt | grep -o "\"404" | head -1 | sed 's/"//g')
+    if [[ ${check_tag} == 404 ]]; then
+        echo "${release_tag} release tag is available..."
+    else
+        echo "Release tag ${release_tag} already exists..."
+        exit 1
+    fi
+}
+
 function package_chart() {
     echo "Packaging chart '${chart}'..."
     helm package "${dir}"/"${chart}" --destination "${dir}"/docs/.chart-packages || exit 1
@@ -49,17 +62,7 @@ function publish_repo() {
     git status
     git add docs/index.yaml
     git status
-    release_tag=$(cat "${dir}"/charts/ping-devops/Chart.yaml | grep "version" | awk '{print $2}')
-    echo "Release ${release_tag} desired. Checking for conflicts..."
-    curl --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" "https://${INTERNAL_GITLAB_URL}/api/v4/projects/7116/repository/tags/${release_tag}" > tag.txt || exit
-    check_tag=$(cat tag.txt | grep -o "\"404" | head -1 | sed 's/"//g')
-    if [[ ${check_tag} == 404 ]]; then
-        echo "${release_tag} release tag is available, creating tag..."
-        git tag "${release_tag}"
-    else
-        echo "Release tag ${release_tag} already exists..."
-        exit 1
-    fi
+    git tag "${release_tag}"
     git commit --message "Release ${release_tag}"
     git push -o ci-skip "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts" HEAD:master
     git push --tags "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts" HEAD:master
@@ -68,6 +71,7 @@ function publish_repo() {
 # install cr
 docker pull quay.io/helmpack/chart-releaser:v"${CR_VERSION}"
 
+check_for_existing_tag
 package_chart ${chart}
 upload_packages
 update_chart_index
