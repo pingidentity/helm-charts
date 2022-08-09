@@ -104,6 +104,7 @@ intel.rbac.example:
   before_script:
     - git clone https://github.com/pingidentity/pingidentity-devops-getting-started.git
     - cat pingidentity-devops-getting-started/30-helm/rbac.yaml helm-tests/examples-test/rbac/teststeps/rbac.yaml > helm-tests/examples-test/rbac/rbac.yaml
+    - perl -i -p -e 's/custom-service-account/default/g' helm-tests/examples-test/rbac/rbac.yaml
   script:
     - ci_scripts/run_helm_integration.sh --test-directory examples-test --integration-test rbac --helm-chart charts/ping-devops/
   retry: 2

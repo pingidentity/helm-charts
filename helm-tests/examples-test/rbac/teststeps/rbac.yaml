@@ -16,3 +16,5 @@ testFramework:
           service: https
         pingdirectory:
           service: https
+        pingauthorize:
+          service: https
