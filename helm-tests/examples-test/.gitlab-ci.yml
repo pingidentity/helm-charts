@@ -34,14 +34,14 @@ intel.pd-backup-sidecar.example:
   rules:
     - if: $NIGHTLY == "true"
 
-intel.pingaccess-cluster.example:
+intel.pingaccess-pingfederate-integration.example:
   stage: test.examples
   before_script:
     - git clone https://github.com/pingidentity/pingidentity-devops-getting-started.git
-    - cat pingidentity-devops-getting-started/30-helm/pingaccess-cluster.yaml helm-tests/examples-test/pingaccess-cluster/teststeps/pingaccess-cluster.yaml > helm-tests/examples-test/pingaccess-cluster/pingaccess-cluster.yaml
-    - perl -i -p -e 's/"insert domain name here"/ping-devops.com/g' helm-tests/examples-test/pingaccess-cluster/pingaccess-cluster.yaml
+    - cat pingidentity-devops-getting-started/30-helm/pingaccess-pingfederate-integration.yaml helm-tests/examples-test/pingaccess-pingfederate-integration/teststeps/pingaccess-pingfederate.yaml > helm-tests/examples-test/pingaccess-pingfederate-integration/pingaccess-pingfederate.yaml
+    - perl -i -p -e 's/"insert domain name here"/ping-devops.com/g' helm-tests/examples-test/pingaccess-pingfederate-integration/pingaccess-pingfederate.yaml
   script:
-    - ci_scripts/run_helm_integration.sh --test-directory examples-test --integration-test pingaccess-cluster --helm-chart charts/ping-devops/
+    - ci_scripts/run_helm_integration.sh --test-directory examples-test --integration-test pingaccess-pingfederate-integration --helm-chart charts/ping-devops/
   retry: 2
   variables:
     KUBERNETES_CPU_REQUEST: 1900m
