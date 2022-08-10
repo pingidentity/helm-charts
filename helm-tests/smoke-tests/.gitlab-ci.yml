@@ -323,3 +323,28 @@ intel.t.pingintelligence:
       - $CI_COMMIT_TAG
       - $SKIP_TESTS == "true"
       - $RELEASE == "true"
+
+intel.t.ldap-sdk-tools:
+  stage: test.smoke
+  script:
+    - ci_scripts/run_helm_smoke.sh --product ldap-sdk-tools
+  retry: 2
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
+
+arm.t.ldap-sdk-tools:
+  stage: test.smoke
+  image: $RUNNER_IMAGE_AARCH64
+  tags:
+    - platform=aarch64
+  script:
+    - ci_scripts/run_helm_smoke.sh --product ldap-sdk-tools
+  retry: 2
+  except:
+    variables:
+      - $CI_COMMIT_TAG
+      - $SKIP_TESTS == "true"
+      - $RELEASE == "true"
