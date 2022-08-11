@@ -1,0 +1,37 @@
+# This test is meant to show a simple example of how to include topologySpreadConstraints 
+# in your format with a test file for the test_helm_template.py script.
+
+### SECTION:PARAMETERS ###
+# If the releaseName parameter is not set, then a default release name
+# matching the name of the file (without the extension) will be used.
+releaseName: topologytest
+# Set skipTest to true to make the script skip this test
+skipTest: false
+### SECTION:VALUES ###
+pingdataconsole:
+  enabled: true
+global:
+  workload:
+    topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: node
+      whenUnsatisfiable: ScheduleAnyway
+      matchLabels:
+        foo: bar
+### SECTION:EXPECTED ###
+# Validate that one replica is created in the PDC Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: topologytest-pingdataconsole
+spec:
+  replicas: 1
+  template:
+    spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: node
+        whenUnsatisfiable: ScheduleAnyway
+        matchLabels:
+          foo: bar
+---

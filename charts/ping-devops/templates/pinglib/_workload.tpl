@@ -74,6 +74,7 @@ spec:
       affinity: {{ toYaml $v.container.affinity | nindent 8 }}
       schedulerName: {{ $v.workload.schedulerName }}
       shareProcessNamespace: {{ $v.workload.shareProcessNamespace }}
+      topologySpreadConstraints: {{ toYaml $v.workload.topologySpreadConstraints | nindent 8 }}
       initContainers:
       {{ include "pinglib.workload.init.waitfor" (concat . (list $v.container.waitFor "")) | nindent 6 }}
       {{ include "pinglib.workload.init.genPrivateCert" . | nindent 6 }}

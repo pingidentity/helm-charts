@@ -388,6 +388,14 @@ global:
     shareProcessNamespace: false
 
     ############################################################
+    # @param    global.workload.spec.template.spec.topologySpreadConstraints Configuration of pod spread across cluster zones
+    # @default  []
+    #
+    # https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+    ############################################################
+    topologySpreadConstraints: []
+
+    ############################################################
     # Deployments
     #
     # @param    global.workload.deployment Deployment workload configuration
