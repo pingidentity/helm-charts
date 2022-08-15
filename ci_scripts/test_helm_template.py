@@ -113,6 +113,12 @@ def printVerbose(message):
     if verbose:
         print(message)
 
+def printActualTemplate():
+    print("helm template output:")
+    with open('/tmp/template.yaml', 'r') as template:
+        for line in template:
+            print(line.rstrip())
+
 class Section(enum.Enum):
     params = 1
     values = 2
@@ -181,6 +187,10 @@ def versionKindNameMatch(obj1, obj2):
 
 # Check if expected values in a yaml block are included in another block
 def expectedValuesFound(actual, expected):
+    # If the elements are just simple strings, compare them here
+    if type(actual) is str and type(expected) is str:
+        return actual == expected
+
     simpleKeys = []
     for key in list(expected):
         if key not in actual or type(expected[key]) != type(actual[key]):
@@ -230,7 +240,8 @@ args = parseArgs()
 operation = args.get("--operation")
 testFile = args.get("--test-file")
 retainTmpFiles = args.get("--retain-temp-files")
-verbose = args.get("--retain-temp-files")
+if "--verbose" in args:
+    verbose = True
 
 if operation == Operation.help:
     printHelp()
@@ -291,6 +302,7 @@ if operation == Operation.test:
         if not matchFound(template, block, False):
             print("No match found for expected block:")
             print(str(block))
+            printActualTemplate()
             exit("Exiting as no match was found for an expected block")
 
     printVerbose("Verifying that a match is not found for any unexpected block...")
@@ -298,6 +310,7 @@ if operation == Operation.test:
         if matchFound(template, block, True):
             print("Match found for unexpected block:")
             print(str(block))
+            printActualTemplate()
             exit("Exiting as a match was found for an unexpected block ")
 
     # If we made it this far, it's a pass!
