@@ -1,0 +1,163 @@
+# This test covers enabling a utility sidecar for a workload, along with a cronjob running a script
+# stored in a ConfigMap.
+
+### SECTION:PARAMETERS ###
+releaseName: sidecar
+# Set skipTest to true to make the script skip this test
+skipTest: false
+### SECTION:VALUES ###
+# Set typical Helm values here
+configMaps:
+  test-cm:
+    data:
+      script.sh: asdf
+
+pingdirectory:
+  cronjob:
+    enabled: true
+    spec:
+      schedule: "0 */6 * * *"
+      successfulJobsHistoryLimit: 0
+      failedJobsHistoryLimit: 1
+    args:
+      - /opt/in/script.sh
+  enabled: true
+  workload:
+    shareProcessNamespace: true
+  volumes:
+  - name: temp
+    emptyDir: {}
+  - name: test-cm
+    configMap:
+      name: test-cm
+  volumeMounts:
+  - name: temp
+    mountPath: /tmp
+
+  # Backups, restores, and other CLI tools should be run from the sidecar to prevent interfering
+  # with the main PingDirectory container process.
+  utilitySidecar:
+    enabled: true
+    volumes:
+    - name: test-cm
+      mountPath: /opt/in/script.sh
+      subPath: script.sh
+### SECTION:EXPECTED ###
+# Validate that the sidecar is configured correctly
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: sidecar-pingdirectory
+spec:
+  template:
+    spec:
+      containers:
+      - name: pingdirectory
+        volumeMounts:
+        - mountPath: /tmp
+          name: temp
+      - name: utility-sidecar
+        args:
+        - -f
+        - /dev/null
+        command:
+        - tail
+        resources:
+          requests:
+            cpu: "0"
+            memory: 128Mi
+        volumeMounts:
+        - mountPath: /tmp
+          name: temp
+        - mountPath: /opt/in/file.txt
+          name: test-cm
+          subPath: file.txt
+      securityContext:
+        fsGroup: 0
+        runAsGroup: 0
+        runAsUser: 9031
+      shareProcessNamespace: true
+      volumes:
+      - emptyDir: {}
+        name: temp
+      - configMap:
+          name: test-cm
+        name: test-cm
+---
+
+# Validate that the configmap is configured correctly
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-cm
+data:
+  script.sh: asdf
+---
+
+# Validate that the cronjob and corresponding RBAC objects are configured correctly
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: sidecar-pingdirectory-cronjob
+spec:
+  schedule: 0 */6 * * *
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - args:
+            - exec
+            - -ti
+            - sidecar-pingdirectory-0
+            - --container
+            - utility-sidecar
+            - --
+            - /opt/in/script.sh
+            command:
+            - kubectl
+            image: bitnami/kubectl:latest
+            name: sidecar-pingdirectory-cronjob
+          serviceAccount: sidecar-pingdirectory-internal-kubectl
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sidecar-pingdirectory-internal-kubectl
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: sidecar-pingdirectory-modify-pods
+rules:
+  - apiGroups: [""]
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - delete
+  - apiGroups: [""]
+    resources:
+      - pods/exec
+    verbs:
+      - create
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: sidecar-pingdirectory-modify-pods-to-sa
+subjects:
+  - kind: ServiceAccount
+    name: sidecar-pingdirectory-internal-kubectl
+roleRef:
+  kind: Role
+  name: sidecar-pingdirectory-modify-pods
+  apiGroup: rbac.authorization.k8s.io
+

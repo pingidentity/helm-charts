@@ -1,5 +1,4 @@
-# This test is meant to show a simple example of how to include topologySpreadConstraints 
-# in your format with a test file for the test_helm_template.py script.
+# This test covers including topologySpreadConstraints in your workload values.
 
 ### SECTION:PARAMETERS ###
 # If the releaseName parameter is not set, then a default release name
@@ -19,13 +18,12 @@ global:
       matchLabels:
         foo: bar
 ### SECTION:EXPECTED ###
-# Validate that one replica is created in the PDC Deployment
+# Validate that topologySpreadConstraints is set in the PDC Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: topologytest-pingdataconsole
 spec:
-  replicas: 1
   template:
     spec:
       topologySpreadConstraints:

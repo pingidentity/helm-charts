@@ -1,0 +1,114 @@
+# This test covers configuring vault via annotations.
+### SECTION:PARAMETERS ###
+releaseName: vault
+# Set skipTest to true to make the script skip this test
+skipTest: false
+### SECTION:VALUES ###
+# Set typical Helm values here
+pingdirectory:
+  enabled: true
+  vault:
+    enabled: true
+    hashicorp:
+      annotations:
+        serviceAccountName: my-vault-service-account
+        customAnnotation: customAnnotationValue
+        role: my-vault-role
+      secretPrefix: prefix
+      secrets:
+        my-secret.env:
+          to-json:
+            path: /opt/in/secretlocation
+            file: my-secret.env
+        others:
+          pd-9.1:
+            file: PingDirectory-9.1.lic
+            path: /opt/in/some/location/licenses
+          pd-9.2:
+            file: PingDirectory-9.2.lic
+
+pingdataconsole:
+  enabled: true
+  rbac:
+    generateServiceAccount: true
+  vault:
+    enabled: true
+    hashicorp:
+      secrets:
+        test-secret:
+          secretone:
+            file: test-secret.txt
+### SECTION:EXPECTED ###
+# Check that PD Vault annotations are set correctly with correct defaults
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: vault-pingdirectory
+spec:
+  template:
+    metadata:
+      annotations:
+        vault.hashicorp.com/agent-init-first: "true"
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-secret-PingDirectory-9.1.lic: prefixothers
+        vault.hashicorp.com/agent-inject-secret-PingDirectory-9.2.lic: prefixothers
+        vault.hashicorp.com/agent-inject-secret-my-secret.env.json: prefixmy-secret.env
+        vault.hashicorp.com/agent-inject-template-my-secret.env.json: |
+          {{- with secret "prefixmy-secret.env" }}
+          {{ .Data.data | toJSONPretty }}
+          {{- end }}
+        vault.hashicorp.com/agent-inject-template-PingDirectory-9.1.lic: |
+          {{- with secret "prefixothers" }}
+          {{- index .Data.data "pd-9.1" }}
+          {{- end }}
+        vault.hashicorp.com/agent-inject-template-PingDirectory-9.2.lic: |
+          {{- with secret "prefixothers" }}
+          {{- index .Data.data "pd-9.2" }}
+          {{- end }}
+        vault.hashicorp.com/agent-pre-populate-only: "true"
+        vault.hashicorp.com/customAnnotation: customAnnotationValue
+        vault.hashicorp.com/log-level: info
+        vault.hashicorp.com/preserve-secret-case: "true"
+        vault.hashicorp.com/role: my-vault-role
+        vault.hashicorp.com/secret-volume-path: /run/secrets
+        vault.hashicorp.com/secret-volume-path-my-secret.env.json: /opt/in/secretlocation
+        vault.hashicorp.com/secret-volume-path-PingDirectory-9.1.lic: /opt/in/some/location/licenses
+        vault.hashicorp.com/secret-volume-path-PingDirectory-9.2.lic: /run/secrets
+        vault.hashicorp.com/serviceAccountName: my-vault-service-account
+    spec:
+      serviceAccountName: my-vault-service-account
+---
+
+# Check that PDC uses the generated service account and handles an empty secret prefix,
+# as well as not setting a secret-volume-path
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vault-pingdataconsole
+spec:
+  template:
+    metadata:
+      annotations:
+        vault.hashicorp.com/agent-init-first: "true"
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-secret-test-secret.txt: test-secret
+        vault.hashicorp.com/agent-inject-template-test-secret.txt: |
+          {{- with secret "test-secret" }}
+          {{- index .Data.data "secretone" }}
+          {{- end }}
+        vault.hashicorp.com/agent-pre-populate-only: "true"
+        vault.hashicorp.com/log-level: info
+        vault.hashicorp.com/preserve-secret-case: "true"
+        vault.hashidcorp.com/role: k8s-default
+        vault.hashicorp.com/secret-volume-path: /run/secrets
+        vault.hashicorp.com/secret-volume-path-test-secret.txt: /run/secrets
+        vault.hashicorp.com/serviceAccountName: vault-pingdataconsole-service-account
+    spec:
+      serviceAccountName: vault-pingdataconsole-service-account
+---
+
+# Check for the generated service account
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vault-pingdataconsole-service-account

@@ -1,0 +1,45 @@
+# This test covers wait-for init containers
+
+### SECTION:PARAMETERS ###
+releaseName: waitfor
+# Set skipTest to true to make the script skip this test
+skipTest: false
+### SECTION:VALUES ###
+pingdataconsole:
+  enabled: true
+  container:
+    waitFor:
+      pingdirectory:
+        service: ldaps
+        timeoutSeconds: 600
+  
+pingdirectory:
+  enabled: true
+### SECTION:EXPECTED ###
+# Validate that the wait-for initContainer is created with the right command, name, and securityContext
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: waitfor-pingdataconsole
+spec:
+  template:
+    spec:
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - echo "Waiting for waitfor-pingdirectory:"636"..." && wait-for waitfor-pingdirectory:"636"
+          -t 600 -- echo "waitfor-pingdirectory:"636" running"
+        imagePullPolicy: IfNotPresent
+        name: wait-for-pingdirectory
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 0
+          runAsNonRoot: true
+          runAsUser: 9031
+
+---

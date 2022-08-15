@@ -10,13 +10,6 @@
 #
 # https://www.vaultproject.io/docs/platform/k8s/injector/annotations
 #
-vault.hashicorp.com/agent-pre-populate-only: {{ ( index . "pre-populate-only" ) | quote }}
-vault.hashicorp.com/agent-inject: "true"
-vault.hashicorp.com/agent-init-first: "true"
-vault.hashicorp.com/role: {{ ( index . "role" ) | quote }}
-vault.hashicorp.com/log-level:  {{ ( index . "log-level" ) | quote }}
-vault.hashicorp.com/preserve-secret-case:  {{ ( index . "preserve-secret-case" ) | quote }}
-vault.hashicorp.com/secret-volume-path:  {{ index . "secret-volume-path" | quote }}
 #----------------------------------------------------
 # Additional Vault configuration annotations
 {{- range $annotation, $val := (omit .annotations "serviceAccountName") }}

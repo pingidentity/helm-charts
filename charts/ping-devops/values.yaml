@@ -145,6 +145,10 @@ global:
   # @desc     be overwritten by the service account generated for the workload
   # @desc     if there is one.
   #
+  # @param    global.vault.secretPrefix Prefix that will be prepended to any
+  # @desc     secrets being injected.
+  # @default  ""
+  #
   # https://www.vaultproject.io/docs/platform/k8s/injector/annotations
   #
   # @param    global.vault.secrets Vault secrets to pull in
@@ -162,6 +166,7 @@ global:
         role: k8s-default
         secret-volume-path: /run/secrets
         serviceAccountName: _defaultServiceAccountName_
+      secretPrefix: ""
   #   secrets:
   #     {secret-name}:
   #       {secret-key | to-json}:

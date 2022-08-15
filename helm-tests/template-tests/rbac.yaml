@@ -1,0 +1,192 @@
+# This test covers setting basic RBAC elements for workloads.
+# It's mostly copied from the rbac.yaml Helm example shown on our doc site.
+### SECTION:PARAMETERS ###
+releaseName: rbac
+# Set skipTest to true to make the script skip this test
+skipTest: false
+### SECTION:VALUES ###
+# Set typical Helm values here
+global:
+  envs:
+    PING_IDENTITY_ACCEPT_EULA: "YES"
+  rbac:
+    applyServiceAccountToWorkload: true
+    generateGlobalServiceAccount: true
+    generateGlobalRoleAndRoleBinding: true
+    role:
+      rules:
+      - apiGroups: [""]
+        resources: ["secrets"]
+        verbs: ["get", "watch", "list"]
+
+pingfederate-admin:
+  enabled: true
+
+pingfederate-engine:
+  enabled: true
+  rbac:
+    generateServiceAccount: true
+    generateRoleAndRoleBinding: true
+    role:
+      rules:
+      - apiGroups: [""]
+        resources: ["secrets"]
+        verbs: ["get", "list"]
+  vault:
+    enabled: true
+
+pingdirectory:
+  enabled: true
+  rbac:
+    applyServiceAccountToWorkload: false
+
+pingdataconsole:
+  enabled: true
+  rbac:
+    generateServiceAccount: true
+    generateRoleAndRoleBinding: true
+    serviceAccountName: "pingdataconsole-sa"
+    role:
+      rules:
+      - apiGroups: [""]
+        resources: ["secrets"]
+        verbs: ["get"]
+
+pingauthorize:
+  enabled: true
+  rbac:
+    serviceAccountName: custom-service-account
+
+### SECTION:EXPECTED ###
+
+# Validate that expected service accounts are generated
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: rbac-global-service-account
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: rbac-pingfederate-engine-service-account
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pingdataconsole-sa
+---
+
+# Validate that expected roles and rolebindings are generated
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: rbac-global-role
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: rbac-pingfederate-engine-role
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: rbac-pingdataconsole-role
+---
+
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: rbac-global-role-binding
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: rbac-pingfederate-engine-role-binding
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: rbac-pingdataconsole-role-binding
+---
+
+# Validate that workloads have the correct serviceAccountName set
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rbac-pingfederate-admin
+spec:
+  template:
+    spec:
+      serviceAccountName: rbac-global-service-account
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rbac-pingdataconsole
+spec:
+  template:
+    spec:
+      serviceAccountName: pingdataconsole-sa
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rbac-pingauthorize
+spec:
+  template:
+    spec:
+      serviceAccountName: custom-service-account
+---
+
+# Validate that pingfederate-engine has the correct Vault values set
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rbac-pingfederate-engine
+spec:
+  template:
+    metadata:
+      annotations:
+        vault.hashicorp.com/serviceAccountName: rbac-pingfederate-engine-service-account
+    spec:
+      serviceAccountName: rbac-pingfederate-engine-service-account
+---
+
+### SECTION:UNEXPECTED ###
+
+# No service account or role/rolebinding should be generated for the PAZ custom-service-account
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: custom-service-account
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: rbac-pingauthorize-role
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: rbac-pingauthorize-role-binding
+---
+
+# No service account should be set for PD
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rbac-pingdirectory
+spec:
+  template:
+    spec:
+      serviceAccountName: rbac-global-service-account
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rbac-pingdirectory
+spec:
+  template:
+    spec:
+      serviceAccountName: rbac-pingdirectory-service-account
