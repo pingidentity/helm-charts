@@ -84,7 +84,10 @@ spec:
       {{- end }}
       containers:
       - name: {{ $v.name }}
-        env: []
+        {{- if $v.container.env }}
+        env:
+          {{- toYaml $v.container.env | nindent 8 }}
+        {{- end }}
 
 
         {{/*--------------------- Image -------------------------*/}}
