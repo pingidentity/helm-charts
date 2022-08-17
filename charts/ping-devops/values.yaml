@@ -543,6 +543,15 @@ global:
     #     name: my-example-secrets
     #     optional: true
 
+    # @param   global.container.env Additional environment variables
+    # @desc    to insert into the Pod spec. Unlike the global.envs values,
+    # @desc    these will be set directly on the Pod. global.envs values
+    # @desc    are set in ConfigMaps rather than on the Pod directly.
+    # @desc    This value allows for setting the valueFrom field for an
+    # @desc    environment variable when necessary.
+    # @default []
+    env: []
+
     ############################################################
     # container life handlers, allowing for lifecycle events such
     # as postStart and preStop events

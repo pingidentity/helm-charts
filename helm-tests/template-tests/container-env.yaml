@@ -1,0 +1,69 @@
+# This test covers the various ways to set environment variables
+# on a Pod in a workload.
+
+### SECTION:PARAMETERS ###
+releaseName: envtest
+# Set skipTest to true to make the script skip this test
+skipTest: false
+### SECTION:VALUES ###
+# Set typical Helm values here
+pingdataconsole:
+  enabled: true
+  envs:
+    CONFIGMAP_VAR: "configmap-var"
+  container:
+    env:
+    - name: DIRECT_VAR
+      value: "direct-var"
+    - name: VALUE_FROM_VAR
+      valueFrom:
+        secretKeyRef:
+          name: my-secret
+          key: my-secret-key
+    envFrom:
+    - configMapRef:
+        name: my-configmap-ref
+### SECTION:EXPECTED ###
+# Validate that all environemnt values are set as expected on the workload
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: envtest-pingdataconsole
+spec:
+  template:
+    spec:
+      containers:
+      - name: pingdataconsole
+        env:
+        - name: DIRECT_VAR
+          value: "direct-var"
+        - name: VALUE_FROM_VAR
+          valueFrom:
+            secretKeyRef:
+              name: my-secret
+              key: my-secret-key
+        envFrom:
+        - configMapRef:
+            name: my-configmap-ref
+        - configMapRef:
+            name: envtest-global-env-vars
+            optional: true
+        - configMapRef:
+            name: envtest-env-vars
+            optional: true
+        - configMapRef:
+            name: envtest-pingdataconsole-env-vars
+        - secretRef:
+            name: devops-secret
+            optional: true
+        - secretRef:
+            name: envtest-pingdataconsole-git-secret
+            optional: true
+---
+# Validate that the config map var is set on the correct configmap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: envtest-pingdataconsole-env-vars
+data:
+  CONFIGMAP_VAR: "configmap-var"
