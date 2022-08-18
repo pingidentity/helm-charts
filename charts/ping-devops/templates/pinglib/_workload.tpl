@@ -75,6 +75,7 @@ spec:
       schedulerName: {{ $v.workload.schedulerName }}
       shareProcessNamespace: {{ $v.workload.shareProcessNamespace }}
       topologySpreadConstraints: {{ toYaml $v.workload.topologySpreadConstraints | nindent 8 }}
+      enableServiceLinks: {{ $v.workload.enableServiceLinks }}
       initContainers:
       {{ include "pinglib.workload.init.waitfor" (concat . (list $v.container.waitFor "")) | nindent 6 }}
       {{ include "pinglib.workload.init.genPrivateCert" . | nindent 6 }}
