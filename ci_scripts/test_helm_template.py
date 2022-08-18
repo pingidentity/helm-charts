@@ -79,6 +79,10 @@ def parseArgs():
     if checkingForValue:
         exit("No value provided for argument {}".format(currentArg))
 
+    # Check for required args
+    if foundArgs.get("--operation") == Operation.test and "--test-file" not in foundArgs:
+        exit("A --test-file value must be provided when running a test")
+
     return foundArgs
 
 # Print a description of the tool
@@ -232,7 +236,7 @@ def matchFound(actual, expected, warnForNoVersionKindNameMatch):
     if warnForNoVersionKindNameMatch:
         print(""" Warning: no version/kind/name match found for block.
                   Ensure correct version/kind/name is set in test file. Block: """)
-        print(str(expected))
+        print(yaml.dump(expected))
     return False
 
 # Main script processing
@@ -301,7 +305,7 @@ if operation == Operation.test:
     for block in expected:
         if not matchFound(template, block, False):
             print("No match found for expected block:")
-            print(str(block))
+            print(yaml.dump(block))
             printActualTemplate()
             exit("Exiting as no match was found for an expected block")
 
@@ -309,7 +313,7 @@ if operation == Operation.test:
     for block in unexpected:
         if matchFound(template, block, True):
             print("Match found for unexpected block:")
-            print(str(block))
+            print(yaml.dump(block))
             printActualTemplate()
             exit("Exiting as a match was found for an unexpected block ")
 

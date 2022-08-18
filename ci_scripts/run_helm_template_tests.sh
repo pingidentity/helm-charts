@@ -8,6 +8,7 @@
 #
 
 # Run each test file found in the template-tests directory
+set -e
 find ./helm-tests/template-tests -type f -print0 | while IFS= read -r -d '' _file; do
     _testFilename=$(basename "${_file}")
     _extension=${_testFilename##*.}
@@ -15,3 +16,4 @@ find ./helm-tests/template-tests -type f -print0 | while IFS= read -r -d '' _fil
         ./ci_scripts/test_helm_template.py test --test-file "${_file}"
     fi
 done
+set +e
