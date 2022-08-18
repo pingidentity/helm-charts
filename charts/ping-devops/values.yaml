@@ -393,7 +393,17 @@ global:
     shareProcessNamespace: false
 
     ############################################################
-    # @param    global.workload.spec.template.spec.topologySpreadConstraints Configuration of pod spread across cluster zones
+    # @param    global.workload.enableServiceLinks indicates whether info
+    # @desc     about services can be added as env variables
+    # @default  true
+    #
+    # https://kubernetes.io/docs/concepts/services-networking/connect-applications-service/
+    ############################################################
+    enableServiceLinks: true
+
+    ############################################################
+    # @param    global.workload.topologySpreadConstraints 
+    # @desc     Configuration of pod spread across cluster zones
     # @default  []
     #
     # https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
