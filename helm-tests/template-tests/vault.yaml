@@ -99,7 +99,7 @@ spec:
         vault.hashicorp.com/agent-pre-populate-only: "true"
         vault.hashicorp.com/log-level: info
         vault.hashicorp.com/preserve-secret-case: "true"
-        vault.hashidcorp.com/role: k8s-default
+        vault.hashicorp.com/role: k8s-default
         vault.hashicorp.com/secret-volume-path: /run/secrets
         vault.hashicorp.com/secret-volume-path-test-secret.txt: /run/secrets
         vault.hashicorp.com/serviceAccountName: vault-pingdataconsole-service-account
