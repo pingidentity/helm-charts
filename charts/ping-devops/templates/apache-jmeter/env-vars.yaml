@@ -1,5 +1,0 @@
-{{- include "pinglib.env-vars" (list . "apache-jmeter") -}}
-
-
-{{- define "apache-jmeter.env-vars" -}}
-{{- end -}}

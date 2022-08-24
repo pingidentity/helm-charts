@@ -1713,18 +1713,6 @@ pingtoolkit:
     name: pingtoolkit
 
 #############################################################
-# @param    apache-jmeter Apache Jmeter values
-#
-# @param    apache-jmeter.enabled Enable Apache Jmeter deployment
-# @default  false
-#############################################################
-apache-jmeter:
-  enabled: false
-  name: apache-jmeter
-  image:
-    name: apache-jmeter
-
-#############################################################
 # testFramework
 #############################################################
 testFramework:
