@@ -1,4 +1,0 @@
-{{- include "pinglib.rbac.role" (list . "apache-jmeter") -}}
-
-{{- define "apache-jmeter.rbac.role" -}}
-{{- end -}}
