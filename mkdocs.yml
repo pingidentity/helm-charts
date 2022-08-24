@@ -67,6 +67,8 @@ nav:
       - Openshift Configuration: "config/openshift.md"
   - Examples:
       - Introduction: "examples/index.md"
+  - How To:
+      - Update Tags: "howto/updatetags.md"
   - Release Notes:
     - Current Release: "release-notes/currentRelease.md"
     - Previous Releases: "release-notes/previousReleases.md"
