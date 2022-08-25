@@ -1,5 +1,6 @@
 # This test verifies that you can remove the securityContext
-# from the pod spec by setting it to null in your values.
+# from the pod spec by setting it to null in your values,
+# and that the container securityContext is not set by default.
 # This is necessary to deploy the Helm charts on OpenShift
 
 ### SECTION:PARAMETERS ###
@@ -12,6 +13,7 @@ pingdirectory:
     securityContext: null
 ### SECTION:UNEXPECTED ###
 # Validate that no securityContext fields are set on the StatefulSet
+# Check for Pod-level security context
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -41,3 +43,62 @@ spec:
     spec:
       securityContext:
         runAsUser: 9031
+---
+# The null security context should be left out of the template
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: openshift-securitycontext-pingdirectory
+spec:
+  template:
+    spec:
+      securityContext: null
+# Check for container-level securityContext
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: openshift-securitycontext-pingdirectory
+spec:
+  template:
+    spec:
+      containers:
+      - name: pingdirectory
+        securityContext:
+          fsGroup: 0
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: openshift-securitycontext-pingdirectory
+spec:
+  template:
+    spec:
+      containers:
+      - name: pingdirectory
+        securityContext:
+          runAsGroup: 0
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: openshift-securitycontext-pingdirectory
+spec:
+  template:
+    spec:
+      containers:
+      - name: pingdirectory
+        securityContext:
+          runAsUser: 9031
+---
+# The null security context should be left out of the template
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: openshift-securitycontext-pingdirectory
+spec:
+  template:
+    spec:
+      containers:
+      - name: pingdirectory
+        securityContext: null

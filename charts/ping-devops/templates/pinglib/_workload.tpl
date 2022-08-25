@@ -163,9 +163,11 @@ spec:
         {{- end }}
         {{- include "pinglib.workload.volumeMounts" $v | nindent 8 }}
 
-        {{/*---------------- Security Context -------------*/}}
-        {{/* Futures: Support for container securityContexts */}}
-        {{/*securityContext: {{ toYaml $v.container.securityContext | nindent 10 }}*/}}
+        {{/*---------------- Container Security Context -------------*/}}
+        {{/* Note: this will override the Pod-level securityContext if set */}}
+        {{- if $v.container.securityContext }}
+        securityContext: {{ toYaml $v.container.securityContext | nindent 10 }}
+        {{- end }}
 
 
         {{/*---------------- Lifecycle --------------------*/}}
