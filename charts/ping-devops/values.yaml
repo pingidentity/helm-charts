@@ -487,15 +487,13 @@ global:
                   storage: 4Gi
 
     ############################################################
-    # @param    global.workload.securityContext securityContext for the workload.
-    # @desc     The securityContext defined will be inserted directly into the spec.
+    # @param    global.workload.securityContext securityContext for the workload Pod spec.
+    # @desc     The securityContext defined will be inserted directly into the Pod spec.
     # @desc     The user (9031) and group (0) represent the current user and group used
     # @desc     with PingIdentity images (except PingDelegator). The fsGroup is
     # @desc     required for any workloads that volumeMount a pvc (i.e. StatefulSets).
     # @desc     Set as securityContext: null when no generated securityContext is desired.
     # @default  fsGroup 0, runAsUser 9031, runAsGroup 0
-    #
-    # Note:
     ############################################################
     securityContext:
       fsGroup: 0
@@ -514,6 +512,18 @@ global:
   # https://kubernetes.io/docs/concepts/workloads/controllers/
   ############################################################
   container:
+    ############################################################
+    # @param    global.workload.container.securityContext securityContext at the container
+    # @desc     level for the workload. The securityContext defined will be inserted
+    # @desc     directly into the spec for the main container of the Pod. By default no
+    # @desc     container securityContext is defined. In Kubernetes when a container-level
+    # @desc     securityContext is set, it will overwrite any corresponding values from the
+    # @desc     Pod-level securityContext.
+    # @default  null
+    #
+    # See https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+    ############################################################
+    securityContext: null
     # @param global.container.replicaCount Number of replicas for workload
     # @default 1
     replicaCount: 1
