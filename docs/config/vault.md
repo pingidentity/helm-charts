@@ -42,7 +42,7 @@ If dropped into the `SECRETS_DIR` (defaults to `/run/secrets`) directory, these 
 be processed as:
 
 * PROPERTY_FILE if the file ends in `.env` or
-* Multiple files will be created for each key=value pair.
+* Separate files will be created for each key=value pair.
 
 See the example below in this document for the
 transformation that occurs with the `devops-secret.env`.
@@ -69,8 +69,9 @@ global:
         preserve-secret-case: true
         role: k8s-default
         secret-volume-path: /run/secrets
-        serviceAccountName: vault-auth
 ```
+
+The serviceAccount used by Vault will match the default serviceAccount for the workload.
 
 ## Example
 
@@ -149,3 +150,18 @@ make use of the secrets and an example of where secrets will be placed into cont
     ```
     LS0tLS1CRUdJ...38sj
     ```
+
+## Using Vault secrets to mount base64-encoded keystore files
+
+To pull keystore files from a Vault cluster, create a secret with separate keys for each individual keystore file. The value of each key should be the base64 representation of the file that needs to be mounted. The names of the keys as well as the name of the secret will be used in the Helm values yaml when mounting the keystore files.
+
+Environment variables or other configuration for the product being deployed will need to be set to point to the location where the keystores are being mounted. For example, for PingDirectory:
+
+```
+KEYSTORE_FILE=/run/secrets/mykeystore.jks
+KEYSTORE_PIN_FILE=/run/secrets/mykeystore.pin
+```
+
+Ensure the Vault cluster is accessible to the Kubernetes cluster where your Helm release is being deployed. You can then use the Vault annotations to mount the keystore files in the desired location. For an example, see the "Vault Keystores" example on the [Helm examples page](https://devops.pingidentity.com/deployment/deployHelm/).
+
+
