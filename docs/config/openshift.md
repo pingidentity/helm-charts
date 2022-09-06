@@ -45,7 +45,6 @@ pingaccess-admin:
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
     SERVER_PROFILE_PATH: baseline/pingaccess
-    SERVER_PROFILE_BRANCH: "2206"
   container:
     waitFor:
       pingfederate-engine:
