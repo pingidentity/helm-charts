@@ -1,6 +1,9 @@
 # Chart Releaser Files
 .cr-*
 
+# Packaged Helm charts
+*.tgz
+
 # mkdocs files
 site/
 
