@@ -18,61 +18,81 @@ set -x
 # under the License.
 #
 
-dir=$(pwd)
-cr="docker run -v ${dir}/docs:/cr quay.io/helmpack/chart-releaser:v${CR_VERSION}"
-gitlab_repo="https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
-github_repo="helm-charts"
-helm_repo="https://helm.pingidentity.com/"
-chart="charts/ping-devops"
-
-git clone -b "${CI_COMMIT_BRANCH}" "${gitlab_repo}"
+curl_output=/tmp/curlout
+github_api_base="https://api.github.com/repos/${GITHUB_OWNER}/helm-charts"
+git clone "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
 cd helm-charts || exit
 
-function check_for_existing_tag() {
-    release_tag=$(cat "${dir}"/charts/ping-devops/Chart.yaml | grep "version" | awk '{print $2}')
-    echo "Release ${release_tag} desired. Checking for conflicts..."
-    curl --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" "https://${INTERNAL_GITLAB_URL}/api/v4/projects/7116/repository/tags/${release_tag}" > tag.txt || exit
-    check_tag=$(cat tag.txt | grep -o "\"404" | head -1 | sed 's/"//g')
-    if [[ ${check_tag} == 404 ]]; then
-        echo "${release_tag} release tag is available..."
-    else
-        echo "Release tag ${release_tag} already exists..."
+function check_for_draft_release() {
+    sem_version=$(grep "version" charts/ping-devops/Chart.yaml | awk '{print $2}')
+    expected_tag="ping-devops-${sem_version}"
+
+    if test "${CI_COMMIT_TAG}" != "${expected_tag}"; then
+        echo "Gitlab tag \"${CI_COMMIT_TAG}\" does not match expected tag \"${expected_tag}\" for release"
+        exit 1
+    fi
+
+    echo "Checking that draft release ${expected_tag} exists and is ready to be published..."
+
+    # Verify that the draft release is set up with the right tag
+    curl -s \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+        "${github_api_base}/releases" > "${curl_output}"
+    release_id=$(jq -r '.[] | select(.tag_name=="'"${expected_tag}"'" and .draft==true) | .id' "${curl_output}")
+
+    if test -z "${release_id}"; then
+        echo "Expected draft release not found for tag \"${expected_tag}\""
+        cat /tmp/curlout
+        exit 1
+    fi
+
+    # Verify that the draft release has the correct Helm package attached
+    curl -s \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+        "${github_api_base}/releases/${release_id}" > "${curl_output}"
+    release_package=$(jq -r '.assets | .[] | select(.name=="'"${expected_tag}.tgz"'") | .name' "${curl_output}")
+
+    if test -z "${release_package}"; then
+        echo "Draft release does not have required Helm package \"${expected_tag}.tgz\" attached"
+        cat /tmp/curlout
+        exit 1
+    fi
+
+    # Verify that the tag for the release exists on GitHub
+    curl -s \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+        "${github_api_base}/git/matching-refs/tags/${expected_tag}" > "${curl_output}"
+    found_tag=$(jq -r '.[] | .ref' "${curl_output}")
+
+    if test -z "${found_tag}"; then
+        echo "The expected tag \"${expected_tag}\" does not exist on the GitHub repository"
+        cat /tmp/curlout
         exit 1
     fi
 }
 
-function package_chart() {
-    echo "Packaging chart '${chart}'..."
-    helm package "${dir}"/"${chart}" --destination "${dir}"/docs/.chart-packages || exit 1
+function publish_release() {
+    echo "Publishing the draft release on GitHub for ${expected_tag}..."
+
+    curl_result=$(curl -s -o /tmp/curlout -w "%{http_code}" -X PATCH -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${GITHUB_TOKEN}" "${github_api_base}/releases/${release_id}" -d '{"draft":false}')
+
+    if test "${curl_result}" != 200; then
+        echo "Failed to publish draft release. HTTP result code ${curl_result}"
+        cat /tmp/curlout
+        exit 1
+    fi
 }
 
-function upload_packages() {
-    echo "Uploading chart packages for ${chart}..."
-    ${cr} upload -o "${GITHUB_OWNER}" -r "${github_repo}" --token "${GITHUB_TOKEN}" --package-path /cr/.chart-packages && sleep 5 || exit 1
+function notify_slack() {
+    # Post to the Helm slack channel via a webhook
+    curl -X POST "${SLACK_WEBHOOK}"
 }
 
-function update_chart_index() {
-    echo "Generating chart index for ${chart}..."
-    ${cr} index -o "${GITHUB_OWNER}" -r "${github_repo}" -c "${helm_repo}" --token "${GITHUB_TOKEN}" --index-path /cr/index.yaml --package-path /cr/.chart-packages && sleep 10 || exit 1
-    rm -rf docs/.chart-packages
-}
+check_for_draft_release
+publish_release
+notify_slack
 
-function publish_repo() {
-    cd ..
-    git status
-    git add docs/index.yaml
-    git status
-    git tag "${release_tag}"
-    git commit --message "Release ${release_tag}"
-    git push -o ci-skip "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts" HEAD:master
-    git push --tags "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts" HEAD:master
-}
-
-# install cr
-docker pull quay.io/helmpack/chart-releaser:v"${CR_VERSION}"
-
-check_for_existing_tag
-package_chart ${chart}
-upload_packages
-update_chart_index
-publish_repo
+set +x
