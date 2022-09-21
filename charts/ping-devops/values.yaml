@@ -1527,6 +1527,73 @@ pingaccess-engine:
         service: https
         timeoutSeconds: 300
 
+  #############################################################
+  # Horizontal Pod Autoscaling
+  # By default this is disabled, since there dependencies to the containers
+  # CPU and/or Memory limits.
+  #
+  # @param    pingaccess-engine.clustering.autoscaling Configure Horizontal Pod Autoscaling
+  #
+  # @param    pingaccess-engine.clustering.autoscaling.enabled Enable Horizontal Pod Autoscaling.
+  # @desc     If enabled, ensure that proper pingaccess.container.resources values are set and
+  # @desc     coordinated with the targetCPUUtilizationPercentage or targetMemoryUtilizationPercentage
+  # @default  false
+  #
+  # @param    pingaccess-engine.clustering.autoscaling.minReplicas Autoscaler minimum replicas
+  # @default  1
+  #
+  # @param    pingaccess-engine.clustering.autoscaling.maxReplicas Autoscaler maximum replicas
+  # @default  4
+  #
+  # @param    pingaccess-engine.clustering.autoscaling.targetCPUUtilizationPercentage Target CPU utilization
+  # @default  75
+  #
+  # @param    pingaccess-engine.clustering.autoscaling.targetMemoryUtilizationPercentage Target memory utilization
+  #
+  # @param    pingaccess-engine.clustering.autoscaling.behavior Custom HPA behavior yaml
+  # @default  {}
+  #
+  # @param    pingaccess-engine.clustering.autoscalingMetricsTemplate Custom HPA metrics yaml
+  # @default  []
+  #############################################################
+  clustering:
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 75
+      # targetMemoryUtilizationPercentage: 50
+      behavior: {}
+      # Custom Horizontal Pod Scaling behavior
+      # ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#default-behavior
+      #  scaleDown:
+      #    stabilizationWindowSeconds: 300
+      #    policies:
+      #    - type: Percent
+      #      value: 100
+      #      periodSeconds: 15
+      #  scaleUp:
+      #    stabilizationWindowSeconds: 0
+      #    policies:
+      #    - type: Percent
+      #      value: 100
+      #      periodSeconds: 15
+      #    - type: Pods
+      #      value: 4
+      #      periodSeconds: 15
+      #    selectPolicy: Max
+
+    autoscalingMetricsTemplate: []
+    # Custom or additional autoscaling metrics
+    # ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#support-for-custom-metrics
+    # - type: Pods
+    #   pods:
+    #     metric:
+    #       name: custom-metric
+    #     target:
+    #       type: AverageValue
+    #       averageValue: 10000m
+
   services:
     https:
       servicePort: 3000
