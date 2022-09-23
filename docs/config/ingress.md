@@ -69,7 +69,7 @@ Default yaml defined in the product ingress section, followed by definitions for
     Resulting host will be:  pingfed-admin.acme.example.com
                                              ^    ^^^^^^^
                                              |       |
-                                    ReleseName    defaultDomain
+                                   ReleaseName    defaultDomain
     ```
 
 ## Example Ingress Manifest
