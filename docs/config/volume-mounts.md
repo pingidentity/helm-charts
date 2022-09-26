@@ -5,22 +5,25 @@ Provides support for mounting secret or configMap volumes on a workload containe
 ## Global/Product Section
 
 Adds ability to use secret and configMap data in a container via a VolumeMount.  A common use for this - bringing product
-licenses into the container.
+licenses or scripts into the container.
 
-!!! note "Example of creating 3 volume mounts in container from secret and configMap"
+!!! note "Example of creating 2 volume mounts in container from secret and configMap"
     ```yaml
-    pingfederate-admin
-      secretVolumes:
-        pingfederate-license:
-          items:
-            license: /opt/in/instance/server/default/conf/pingfederate.lic
-            hello: /opt/in/instance/server/default/hello.txt
-
-      configMapVolumes:
-        pingfederate-props:
-            items:
-              pf-props: /opt/in/etc/pingfederate.properties
-    ```
+    pingfederate-admin:
+        enabled: true
+        volumes:
+          - name: pf-props
+            configMap:
+              name: pingfederate-props
+          - name: pf-license
+            secret:
+              secretName: pingfederate-license
+        volumeMounts:
+          - mountPath: /opt/in/etc/pingfederate.properties
+            name: pf-props
+          - mountPath: /opt/in/instance/server/default/conf/pingfederate.lic
+            name: pf-license
+      ```
 
 > [Secrets](https://kubernetes.io/docs/tasks/configmap-secret/managing-secret-using-kubectl) and [ConfigMaps](https://kubernetes.io/docs/concepts/configuration/configmap/) must be created in the cluster prior to deploying the helm chart.
 
@@ -34,7 +37,6 @@ couple of key values (license, hello) and (pf-props) into the container as speci
         Mounts:
           /opt/in/etc/pingfederate.properties from pingfederate-props (ro,path="pingfederate.properties")
           /opt/in/instance/server/default/conf/pingfederate.lic from pingfederate-license (ro,path="pingfederate.lic")
-          /opt/in/instance/server/default/hello.txt from pingfederate-license (ro,path="hello.txt")
     Volumes:
       pingfederate-license:
         Type:        Secret (a volume populated by a Secret)

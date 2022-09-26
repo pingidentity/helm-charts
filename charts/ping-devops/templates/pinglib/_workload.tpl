@@ -370,17 +370,20 @@ spec:
   template volumes and volumeMounts expect a struture
   like:
 
-  pingfederate-admin
-    secretVolumes:
-      pingfederate-license:
-        items:
-          license: /opt/in/instance/server/default/conf/pingfederate.lic
-          hello: /opt/in/instance/server/default/hello.txt
-
-  configMapVolumes:
-    pingfederate-props:
-        items:
-          pf-props: /opt/in/etc/pingfederate.properties
+  pingfederate-admin:
+      enabled: true
+      volumes:
+        - name: pf-props
+          configMap:
+            name: pingfederate-props
+        - name: pf-license
+          secret:
+            secretName: pingfederate-license
+      volumeMounts:
+        - mountPath: /opt/in/etc/pingfederate.properties
+          name: pf-props
+        - mountPath: /opt/in/instance/server/default/conf/pingfederate.lic
+          name: pf-license
 
 ------------------------------------------------------*/}}
 {{- define "pinglib.workload.volumes" -}}
