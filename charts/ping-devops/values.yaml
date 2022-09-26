@@ -811,23 +811,6 @@ pingfederate-admin:
   #       service: ldaps
   #       timeoutSeconds: 300
 
-
-  # Example: Pulling in a secret (called pingfederate-license) into container
-  #          mounting the name (license) value into a file (/opt/in/.../pingfederate.lic)
-  #
-  # secretVolumes:
-  #   pingfederate-license:
-  #     items:
-  #       license: /opt/in/instance/server/default/conf/pingfederate.lic
-
-  # Example: Pulling in a configMap (called pingfederate-props) into container
-  #          mounting the name (pf-props) value into a file (/opt/in/.../pingfederate.properties)
-  #
-  # configMapVolumes:
-  #  pingfederate-props:
-  #     items:
-  #       pf-props: /opt/in/etc/pingfederate.properties
-
   services:
     https:
       servicePort: 9999
