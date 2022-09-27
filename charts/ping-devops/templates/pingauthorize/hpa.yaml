@@ -1,0 +1,8 @@
+{{- if (index .Values "pingauthorize").clustering.autoscaling.enabled -}}
+{{- include "pinglib.hpa" (list . "pingauthorize") -}}
+{{- end -}}
+
+
+
+{{- define "pingauthorize.hpa" -}}
+{{- end -}}

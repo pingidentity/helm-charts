@@ -1,0 +1,8 @@
+{{- if (index .Values "pingfederate-admin").clustering.autoscaling.enabled -}}
+{{- include "pinglib.hpa" (list . "pingfederate-admin") -}}
+{{- end -}}
+
+
+
+{{- define "pingfederate-admin.hpa" -}}
+{{- end -}}
