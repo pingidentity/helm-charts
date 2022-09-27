@@ -23,7 +23,7 @@ licenses or scripts into the container.
             name: pf-props
           - mountPath: /opt/in/instance/server/default/conf/pingfederate.lic
             name: pf-license
-      ```
+    ```
 
 > [Secrets](https://kubernetes.io/docs/tasks/configmap-secret/managing-secret-using-kubectl) and [ConfigMaps](https://kubernetes.io/docs/concepts/configuration/configmap/) must be created in the cluster prior to deploying the helm chart.
 
