@@ -1,0 +1,81 @@
+# This test covers setting autoscaling.
+### SECTION:PARAMETERS ###
+releaseName: autoscaling
+# Set skipTest to true to make the script skip this test
+skipTest: false
+### SECTION:VALUES ###
+# Set typical Helm values here
+global:
+  envs:
+    PING_IDENTITY_ACCEPT_EULA: "YES"
+  clustering:
+    autoscaling:
+      enabled: true
+
+pingfederate-admin:
+  enabled: true
+
+pingfederate-engine:
+  enabled: true
+
+pingaccess-engine:
+  enabled: true
+
+pingdataconsole:
+  enabled: true
+
+pingauthorize:
+  enabled: true
+
+pingauthorizepap:
+  enabled: true
+
+pingcentral:
+  enabled: true
+
+pingdelegator:
+  enabled: true
+
+### SECTION:EXPECTED ###
+
+# Validate that expected Horizontal Pod Autoscaler are generated
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: autoscaling-pingfederate-admin
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: autoscaling-pingfederate-engine
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: autoscaling-pingaccess-engine
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: autoscaling-pingdataconsole
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: autoscaling-pingauthorize
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: autoscaling-pingauthorizepap
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: autoscaling-pingcentral
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: autoscaling-pingdelegator
+---

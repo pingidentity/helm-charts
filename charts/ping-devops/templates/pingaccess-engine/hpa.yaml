@@ -1,0 +1,8 @@
+{{- if (index .Values "pingaccess-engine").clustering.autoscaling.enabled -}}
+{{- include "pinglib.hpa" (list . "pingaccess-engine") -}}
+{{- end -}}
+
+
+
+{{- define "pingaccess-engine.hpa" -}}
+{{- end -}}
