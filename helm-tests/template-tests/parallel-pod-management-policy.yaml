@@ -1,0 +1,54 @@
+### SECTION:PARAMETERS ###
+releaseName: parallel
+skipTest: false
+### SECTION:VALUES ###
+# Set typical Helm values here
+pingdirectory:
+  enabled: true
+  container:
+    replicaCount: 3
+  workload:
+    statefulSet:
+      podManagementPolicy: Parallel
+
+pingdatasync:
+  enabled: true
+  container:
+    replicaCount: 2
+  workload:
+    statefulSet:
+      podManagementPolicy: Parallel
+### SECTION:EXPECTED ###
+# Validate that the policy is set
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: parallel-pingdirectory
+spec:
+  replicas: 3
+  podManagementPolicy: Parallel
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: parallel-pingdatasync
+spec:
+  replicas: 2
+  podManagementPolicy: Parallel
+---
+# Validate that the PARALLEL_POD_MANAGEMENT_POLICY variable is set in the environment variable ConfigMap
+apiVersion: v1
+data:
+  K8S_STATEFUL_SET_NAME: parallel-pingdirectory
+  PARALLEL_POD_MANAGEMENT_POLICY: "true"
+kind: ConfigMap
+metadata:
+  name: parallel-pingdirectory-env-vars
+---
+apiVersion: v1
+data:
+  K8S_STATEFUL_SET_NAME: parallel-pingdatasync
+  PARALLEL_POD_MANAGEMENT_POLICY: "true"
+kind: ConfigMap
+metadata:
+  name: parallel-pingdatasync-env-vars

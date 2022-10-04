@@ -8,4 +8,7 @@ data:
   K8S_STATEFUL_SET_NAME: {{ include "pinglib.fullname" . }}
   K8S_STATEFUL_SET_SERVICE_NAME: {{ include "pinglib.fullclusterservicename" . }}
   LDAPS_PORT: {{ $top.Values.pingdatasync.services.ldaps.containerPort | quote }}
+  {{- if eq $top.Values.pingdatasync.workload.statefulSet.podManagementPolicy "Parallel" }}
+  PARALLEL_POD_MANAGEMENT_POLICY: "true"
+  {{- end }}
 {{- end -}}

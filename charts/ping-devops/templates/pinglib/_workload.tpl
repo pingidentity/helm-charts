@@ -30,7 +30,7 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       partition: {{ $v.workload.statefulSet.partition }}
-  podManagementPolicy: OrderedReady
+  podManagementPolicy: {{ $v.workload.statefulSet.podManagementPolicy }}
   {{- end }}
   {{/*-------------------------------------------------------*/}}
 
