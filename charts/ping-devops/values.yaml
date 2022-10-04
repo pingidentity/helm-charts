@@ -486,6 +486,21 @@ global:
                 requests:
                   storage: 4Gi
 
+      # @param    global.workload.statefulSet.podManagementPolicy Controls how pods
+      # @desc     are created during initial scale up, when replacing pods on nodes,
+      # @desc     or when scaling down. The default behavior is OrderedReady. The
+      # @desc     Parallel podManagementPolicy allows for starting up and scaling
+      # @desc     down multiple Pods simultaneously. Updates are not affected.
+      # @desc     The only products that support Parallel are
+      # @desc     PingDirectory and PingDataSync, on versions 2209 and later. When
+      # @desc     using the Parallel policy, consider setting the RETRY_TIMEOUT_SECONDS
+      # @desc     environment variable to a higher value (it defaults to 180) for the
+      # @desc     Pods. If the value is too low with many servers starting at once, it
+      # @desc     may lead to some Pods restarting unnecessarily during the initial
+      # @desc     workload startup.
+      # @default  OrderedReady
+      podManagementPolicy: OrderedReady
+
     ############################################################
     # @param    global.workload.securityContext securityContext for the workload Pod spec.
     # @desc     The securityContext defined will be inserted directly into the Pod spec.
@@ -1056,6 +1071,7 @@ pingdirectory:
   workload:
     type: StatefulSet
     statefulSet:
+      podManagementPolicy: OrderedReady
       persistentvolume:
         volumes:
           out-dir:
@@ -1214,6 +1230,8 @@ pingdatasync:
 
   workload:
     type: StatefulSet
+    statefulSet:
+      podManagementPolicy: OrderedReady
 
   container:
     resources:

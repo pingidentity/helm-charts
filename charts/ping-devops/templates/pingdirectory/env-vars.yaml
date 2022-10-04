@@ -12,4 +12,7 @@ data:
   LDAP_PORT: {{ $top.Values.pingdirectory.services.ldap.containerPort | quote }}
   LDAPS_PORT: {{ $top.Values.pingdirectory.services.ldaps.containerPort | quote }}
   HTTPS_PORT: {{ $top.Values.pingdirectory.services.https.containerPort | quote }}
+  {{- if eq $top.Values.pingdirectory.workload.statefulSet.podManagementPolicy "Parallel" }}
+  PARALLEL_POD_MANAGEMENT_POLICY: "true"
+  {{- end }}
 {{- end -}}
