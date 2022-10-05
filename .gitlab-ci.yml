@@ -95,8 +95,9 @@ p.github:
   script:
     - git --version
     - ci_scripts/push_to_github.sh
-  only:
-    - master
+  rules:
+    - if: '$CI_COMMIT_REF_NAME =~ /^master$/'
+    - if: $RELEASE == "true"
 
 ################################################
 #  ____      _
