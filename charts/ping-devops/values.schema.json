@@ -1,0 +1,3381 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "global": {
+      "type": "object",
+      "properties": {
+        "envs": {
+          "type": "object"
+        },
+        "addReleaseNameToResource": {
+          "type": "string",
+          "pattern": "^(none|append|prepend)$"
+        },
+        "ingress": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "addReleaseNameToHost": {
+              "type": "string",
+              "pattern": "^(prepend|append|subdomain|none)$"
+            },
+            "defaultDomain": {
+              "type": "string"
+            },
+            "defaultTlsSecret": {
+            }
+          },
+          "required": [
+            "enabled"
+          ]
+        },
+        "privateCert": {
+          "type": "object",
+          "properties": {
+            "generate": {
+              "type": "boolean"
+            },
+            "format": {
+              "type": "string"
+            },
+            "additionalHosts": {
+              "type": "array",
+              "items": {}
+            },
+            "additionalIPs": {
+              "type": "array",
+              "items": {}
+            }
+          }
+        },
+        "masterPassword": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "strength": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "site": {
+              "type": "string"
+            },
+            "secret": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "enabled"
+          ]
+        },
+        "vault": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "hashicorp": {
+              "type": "object",
+              "properties": {
+                "annotations": {
+                  "type": "object",
+                  "properties": {
+                    "agent-inject": {
+                      "type": "boolean"
+                    },
+                    "agent-init-first": {
+                      "type": "boolean"
+                    },
+                    "agent-pre-populate-only": {
+                      "type": "boolean"
+                    },
+                    "log-level": {
+                      "type": "string"
+                    },
+                    "preserve-secret-case": {
+                      "type": "boolean"
+                    },
+                    "role": {
+                      "type": "string"
+                    },
+                    "secret-volume-path": {
+                      "type": "string"
+                    },
+                    "serviceAccountName": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "secretPrefix": {
+                  "type": "string"
+                }
+              }
+            },
+            "secret": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "enabled"
+          ]
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "repository": {
+              "type": "string"
+            },
+            "repositoryFqn": {
+            },
+            "name": {
+            },
+            "tag": {
+              "type": "string"
+            },
+            "pullPolicy": {
+              "type": "string",
+              "pattern": "^(Always|Never|IfNotPresent)$"
+            }
+          }
+        },
+        "rbac": {
+          "type": "object",
+          "properties": {
+            "generateServiceAccount": {
+              "type": "boolean"
+            },
+            "serviceAccountName": {
+              "type": "string"
+            },
+            "generateRoleAndRoleBinding": {
+              "type": "boolean"
+            },
+            "applyServiceAccountToWorkload": {
+              "type": "boolean"
+            },
+            "generateGlobalServiceAccount": {
+              "type": "boolean"
+            },
+            "generateGlobalRoleAndRoleBinding": {
+              "type": "boolean"
+            }
+          }
+        },
+        "externalImage": {
+          "type": "object",
+          "properties": {
+            "pingtoolkit": {
+              "type": "object",
+              "properties": {
+                "resources": {
+                  "type": "object",
+                  "properties": {
+                    "limits": {
+                      "type": "object",
+                      "properties": {
+                        "cpu": {
+                        },
+                        "memory": {
+                        }
+                      }
+                    },
+                    "requests": {
+                      "type": "object",
+                      "properties": {
+                        "cpu": {
+                        },
+                        "memory": {
+                        }
+                      }
+                    }
+                  }
+                },
+                "securityContext": {
+                  "type": "object",
+                  "properties": {
+                    "allowPrivilegeEscalation": {
+                      "type": "boolean"
+                    },
+                    "capabilities": {
+                      "type": "object",
+                      "properties": {
+                        "drop": {
+                          "type": "array",
+                          "items": [
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "readOnlyRootFilesystem": {
+                      "type": "boolean"
+                    },
+                    "runAsNonRoot": {
+                      "type": "boolean"
+                    },
+                    "runAsUser": {
+                      "type": "integer"
+                    },
+                    "runAsGroup": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            },
+            "pingaccess": {
+              "type": "object",
+              "properties": {
+                "resources": {
+                  "type": "object",
+                  "properties": {
+                    "limits": {
+                      "type": "object",
+                      "properties": {
+                        "cpu": {
+                        },
+                        "memory": {
+                        }
+                      }
+                    }
+                  }
+                },
+                "securityContext": {
+                  "type": "object",
+                  "properties": {
+                    "allowPrivilegeEscalation": {
+                      "type": "boolean"
+                    },
+                    "capabilities": {
+                      "type": "object",
+                      "properties": {
+                        "drop": {
+                          "type": "array",
+                          "items": [
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "runAsNonRoot": {
+                      "type": "boolean"
+                    },
+                    "runAsUser": {
+                      "type": "integer"
+                    },
+                    "runAsGroup": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "services": {
+          "type": "object",
+          "properties": {
+            "clusterExternalDNSHostname": {},
+            "clusterServiceName": {},
+            "serviceName": {
+              "type": "object",
+              "properties": {
+                "dataService": {
+                  "type": "boolean"
+                },
+                "clusterService": {
+                  "type": "boolean"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "servicePort": {
+                  "type": "integer"
+                },
+                "ingressPort": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "workload": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "pattern": "^(Deployment|StatefulSet)$"
+            },
+            "schedulerName": {
+              "type": "string"
+            },
+            "shareProcessNamespace": {
+              "type": "boolean"
+            },
+            "enableServiceLinks": {
+              "type": "boolean"
+            },
+            "deployment": {
+              "type": "object",
+              "properties": {
+                "strategy": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "pattern": "^(RollingUpdate|Recreate)$"
+                    }
+                  }
+                }
+              }
+            },
+            "statefulSet": {
+              "type": "object",
+              "properties": {
+                "partition": {
+                  "type": "integer"
+                },
+                "persistentvolume": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "volumes": {
+                      "type": "object",
+                      "properties": {
+                        "out-dir": {
+                          "type": "object",
+                          "properties": {
+                            "mountPath": {
+                              "type": "string"
+                            },
+                            "persistentVolumeClaim": {
+                              "type": "object",
+                              "properties": {
+                                "accessModes": {
+                                  "type": "array",
+                                  "items": [
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "storageClassName": {
+                                },
+                                "resources": {
+                                  "type": "object",
+                                  "properties": {
+                                    "requests": {
+                                      "type": "object",
+                                      "properties": {
+                                        "storage": {
+                                          "type": "string"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "volumeName": {
+                          "type": "object",
+                          "properties": {
+                            "mountPath": {},
+                            "persistentVolumeClaim": {}
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "enabled"
+                  ]
+                },
+                "podManagementPolicy": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "clustering": {
+          "type": "object",
+          "properties": {
+            "autoscaling": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "minReplicas": {
+                  "type": "integer"
+                },
+                "maxReplicas": {
+                  "type": "integer"
+                },
+                "targetCPUUtilizationPercentage": {
+                  "type": "integer"
+                },
+                "targetMemoryUtilizationPercentage": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "enabled"
+              ]
+            }
+          }
+        },
+        "container": {
+          "type": "object",
+          "properties": {
+            "replicaCount": {
+              "type": "integer"
+            },
+            "terminationGracePeriodSeconds": {
+              "type": "integer"
+            }
+          }
+        },
+        "license": {
+          "type": "object",
+          "properties": {
+            "secret": {
+              "type": "object",
+              "properties": {
+                "devOps": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "utilitySidecar": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "resources": {
+              "type": "object",
+              "properties": {
+                "limits": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                },
+                "requests": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "includeSidecars": {
+          "type": "array",
+          "items": {}
+        },
+        "includeInitContainers": {
+          "type": "array",
+          "items": {}
+        },
+        "includeVolumes": {
+          "type": "array",
+          "items": {}
+        }
+      }
+    },
+    "sidecars": {
+      "type": "object"
+    },
+    "initContainers": {
+      "type": "object"
+    },
+    "volumes": {
+      "type": "object"
+    },
+    "configMaps": {
+      "type": "object"
+    },
+    "ldap-sdk-tools": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "container": {
+          "type": "object",
+          "properties": {
+            "command": {
+              "type": "string"
+            },
+            "probes": {
+              "type": "object",
+              "properties": {
+                "livenessProbe": {
+                  "type": "object",
+                  "properties": {
+                    "exec": {
+                      "type": "object",
+                      "properties": {
+                        "command": {
+                          "type": "array",
+                          "items": [
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                "readinessProbe": {
+                  "type": "object",
+                  "properties": {
+                    "exec": {
+                      "type": "object",
+                      "properties": {
+                        "command": {
+                          "type": "array",
+                          "items": [
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                "startupProbe": {
+                  "type": "object",
+                  "properties": {
+                    "exec": {
+                      "type": "object",
+                      "properties": {
+                        "command": {
+                          "type": "array",
+                          "items": [
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    },
+    "pingfederate-admin": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "container": {
+          "type": "object",
+          "properties": {
+            "resources": {
+              "type": "object",
+              "properties": {
+                "requests": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                },
+                "limits": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "workload": {
+          "type": "object",
+          "properties": {
+            "deployment": {
+              "type": "object",
+              "properties": {
+                "strategy": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "services": {
+          "type": "object",
+          "properties": {
+            "https": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "ingressPort": {
+                  "type": "integer"
+                },
+                "dataService": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "clusterbind": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "clusterService": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "clusterfail": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "clusterService": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "clusterServiceName": {
+              "type": "string"
+            }
+          }
+        },
+        "ingress": {
+          "type": "object",
+          "properties": {
+            "hosts": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "type": "string"
+                    },
+                    "paths": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "type": "string"
+                            },
+                            "pathType": {
+                              "type": "string"
+                            },
+                            "backend": {
+                              "type": "object",
+                              "properties": {
+                                "serviceName": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "tls": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "secretName": {
+                      "type": "string"
+                    },
+                    "hosts": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "envs": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    },
+    "pingfederate-engine": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "container": {
+          "type": "object",
+          "properties": {
+            "resources": {
+              "type": "object",
+              "properties": {
+                "requests": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                },
+                "limits": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                }
+              }
+            },
+            "waitFor": {
+              "type": "object",
+              "properties": {
+                "pingfederate-admin": {
+                  "type": "object",
+                  "properties": {
+                    "service": {
+                      "type": "string"
+                    },
+                    "timeoutSeconds": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "envs": {
+          "type": "object",
+          "properties": {
+            "PF_ADMIN_PORT": {
+              "type": "string"
+            }
+          }
+        },
+        "services": {
+          "type": "object",
+          "properties": {
+            "https": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "ingressPort": {
+                  "type": "integer"
+                },
+                "dataService": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "clusterbind": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "clusterService": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "clusterfail": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "clusterService": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "clusterServiceName": {
+              "type": "string"
+            }
+          }
+        },
+        "ingress": {
+          "type": "object",
+          "properties": {
+            "hosts": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "type": "string"
+                    },
+                    "paths": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "type": "string"
+                            },
+                            "pathType": {
+                              "type": "string"
+                            },
+                            "backend": {
+                              "type": "object",
+                              "properties": {
+                                "serviceName": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "tls": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "secretName": {
+                      "type": "string"
+                    },
+                    "hosts": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    },
+    "pingdirectory": {
+      "type": "object",
+      "properties": {
+        "cronjob": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "image": {
+              "type": "string"
+            },
+            "args": {
+              "type": "array",
+              "items": {}
+            }
+          }
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "container": {
+          "type": "object",
+          "properties": {
+            "replicaCount": {
+              "type": "integer"
+            },
+            "resources": {
+              "type": "object",
+              "properties": {
+                "requests": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                },
+                "limits": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                }
+              }
+            },
+            "terminationGracePeriodSeconds": {
+              "type": "integer"
+            },
+            "probes": {
+              "type": "object",
+              "properties": {
+                "readinessProbe": {
+                  "type": "object",
+                  "properties": {
+                    "periodSeconds": {
+                      "type": "integer"
+                    },
+                    "failureThreshold": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "startupProbe": {
+                  "type": "object",
+                  "properties": {
+                    "periodSeconds": {
+                      "type": "integer"
+                    },
+                    "failureThreshold": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "workload": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "statefulSet": {
+              "type": "object",
+              "properties": {
+                "podManagementPolicy": {
+                  "type": "string"
+                },
+                "persistentvolume": {
+                  "type": "object",
+                  "properties": {
+                    "volumes": {
+                      "type": "object",
+                      "properties": {
+                        "out-dir": {
+                          "type": "object",
+                          "properties": {
+                            "persistentVolumeClaim": {
+                              "type": "object",
+                              "properties": {
+                                "resources": {
+                                  "type": "object",
+                                  "properties": {
+                                    "requests": {
+                                      "type": "object",
+                                      "properties": {
+                                        "storage": {
+                                          "type": "string"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "envs": {
+          "type": "object",
+          "properties": {
+            "MAKELDIF_USERS": {
+              "type": "string"
+            }
+          }
+        },
+        "services": {
+          "type": "object",
+          "properties": {
+            "ldap": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "dataService": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "ldaps": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "dataService": {
+                  "type": "boolean"
+                },
+                "clusterService": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "https": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "ingressPort": {
+                  "type": "integer"
+                },
+                "dataService": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "clusterServiceName": {
+              "type": "string"
+            }
+          }
+        },
+        "ingress": {
+          "type": "object",
+          "properties": {
+            "hosts": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "type": "string"
+                    },
+                    "paths": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "type": "string"
+                            },
+                            "pathType": {
+                              "type": "string"
+                            },
+                            "backend": {
+                              "type": "object",
+                              "properties": {
+                                "serviceName": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "tls": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "secretName": {
+                      "type": "string"
+                    },
+                    "hosts": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    },
+    "pingdirectoryproxy": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "workload": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "statefulSet": {
+              "type": "object",
+              "properties": {
+                "persistentvolume": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container": {
+          "type": "object",
+          "properties": {
+            "resources": {
+              "type": "object",
+              "properties": {
+                "requests": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                },
+                "limits": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "services": {
+          "type": "object",
+          "properties": {
+            "ldaps": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "clusterService": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "https": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "ingressPort": {
+                  "type": "integer"
+                },
+                "dataService": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "clusterServiceName": {
+              "type": "string"
+            }
+          }
+        },
+        "ingress": {
+          "type": "object",
+          "properties": {
+            "hosts": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "type": "string"
+                    },
+                    "paths": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "type": "string"
+                            },
+                            "pathType": {
+                              "type": "string"
+                            },
+                            "backend": {
+                              "type": "object",
+                              "properties": {
+                                "serviceName": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "tls": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "secretName": {
+                      "type": "string"
+                    },
+                    "hosts": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "envs": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    },
+    "pingdelegator": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "container": {
+          "type": "object",
+          "properties": {
+            "resources": {
+              "type": "object",
+              "properties": {
+                "requests": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                },
+                "limits": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "publicPort": {
+          "type": "integer"
+        },
+        "tokenProvider": {
+          "type": "object",
+          "properties": {
+            "port": {
+              "type": "integer"
+            },
+            "clientId": {
+              "type": "string"
+            }
+          }
+        },
+        "pingDirectoryServer": {
+          "type": "object",
+          "properties": {
+            "port": {
+              "type": "integer"
+            }
+          }
+        },
+        "services": {
+          "type": "object",
+          "properties": {
+            "https": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "ingressPort": {
+                  "type": "integer"
+                },
+                "dataService": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "ingress": {
+          "type": "object",
+          "properties": {
+            "hosts": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "type": "string"
+                    },
+                    "paths": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "type": "string"
+                            },
+                            "pathType": {
+                              "type": "string"
+                            },
+                            "backend": {
+                              "type": "object",
+                              "properties": {
+                                "serviceName": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "tls": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "secretName": {
+                      "type": "string"
+                    },
+                    "hosts": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "envs": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    },
+    "pingdatasync": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "workload": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "statefulSet": {
+              "type": "object",
+              "properties": {
+                "podManagementPolicy": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "container": {
+          "type": "object",
+          "properties": {
+            "resources": {
+              "type": "object",
+              "properties": {
+                "requests": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                },
+                "limits": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "services": {
+          "type": "object",
+          "properties": {
+            "ldaps": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "clusterService": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "https": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "ingressPort": {
+                  "type": "integer"
+                },
+                "dataService": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "clusterServiceName": {
+              "type": "string"
+            }
+          }
+        },
+        "ingress": {
+          "type": "object",
+          "properties": {
+            "hosts": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "type": "string"
+                    },
+                    "paths": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "type": "string"
+                            },
+                            "pathType": {
+                              "type": "string"
+                            },
+                            "backend": {
+                              "type": "object",
+                              "properties": {
+                                "serviceName": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "tls": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "secretName": {
+                      "type": "string"
+                    },
+                    "hosts": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "envs": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    },
+    "pingauthorize": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "container": {
+          "type": "object",
+          "properties": {
+            "resources": {
+              "type": "object",
+              "properties": {
+                "requests": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                },
+                "limits": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "services": {
+          "type": "object",
+          "properties": {
+            "https": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "ingressPort": {
+                  "type": "integer"
+                },
+                "dataService": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "ldaps": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "clusterService": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "clusterServiceName": {
+              "type": "string"
+            }
+          }
+        },
+        "ingress": {
+          "type": "object",
+          "properties": {
+            "hosts": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "type": "string"
+                    },
+                    "paths": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "type": "string"
+                            },
+                            "pathType": {
+                              "type": "string"
+                            },
+                            "backend": {
+                              "type": "object",
+                              "properties": {
+                                "serviceName": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "tls": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "secretName": {
+                      "type": "string"
+                    },
+                    "hosts": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "envs": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    },
+    "pingauthorizepap": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "container": {
+          "type": "object",
+          "properties": {
+            "resources": {
+              "type": "object",
+              "properties": {
+                "requests": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                },
+                "limits": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "envs": {
+          "type": "object",
+          "properties": {
+            "HTTPS_PORT": {
+              "type": "string"
+            }
+          }
+        },
+        "services": {
+          "type": "object",
+          "properties": {
+            "https": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "ingressPort": {
+                  "type": "integer"
+                },
+                "dataService": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "ingress": {
+          "type": "object",
+          "properties": {
+            "hosts": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "type": "string"
+                    },
+                    "paths": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "type": "string"
+                            },
+                            "pathType": {
+                              "type": "string"
+                            },
+                            "backend": {
+                              "type": "object",
+                              "properties": {
+                                "serviceName": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "tls": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "secretName": {
+                      "type": "string"
+                    },
+                    "hosts": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    },
+    "pingdatagovernance": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "container": {
+          "type": "object",
+          "properties": {
+            "resources": {
+              "type": "object",
+              "properties": {
+                "requests": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                },
+                "limits": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "services": {
+          "type": "object",
+          "properties": {
+            "https": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "ingressPort": {
+                  "type": "integer"
+                },
+                "dataService": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "ldaps": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "clusterService": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "clusterServiceName": {
+              "type": "string"
+            }
+          }
+        },
+        "ingress": {
+          "type": "object",
+          "properties": {
+            "hosts": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "type": "string"
+                    },
+                    "paths": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "type": "string"
+                            },
+                            "pathType": {
+                              "type": "string"
+                            },
+                            "backend": {
+                              "type": "object",
+                              "properties": {
+                                "serviceName": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "tls": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "secretName": {
+                      "type": "string"
+                    },
+                    "hosts": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    },
+    "pingdatagovernancepap": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "container": {
+          "type": "object",
+          "properties": {
+            "resources": {
+              "type": "object",
+              "properties": {
+                "requests": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                },
+                "limits": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "envs": {
+          "type": "object",
+          "properties": {
+            "HTTPS_PORT": {
+              "type": "string"
+            }
+          }
+        },
+        "services": {
+          "type": "object",
+          "properties": {
+            "https": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "ingressPort": {
+                  "type": "integer"
+                },
+                "dataService": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "ingress": {
+          "type": "object",
+          "properties": {
+            "hosts": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "type": "string"
+                    },
+                    "paths": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "type": "string"
+                            },
+                            "pathType": {
+                              "type": "string"
+                            },
+                            "backend": {
+                              "type": "object",
+                              "properties": {
+                                "serviceName": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "tls": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "secretName": {
+                      "type": "string"
+                    },
+                    "hosts": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    },
+    "pingaccess-admin": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "workload": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            }
+          }
+        },
+        "container": {
+          "type": "object",
+          "properties": {
+            "resources": {
+              "type": "object",
+              "properties": {
+                "requests": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                },
+                "limits": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "services": {
+          "type": "object",
+          "properties": {
+            "https": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "ingressPort": {
+                  "type": "integer"
+                },
+                "dataService": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "clusterconfig": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "dataService": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "ingress": {
+          "type": "object",
+          "properties": {
+            "hosts": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "type": "string"
+                    },
+                    "paths": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "type": "string"
+                            },
+                            "pathType": {
+                              "type": "string"
+                            },
+                            "backend": {
+                              "type": "object",
+                              "properties": {
+                                "serviceName": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "tls": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "secretName": {
+                      "type": "string"
+                    },
+                    "hosts": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "envs": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    },
+    "pingaccess-engine": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "container": {
+          "type": "object",
+          "properties": {
+            "resources": {
+              "type": "object",
+              "properties": {
+                "requests": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                },
+                "limits": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                }
+              }
+            },
+            "waitFor": {
+              "type": "object",
+              "properties": {
+                "pingaccess-admin": {
+                  "type": "object",
+                  "properties": {
+                    "service": {
+                      "type": "string"
+                    },
+                    "timeoutSeconds": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "services": {
+          "type": "object",
+          "properties": {
+            "https": {
+              "type": "object",
+              "properties": {
+                "servicePort": {
+                  "type": "integer"
+                },
+                "containerPort": {
+                  "type": "integer"
+                },
+                "ingressPort": {
+                  "type": "integer"
+                },
+                "dataService": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "ingress": {
+          "type": "object",
+          "properties": {
+            "hosts": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "type": "string"
+                    },
+                    "paths": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "type": "string"
+                            },
+                            "pathType": {
+                              "type": "string"
+                            },
+                            "backend": {
+                              "type": "object",
+                              "properties": {
+                                "serviceName": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "tls": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "secretName": {
+                      "type": "string"
+                    },
+                    "hosts": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "envs": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    },
+    "pingcentral": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "container": {
+          "type": "object",
+          "properties": {
+            "resources": {
+              "type": "object",
+              "properties": {
+                "requests": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                },
+                "limits": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "services": {
+          "type": "object",
+          "properties": {
+            "https": {
+              "type": "object",
+              "properties": {
+                "containerPort": {
+                  "type": "integer"
+                },
+                "servicePort": {
+                  "type": "integer"
+                },
+                "ingressPort": {
+                  "type": "integer"
+                },
+                "dataService": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "ingress": {
+          "type": "object",
+          "properties": {
+            "hosts": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "type": "string"
+                    },
+                    "paths": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "type": "string"
+                            },
+                            "pathType": {
+                              "type": "string"
+                            },
+                            "backend": {
+                              "type": "object",
+                              "properties": {
+                                "serviceName": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "tls": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "secretName": {
+                      "type": "string"
+                    },
+                    "hosts": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "envs": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    },
+    "pingdataconsole": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "container": {
+          "type": "object",
+          "properties": {
+            "resources": {
+              "type": "object",
+              "properties": {
+                "requests": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                },
+                "limits": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "defaultLogin": {
+          "type": "object",
+          "properties": {
+            "server": {
+              "type": "object",
+              "properties": {
+                "host": {
+                  "type": "string"
+                },
+                "port": {
+                  "type": "integer"
+                }
+              }
+            },
+            "username": {
+              "type": "string"
+            }
+          }
+        },
+        "services": {
+          "type": "object",
+          "properties": {
+            "https": {
+              "type": "object",
+              "properties": {
+                "containerPort": {
+                  "type": "integer"
+                },
+                "servicePort": {
+                  "type": "integer"
+                },
+                "ingressPort": {
+                  "type": "integer"
+                },
+                "dataService": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "ingress": {
+          "type": "object",
+          "properties": {
+            "hosts": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "type": "string"
+                    },
+                    "paths": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "type": "string"
+                            },
+                            "pathType": {
+                              "type": "string"
+                            },
+                            "backend": {
+                              "type": "object",
+                              "properties": {
+                                "serviceName": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "tls": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "secretName": {
+                      "type": "string"
+                    },
+                    "hosts": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "envs": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    },
+    "pingintelligence": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "volumes": {
+          "type": "array",
+          "items": [
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "emptyDir": {
+                  "type": "object",
+                  "properties": {
+                    "medium": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "volumeMounts": {
+          "type": "array",
+          "items": [
+            {
+              "type": "object",
+              "properties": {
+                "mountPath": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "container": {
+          "type": "object",
+          "properties": {
+            "resources": {
+              "type": "object",
+              "properties": {
+                "requests": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                },
+                "limits": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "services": {
+          "type": "object",
+          "properties": {
+            "https": {
+              "type": "object",
+              "properties": {
+                "containerPort": {
+                  "type": "integer"
+                },
+                "servicePort": {
+                  "type": "integer"
+                },
+                "ingressPort": {
+                  "type": "integer"
+                },
+                "dataService": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "ingress": {
+          "type": "object",
+          "properties": {
+            "hosts": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "type": "string"
+                    },
+                    "paths": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "type": "string"
+                            },
+                            "pathType": {
+                              "type": "string"
+                            },
+                            "backend": {
+                              "type": "object",
+                              "properties": {
+                                "serviceName": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "tls": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "secretName": {
+                      "type": "string"
+                    },
+                    "hosts": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "envs": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    },
+    "pd-replication-timing": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "envs": {
+          "type": "object",
+          "properties": {
+            "SERVER_PROFILE_URL": {
+              "type": "string"
+            },
+            "SERVER_PROFILE_PATH": {
+              "type": "string"
+            },
+            "STARTUP_COMMAND": {
+              "type": "string"
+            },
+            "STARTUP_BACKGROUND_OPTS": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    },
+    "pingtoolkit": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "envs": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    },
+    "testFramework": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "sharedMountPath": {
+          "type": "string"
+        },
+        "rbac": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "role": {
+              "type": "object",
+              "properties": {
+                "rules": {
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "apiGroups": {
+                          "type": "array",
+                          "items": [
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "resources": {
+                          "type": "array",
+                          "items": [
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "verbs": {
+                          "type": "array",
+                          "items": [
+                            {
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "testConfigMaps": {
+          "type": "object",
+          "properties": {
+            "prefix": {
+              "type": "string"
+            },
+            "volumeMountPath": {
+              "type": "string"
+            }
+          }
+        },
+        "testSteps": {
+          "type": "array",
+          "items": {}
+        },
+        "finalStep": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "image": {
+              "type": "string"
+            },
+            "imagePullPolicy": {
+              "type": "string"
+            },
+            "command": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "resources": {
+              "type": "object",
+              "properties": {
+                "limits": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                },
+                "requests": {
+                  "type": "object",
+                  "properties": {
+                    "cpu": {
+                    },
+                    "memory": {
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "pod": {
+          "type": "object",
+          "properties": {
+            "securityContext": {
+              "type": "object",
+              "properties": {
+                "runAsUser": {
+                  "type": "integer"
+                },
+                "runAsGroup": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    }
+  },
+  "required": [
+    "global",
+    "ldap-sdk-tools",
+    "pingfederate-admin",
+    "pingfederate-engine",
+    "pingdirectory",
+    "pingdirectoryproxy",
+    "pingdelegator",
+    "pingdatasync",
+    "pingauthorize",
+    "pingauthorizepap",
+    "pingaccess-admin",
+    "pingaccess-engine",
+    "pingcentral",
+    "pingdataconsole",
+    "pingintelligence",
+    "pd-replication-timing",
+    "pingtoolkit",
+    "testFramework"
+  ]
+}
