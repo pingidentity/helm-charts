@@ -31,12 +31,12 @@ spec:
         type: Utilization
         averageUtilization: {{ . }}
   {{- end }}
+    {{- with $v.clustering.autoscalingMetricsTemplate }}
+  {{- toYaml . | nindent 2 }}
+    {{- end }}
   behavior:
   {{- with $v.clustering.autoscaling.behavior }}
 {{- toYaml . | nindent 4 }}
-  {{- end }}
-  {{- with $v.clustering.autoscalingMetricsTemplate }}
-{{- toYaml . | nindent 2 }}
   {{- end }}
 {{- end -}}
 
