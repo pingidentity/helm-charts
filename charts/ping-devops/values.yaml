@@ -993,10 +993,10 @@ pingdirectory:
   # @param    pingdirectory.cronjob.enabled Enable the PingDirectory CronJob
   # @default  false
   #
-  # @param    pingdirectory.cronjob.spec yaml to insert into the created CronJob spec. The jobTemplate
-  # @desc     should not be included. A schedule value must be provided
-  # 
-  # @param    pingdirectory.cronjob.jobspec 
+  # @param    pingdirectory.cronjob.spec yaml to insert into the created CronJob spec. If a jobTemplate is not
+  # @desc     provided, a default template will be inserted. A schedule value must be provided
+  #
+  # @param    pingdirectory.cronjob.spec.jobTemplate
   # @desc     yaml to override default jobTemplate.
   #
   # @param    pingdirectory.cronjob.image Image to run the Jobs. The image must include kubectl
@@ -1014,7 +1014,6 @@ pingdirectory:
       # failedJobsHistoryLimit: 1
     # The image can be replaced with any desired image that includes kubectl
 
-    jobspec: {}
     image: bitnami/kubectl:latest
     args: []
   enabled: false

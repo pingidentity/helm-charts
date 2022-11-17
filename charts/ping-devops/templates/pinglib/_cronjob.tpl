@@ -18,10 +18,7 @@ spec:
   successfulJobsHistoryLimit: 0
   failedJobsHistoryLimit: 1
   {{ end }}
-  {{ if $v.cronjob.spec.jobTemplate }}
-  jobTemplate:
-  {{ toYaml $v.cronjob.spec.jobTemplate | nindent 6 }}
-  {{ else }}
+  {{ if not $v.cronjob.spec.jobTemplate }}
   jobTemplate:
     spec:
       template:

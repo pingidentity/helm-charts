@@ -1,0 +1,59 @@
+# This test covers setting cronjob for PD.
+### SECTION:PARAMETERS ###
+releaseName: cronjob
+# Set skipTest to true to make the script skip this test
+skipTest: false
+### SECTION:VALUES ###
+# Set typical Helm values here
+pingdirectory:
+  # Use a cronJob to run backups every six hours
+  cronjob:
+    enabled: true
+    spec:
+      schedule: "0 */6 * * *"
+      successfulJobsHistoryLimit: 0
+      failedJobsHistoryLimit: 1
+      jobTemplate:
+        spec:
+          template:
+            spec:
+              serviceAccount: pinglib-internal-kubectl
+              restartPolicy: OnFailure
+              containers:
+                - name: pinglib-cronjob
+                  image: image
+                  command: [ "kubectl" ]
+                  args:
+                    - .
+    args:
+      - /opt/in/backup.sh
+  enabled: true
+  envs:
+    SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+    SERVER_PROFILE_PATH: getting-started/pingdirectory
+
+### SECTION:EXPECTED ###
+
+# Validate that expected Cronjob are generated
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: cronjob-pingdirectory-cronjob
+spec:
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - args:
+                - .
+              command:
+                - kubectl
+              image: image
+              name: pinglib-cronjob
+          restartPolicy: OnFailure
+          serviceAccount: pinglib-internal-kubectl
+  schedule: 0 */6 * * *
+  successfulJobsHistoryLimit: 0
+---
