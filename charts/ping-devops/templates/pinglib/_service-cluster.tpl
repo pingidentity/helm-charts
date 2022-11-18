@@ -8,6 +8,7 @@ metadata:
   {{ include "pinglib.metadata.annotations" .  | nindent 2  }}
 {{- if $v.services.clusterExternalDNSHostname }}
   annotations:
+    {{ include "pinglib.metadata.annotations" . | nindent 2 }}
     external-dns.alpha.kubernetes.io/hostname: {{ $v.services.clusterExternalDNSHostname }}
 {{- end }}
   name: {{ include "pinglib.fullclusterservicename" . }}

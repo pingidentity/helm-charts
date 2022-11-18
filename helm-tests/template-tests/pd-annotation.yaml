@@ -1,0 +1,42 @@
+# This test covers setting annotation for PD.
+### SECTION:PARAMETERS ###
+releaseName: annotation
+# Set skipTest to true to make the script skip this test
+skipTest: false
+### SECTION:VALUES ###
+# Set typical Helm values here
+pingdirectory:
+  enabled: true
+  annotations:
+    external-dns.alpha.kubernetes.io/myannotation: "mycustomannotation"
+  services:
+    clusterExternalDNSHostname: set1.west.ping-multi-cluster.com
+    dataExternalDNSHostname: us.west.ping-multi-cluster.com
+
+### SECTION:EXPECTED ###
+
+# Validate that expected annotations are generated
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: set1.west.ping-multi-cluster.com
+    external-dns.alpha.kubernetes.io/myannotation: mycustomannotation
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+  name: annotation-pingdirectory-cluster
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: us.west.ping-multi-cluster.com
+    external-dns.alpha.kubernetes.io/myannotation: mycustomannotation
+  name: annotation-pingdirectory
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  annotations:
+    external-dns.alpha.kubernetes.io/myannotation: mycustomannotation
+  name: annotation-pingdirectory
+---
