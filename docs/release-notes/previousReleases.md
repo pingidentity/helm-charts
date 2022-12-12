@@ -1,4 +1,8 @@
 # Release Notes
+## Release 0.9.7 (November 02, 2022)
+### Features ###
+  - Updated default global image tag to `2210`.
+
 ## Release 0.9.6 (October 04, 2022)
 ### Features ###
   - Updated default global image tag to `2209`.
