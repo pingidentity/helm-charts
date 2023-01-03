@@ -1,4 +1,0 @@
-{{- include "pinglib.rbac.role-binding" (list . "pingdatagovernance") -}}
-
-{{- define "pingdatagovernance.rbac.role-binding" -}}
-{{- end -}}

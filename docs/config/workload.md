@@ -93,7 +93,7 @@ global:
           pingdirectory:
             service: ldaps
             timeoutSeconds: 600
-          pingdatagovernance:
+          pingauthorize:
             service: https
             timeoutSeconds: 300
     ```
