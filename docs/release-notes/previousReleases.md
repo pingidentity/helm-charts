@@ -1010,6 +1010,7 @@
                 X509v3 Subject Alternative Name:
                     DNS:rel050-pa-pingaccess-admin.ping-devops.com. pingaccess-admin.west-cluster.example.com, DNS:pa-admin.west-cluster.example.com, IP Address:123.45.67.8
     ```
+  
 ## Release 0.4.9
 
 * [Issue #104](https://github.com/pingidentity/helm-charts/issues/104) - Update default global image tag to 2102 (Feb 2021)
@@ -1091,6 +1092,7 @@
     #
     #-------------------------------------------------------------------------------------
     ```
+
 ## Release 0.4.4
 
 * [Issue #80](https://github.com/pingidentity/helm-charts/issues/80) - Add support for importing a secret containing license into the container.
@@ -1132,6 +1134,7 @@
             Name:      pingfederate-props
             Optional:  false
         ```
+
 ## Release 0.4.3
 
 * [Issue #83](https://github.com/pingidentity/helm-charts/issues/83) - Remove old pingdirectory tag check when creating service-cluster.
