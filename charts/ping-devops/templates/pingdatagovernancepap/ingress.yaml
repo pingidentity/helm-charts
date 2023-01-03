@@ -1,8 +1,0 @@
-{{- if (merge (index .Values "pingdatagovernancepap") .Values.global).ingress.enabled }}
-{{- include "pinglib.ingress" (list . "pingdatagovernancepap") -}}
-{{- end -}}
-
-
-
-{{- define "pingdatagovernancepap.ingress" -}}
-{{- end -}}

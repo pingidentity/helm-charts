@@ -1,6 +1,0 @@
-{{- include "pinglib.env-vars" (list . "pingdatagovernance") -}}
-
-
-
-{{- define "pingdatagovernance.env-vars" -}}
-{{- end -}}

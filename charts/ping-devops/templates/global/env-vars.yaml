@@ -14,8 +14,6 @@ data:
   {{ include "global.private.host.port" (list $top $v "PAZP_ENGINE" "pingauthorizepap") }}
   {{ include "global.private.host.port" (list $top $v "PD_CONSOLE" "pingdataconsole") }}
   {{ include "global.private.host.port" (list $top $v "PDS_ENGINE" "pingdatasync") }}
-  {{ include "global.private.host.port" (list $top $v "PDG_ENGINE" "pingdatagovernance") }}
-  {{ include "global.private.host.port" (list $top $v "PDGP_ENGINE" "pingdatagovernancepap") }}
   {{ include "global.private.host.port" (list $top $v "PD_DELEGATOR" "pingdelegator") }}
   {{ include "global.private.host.port" (list $top $v "PD_ENGINE" "pingdirectory") }}
   {{ include "global.private.host.port" (list $top $v "PDP_ENGINE" "pingdirectoryproxy") }}
@@ -29,8 +27,6 @@ data:
   {{ include "global.public.host.port" (list $top $v "PAZP_ENGINE" "pingauthorizepap") }}
   {{ include "global.public.host.port" (list $top $v "PD_CONSOLE" "pingdataconsole") }}
   {{ include "global.public.host.port" (list $top $v "PDS_ENGINE" "pingdatasync") }}
-  {{ include "global.public.host.port" (list $top $v "PDG_ENGINE" "pingdatagovernance") }}
-  {{ include "global.public.host.port" (list $top $v "PDGP_ENGINE" "pingdatagovernancepap") }}
   {{ include "global.public.host.port" (list $top $v "PD_DELEGATOR" "pingdelegator") }}
   {{ include "global.public.host.port" (list $top $v "PD_ENGINE" "pingdirectory") }}
   {{ include "global.public.host.port" (list $top $v "PDP_ENGINE" "pingdirectoryproxy") }}
