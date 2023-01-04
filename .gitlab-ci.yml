@@ -116,8 +116,7 @@ r.release:
   script:
     - ci_scripts/release_charts.sh
   rules:
-    - if: $RELEASE == "true"
-    - if: '$CI_COMMIT_TAG !~ "/^$/"'
+    - if: $RELEASE == "true" && '$CI_COMMIT_TAG !~ "/^$/"'
 
 ################################################
 #   ______ _____ _   _          _
