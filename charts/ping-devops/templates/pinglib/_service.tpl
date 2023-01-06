@@ -13,6 +13,9 @@ metadata:
 {{- end }}
   name: {{ include "pinglib.fullname" . }}
 spec:
+  {{- if $v.services.useLoadBalancerForDataService }}
+  type: LoadBalancer
+  {{- end }}
   ports:
   {{- range $serviceName, $val := $v.services }}
   {{- if kindIs "map" $val }}
