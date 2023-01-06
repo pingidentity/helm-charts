@@ -320,10 +320,15 @@ global:
   #
   # @param    global.services.clusterExternalDNSHostname
   # @desc     Value for the external-dns.alpha.kubernetes.io/hostname annotation
+  # @desc     for the cluster service.
   # @default
   #
   # @param    global.services.clusterServiceName If set, then this name will
   # @desc     be used as the cluster service name (i.e clusterService == true).
+  #
+  # @param    global.services.useLoadBalancerForDataService If true, the data service
+  # @desc     will be created with type: LoadBalancer.
+  # @default  false
   #
   # @param    global.services.serviceName.dataService If true, a ClusterIP service is
   # @desc     created reachable within the cluster. A single IP is provided and the
@@ -359,6 +364,7 @@ global:
   #    clusterService: true
   #  clusterExternalDNSHostname:
   #  clusterServiceName:
+  #  useLoadBalancerForDataService: false
 
 
   ############################################################
@@ -1082,6 +1088,21 @@ pingdirectory:
   envs:
     MAKELDIF_USERS: "20000"
 
+  # @param    pingdirectory.services.serviceName.loadBalancerService If true, the
+  # @desc     per-Pod LoadBalancer services enabled with
+  # @desc     pingdirectory.services.loadBalancerServicePerPod will include this port.
+  # @default  false
+  #
+  # @param    pingdirectory.services.loadBalancerServicePerPod
+  # @desc     Set to true to create a separate LoadBalancer service for each individual
+  # @desc     Pod in the PingDirectory StatefulSet.
+  # @default  false
+  #
+  # @param    pingdirectory.services.loadBalancerExternalDNSHostnameSuffix
+  # @desc     Value used for the external-dns.alpha.kubernetes.io/hostname annotation
+  # @desc     for the LoadBalancer services. This value will be used as a suffix for
+  # @desc     the hostname for each individual pod when
+  # @desc     pingdirectory.services.loadBalancerServicePerPod is set to true.
   services:
     ldap:
       servicePort: 389
@@ -1092,12 +1113,18 @@ pingdirectory:
       containerPort: 1636
       dataService: true
       clusterService: true
+      loadBalancerService: true
     https:
       servicePort: 443
       containerPort: 1443
       ingressPort: 443
       dataService: true
+    replication:
+      containerPort: 8989
+      loadBalancerService: true
     clusterServiceName: pingdirectory-cluster
+    loadBalancerServicePerPod: false
+    #loadBalancerExternalDNSHostnameSuffix: .example.com
 
   ingress:
     hosts:

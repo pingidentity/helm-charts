@@ -1,0 +1,85 @@
+# This test covers using LoadBalancer services with PingDirectory
+### SECTION:PARAMETERS ###
+releaseName: loadbalancer
+# Set skipTest to true to make the script skip this test
+skipTest: false
+### SECTION:VALUES ###
+# Set typical Helm values here
+pingdirectory:
+  enabled: true
+  container:
+    replicaCount: 2
+  annotations:
+    myannotation: "mycustomannotation"
+  services:
+    loadBalancerServicePerPod: true
+    loadBalancerExternalDNSHostnameSuffix: .my-cluster.example.com
+    useLoadBalancerForDataService: true
+
+### SECTION:EXPECTED ###
+
+# Validate that the typical data service is a LoadBalancer
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    myannotation: "mycustomannotation"
+  name: loadbalancer-pingdirectory
+spec:
+  ports:
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 1443
+  - name: ldap
+    port: 389
+    protocol: TCP
+    targetPort: 1389
+  - name: ldaps
+    port: 636
+    protocol: TCP
+    targetPort: 1636
+  type: LoadBalancer
+---
+# Validate that two other LoadBalancer services are created, one for each pod
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    myannotation: "mycustomannotation"
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    external-dns.alpha.kubernetes.io/hostname: loadbalancer-pingdirectory-1.my-cluster.example.com
+  name: loadbalancer-pingdirectory-1
+spec:
+  type: LoadBalancer
+  selector:
+    statefulset.kubernetes.io/pod-name: loadbalancer-pingdirectory-1
+  publishNotReadyAddresses: true
+  ports:
+    - name: ldaps
+      port: 1636
+      protocol: TCP
+    - name: replication
+      port: 8989
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    myannotation: "mycustomannotation"
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    external-dns.alpha.kubernetes.io/hostname: loadbalancer-pingdirectory-0.my-cluster.example.com
+  name: loadbalancer-pingdirectory-0
+spec:
+  type: LoadBalancer
+  selector:
+    statefulset.kubernetes.io/pod-name: loadbalancer-pingdirectory-0
+  publishNotReadyAddresses: true
+  ports:
+    - name: ldaps
+      port: 1636
+      protocol: TCP
+    - name: replication
+      port: 8989
+      protocol: TCP
