@@ -846,6 +846,10 @@ ldap-sdk-tools:
   name: ldap-sdk-tools
   image:
     name: ldap-sdk-tools
+    repository: pingidentity
+    repositoryFqn:
+    tag: "2212"
+    pullPolicy: IfNotPresent
 
   container:
     command: "tail -f /dev/null"
@@ -1641,6 +1645,10 @@ pd-replication-timing:
   name: pd-replication-timing
   image:
     name: pingtoolkit
+    repository: pingidentity
+    repositoryFqn:
+    tag: "2212"
+    pullPolicy: IfNotPresent
 
   envs:
     SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
@@ -1659,6 +1667,10 @@ pingtoolkit:
   name: pingtoolkit
   image:
     name: pingtoolkit
+    repository: pingidentity
+    repositoryFqn:
+    tag: "2212"
+    pullPolicy: IfNotPresent
 
 #############################################################
 # testFramework

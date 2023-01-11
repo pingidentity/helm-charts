@@ -26,11 +26,13 @@
     {{- $tag := ternary (toString .image.tag) "" .enabled }}
     {{- $workload := "" }}
     {{- if .workload }}
-      {{- $workload := ternary (ternary "dep" "sts" (eq .workload.type "Deployment")) "" .enabled }}
+      {{- $workload = ternary (ternary "dep" "sts" (eq .workload.type "Deployment")) "" .enabled }}
     {{- end }}
     {{- $numReplica := "" }}
     {{- if .container }}
-        {{- $numReplica := ternary (toString .container.replicaCount) "" .enabled }}
+        {{- if .container.replicaCount }}
+            {{- $numReplica = ternary (toString .container.replicaCount) "" .enabled }}
+        {{- end }}
     {{- end }}
     {{- $slash := ternary "/" "" .enabled }}
     {{- $cpur := "" }}
@@ -39,15 +41,15 @@
     {{- $meml := "" }}
     {{- if .container }}
         {{- if .container.resources }}
-            {{- $cpur := ternary (toString .container.resources.requests.cpu) "" .enabled }}
-            {{- $cpul := ternary (toString .container.resources.limits.cpu) "" .enabled }}
-            {{- $memr := ternary (toString .container.resources.requests.memory) "" .enabled }}
-            {{- $meml := ternary (toString .container.resources.limits.memory) "" .enabled }}
+            {{- $cpur = ternary (toString .container.resources.requests.cpu) "" .enabled }}
+            {{- $cpul = ternary (toString .container.resources.limits.cpu) "" .enabled }}
+            {{- $memr = ternary (toString .container.resources.requests.memory) "" .enabled }}
+            {{- $meml = ternary (toString .container.resources.limits.memory) "" .enabled }}
         {{- end }}
     {{- end }}
     {{- $ingEnabled := "" }}
     {{- if .ingress }}
-        {{- $ingEnabled := .enabled | ternary (ternary " √ " "" .ingress.enabled) "" }}
+        {{- $ingEnabled = .enabled | ternary (ternary " √ " "" .ingress.enabled) "" }}
     {{- end }}
 #  {{ printf $format $prodEnabled $prodName $tag $workload $numReplica $cpur $slash $cpul $memr $slash $meml $ingEnabled  }}
 {{- if .enabled }}
