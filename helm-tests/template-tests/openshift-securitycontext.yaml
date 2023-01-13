@@ -7,17 +7,66 @@
 skipTest: false
 ### SECTION:VALUES ###
 # This is not specific to any particular product
-pingdirectory:
-  enabled: true
+global:
   workload:
-    securityContext: null
-### SECTION:UNEXPECTED ###
-# Validate that no securityContext fields are set on the StatefulSet
+    securityContext:
+      runAsUser: null
+      fsGroup: null
+  externalImage:
+    pingtoolkit:
+      securityContext:
+        runAsUser: null
+
+pingaccess-admin:
+  enabled: true
+
+pingaccess-engine:
+  enabled: true
+  
+### SECTION:EXPECTED ###
+# Validate that the other securityContext fields are set as expected, at
+# the pod and container level.
 # Check for Pod-level security context
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  name: openshift-securitycontext-pingdirectory
+  name: openshift-securitycontext-pingaccess-engine
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsGroup: 0
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+---
+# Check for initcontainer-level securityContext
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openshift-securitycontext-pingaccess-engine
+spec:
+  template:
+    spec:
+      initContainers:
+      - name: wait-for-pingaccess-admin
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 0
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+---
+### SECTION:UNEXPECTED ###
+# Validate that the nulled-out fields override the default values
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openshift-securitycontext-pingaccess-engine
 spec:
   template:
     spec:
@@ -25,80 +74,24 @@ spec:
         fsGroup: 0
 ---
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  name: openshift-securitycontext-pingdirectory
-spec:
-  template:
-    spec:
-      securityContext:
-        runAsGroup: 0
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: openshift-securitycontext-pingdirectory
+  name: openshift-securitycontext-pingaccess-engine
 spec:
   template:
     spec:
       securityContext:
         runAsUser: 9031
 ---
-# The null security context should be left out of the template
+# Check for initcontainer-level securityContext
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  name: openshift-securitycontext-pingdirectory
+  name: openshift-securitycontext-pingaccess-engine
 spec:
   template:
     spec:
-      securityContext: null
-# Check for container-level securityContext
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: openshift-securitycontext-pingdirectory
-spec:
-  template:
-    spec:
-      containers:
-      - name: pingdirectory
-        securityContext:
-          fsGroup: 0
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: openshift-securitycontext-pingdirectory
-spec:
-  template:
-    spec:
-      containers:
-      - name: pingdirectory
-        securityContext:
-          runAsGroup: 0
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: openshift-securitycontext-pingdirectory
-spec:
-  template:
-    spec:
-      containers:
-      - name: pingdirectory
+      initContainers:
+      - name: wait-for-pingaccess-admin
         securityContext:
           runAsUser: 9031
----
-# The null security context should be left out of the template
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: openshift-securitycontext-pingdirectory
-spec:
-  template:
-    spec:
-      containers:
-      - name: pingdirectory
-        securityContext: null

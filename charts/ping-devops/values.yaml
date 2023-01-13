@@ -297,6 +297,8 @@ global:
         runAsNonRoot: true
         runAsUser: 9031
         runAsGroup: 0
+        seccompProfile:
+          type: RuntimeDefault
     pingaccess:
       resources:
         limits:
@@ -310,6 +312,8 @@ global:
         runAsNonRoot: true
         runAsUser: 9031
         runAsGroup: 0
+        seccompProfile:
+          type: RuntimeDefault
 
   ############################################################
   # Services
@@ -520,10 +524,9 @@ global:
       fsGroup: 0
       runAsUser: 9031
       runAsGroup: 0
-      # allowPrivilegeEscalation: false
-      # capabilities:
-      #   drop:
-      #   - ALL
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
 
   #############################################################
   # Horizontal Pod Autoscaling
@@ -611,7 +614,11 @@ global:
     #
     # See https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
     ############################################################
-    securityContext: null
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
     # @param global.container.replicaCount Number of replicas for workload
     # @default 1
     replicaCount: 1
@@ -1772,5 +1779,9 @@ testFramework:
   #########################################################
   pod:
     securityContext:
+      fsGroup: 0
       runAsUser: 9031
       runAsGroup: 0
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
