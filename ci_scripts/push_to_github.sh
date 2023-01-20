@@ -20,10 +20,18 @@ CI_SCRIPTS_DIR="${CI_PROJECT_DIR:-.}/ci_scripts"
 rm -rf ~/tmp/build
 mkdir -p ~/tmp/build && cd ~/tmp/build || exit 9
 
+echo "${GITHUB_DEPLOY_TOKEN}" > ~/.ssh/github_deploy_token
+
+echo "" >> ~/.ssh/config
+echo "Host github.com-helm-charts" >> ~/.ssh/config
+echo "    Hostname github.com" >> ~/.ssh/config
+echo "    IdentityFile ~/.ssh/github_deploy_token" >> ~/.ssh/config
+echo "" >> ~/.ssh/config
+
 git clone "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
 cd helm-charts || exit 97
 
-git remote add gh_location "https://${GITHUB_OWNER}:${GITHUB_TOKEN}@github.com/${GITHUB_TARGET_REPO}.git"
+git remote add gh_location "git@github.com-helm-charts:${GITHUB_TARGET_REPO}.git"
 
 if test -n "$CI_COMMIT_TAG"; then
     git push --force gh_location "$CI_COMMIT_TAG"
