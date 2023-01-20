@@ -21,6 +21,9 @@ rm -rf ~/tmp/build
 mkdir -p ~/tmp/build && cd ~/tmp/build || exit 9
 mkdir -p ~/.ssh || exit 9
 
+echo "Writing GitHub host key"
+echo "${GITHUB_HOST_KEY}" >> ~/.ssh/known_hosts
+
 echo "Writing deploy token and SSH config"
 echo "${GITHUB_DEPLOY_TOKEN}" > ~/.ssh/github_deploy_token || exit 9
 chmod 600 ~/.ssh/github_deploy_token
