@@ -21,6 +21,7 @@ rm -rf ~/tmp/build
 mkdir -p ~/tmp/build && cd ~/tmp/build || exit 9
 
 echo "${GITHUB_DEPLOY_TOKEN}" > ~/.ssh/github_deploy_token
+chmod 600 ~/.ssh/github_deploy_token
 
 echo "" >> ~/.ssh/config
 echo "Host github.com-helm-charts" >> ~/.ssh/config
