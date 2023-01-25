@@ -8,8 +8,8 @@ stages:
   - initialization
   - test.template
   - test.smoke
-  - test.integration
   - test.examples
+  - test.integration
   - publish
   - push
   - release
