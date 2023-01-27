@@ -132,3 +132,9 @@ clean-k8s:
   script:
     - ci_scripts/cleanup_kubernetes.sh
   when: always
+
+delete-old-k8s:
+  stage: final
+  script:
+    - ci_scripts/cleanup_old_kubernetes.sh
+  when: always
