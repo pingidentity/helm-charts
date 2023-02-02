@@ -1,4 +1,9 @@
 # Release Notes
+## Release 0.9.9 (January 03, 2023)
+### Features ###
+  - Updated default global image tag to `2212`.
+  - Removed `pingdatagovernance` and `pingdatagovernancepap` from the chart. Use `pingauthorize` and `pingauthorizepap` instead.
+
 ## Release 0.9.8 (December 05, 2022)
 ### Features ###
   - Updated default global image tag to `2211`.
