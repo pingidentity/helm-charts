@@ -2,5 +2,9 @@
 
 
 {{- define "pingdirectoryproxy.env-vars" -}}
+{{- $top := index . 0 -}}
 data:
+  K8S_STATEFUL_SET_NAME: {{ include "pinglib.fullname" . }}
+  K8S_STATEFUL_SET_SERVICE_NAME: {{ include "pinglib.fullclusterservicename" . }}
+  LDAPS_PORT: {{ $top.Values.pingdirectoryproxy.services.ldaps.containerPort | quote }}
 {{- end -}}
