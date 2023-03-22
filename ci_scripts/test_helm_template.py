@@ -205,10 +205,10 @@ def expectedValuesFound(actual, expected):
             if not expectedValuesFound(actual[key], expected[key]):
                 return False
         elif type(expected[key]) is list:
-            foundMatch = False
             # Try to find a match for each list element
             actualElements = list(actual[key])
             for expectedEl in expected[key]:
+                foundMatch = False
                 toRemove = None
                 for actualEl in actualElements:
                     if expectedValuesFound(actualEl, expectedEl):
@@ -219,8 +219,8 @@ def expectedValuesFound(actual, expected):
                 # multiple values from the expected elements
                 if toRemove:
                     actualElements.remove(actualEl)
-            if not foundMatch:
-                return False
+                if not foundMatch:
+                    return False
         else:
             simpleKeys.append(key)
     # Verify that the remaining non-list, non-dict items are a subset of the actual object
