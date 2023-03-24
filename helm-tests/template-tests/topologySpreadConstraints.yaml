@@ -15,8 +15,12 @@ global:
     - maxSkew: 1
       topologyKey: node
       whenUnsatisfiable: ScheduleAnyway
-      matchLabels:
-        foo: bar
+    - maxSkew: 2
+      topologyKey: node2
+      whenUnsatisfiable: ScheduleAnyway
+    - maxSkew: 3
+      topologyKey: node3
+      whenUnsatisfiable: ScheduleAnyway
 ### SECTION:EXPECTED ###
 # Validate that topologySpreadConstraints is set in the PDC Deployment
 apiVersion: apps/v1
@@ -27,9 +31,25 @@ spec:
   template:
     spec:
       topologySpreadConstraints:
-      - maxSkew: 1
+      - labelSelector:
+          matchLabels:
+            app.kubernetes.io/instance: topologytest
+            app.kubernetes.io/name: pingdataconsole
+        maxSkew: 1
         topologyKey: node
         whenUnsatisfiable: ScheduleAnyway
-        matchLabels:
-          foo: bar
+      - labelSelector:
+          matchLabels:
+            app.kubernetes.io/instance: topologytest
+            app.kubernetes.io/name: pingdataconsole
+        maxSkew: 2
+        topologyKey: node2
+        whenUnsatisfiable: ScheduleAnyway
+      - labelSelector:
+          matchLabels:
+            app.kubernetes.io/instance: topologytest
+            app.kubernetes.io/name: pingdataconsole
+        maxSkew: 3
+        topologyKey: node3
+        whenUnsatisfiable: ScheduleAnyway
 ---

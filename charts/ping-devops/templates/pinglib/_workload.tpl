@@ -74,7 +74,13 @@ spec:
       affinity: {{ toYaml $v.container.affinity | nindent 8 }}
       schedulerName: {{ $v.workload.schedulerName }}
       shareProcessNamespace: {{ $v.workload.shareProcessNamespace }}
-      topologySpreadConstraints: {{ toYaml $v.workload.topologySpreadConstraints | nindent 8 }}
+      topologySpreadConstraints:
+      {{- range $v.workload.topologySpreadConstraints }}
+      - {{ . | toYaml | indent 8 | trim }}
+        labelSelector:
+          matchLabels: 
+          {{- include "pinglib.selector.labels" (list $top $v) | nindent 12 -}}
+      {{- end }}
       enableServiceLinks: {{ $v.workload.enableServiceLinks }}
       initContainers:
       {{ include "pinglib.workload.init.waitfor" (concat . (list $v.container.waitFor "")) | nindent 6 }}
