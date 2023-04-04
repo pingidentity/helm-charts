@@ -1,4 +1,9 @@
 # Release Notes
+## Release 0.9.11 (March 03, 2023)
+### Features ###
+  - Updated default global image tag to `2302`.
+  - Added default environment variables to `pingdirectoryproxy` to support joining a PingDirectory topology.
+
 ## Release 0.9.10 (February 03, 2023)
 ### Features ###
   - Updated default global image tag to `2301`.
