@@ -1,5 +1,4 @@
 # Release Notes
-## Release 0.9.12 (April 03, 2023)
+## Release 0.9.13 (May 04, 2023)
 ### Features ###
-  - Updated default global image tag to `2303`.
-  - Updated the workload `topologySpreadConstraints` field to automatically set `matchLabels` to match the workload labels.
+  - Updated default global image tag to `2304`.
