@@ -1,4 +1,4 @@
 # Release Notes
-## Release 0.9.13 (May 04, 2023)
+## Release 0.9.14 (June 02, 2023)
 ### Features ###
-  - Updated default global image tag to `2304`.
+  - Updated default global image tag to `2305`.
