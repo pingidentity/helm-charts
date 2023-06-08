@@ -4,6 +4,9 @@ Generates a private certificate (.crt and .key) based on the internal hostname o
 
 ## Global Section
 
+!!! Note
+    privateCert is currently only supported by PingAccess.
+
 Default yaml defined in the global privateCert section.  By default certificates will not be
 generated.  It is advised to *NOT* generate internal certs at the global level, as many
 services don't need a private cert on the internal service.
@@ -63,5 +66,5 @@ keystore.env. The default variables set are:
 * `PRIVATE_KEYSTORE_TYPE=pkcs12`
 * `PRIVATE_KEYSTORE={pkcs12 keystore}`
 
-These environment variables can then be used in any server-profile artifacts to be replaced
-when the images are started.
+These environment variables are required in the `data.json.subst` file in-order to use the generated privateCert. They can be 
+used in any server-profile artifacts to be replaced when the images are started.
