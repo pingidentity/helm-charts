@@ -14,7 +14,7 @@ metadata:
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
-    kind: Deployment
+    kind: {{ $v.workload.type }}
     name: {{ include "pinglib.fullname" . }}
   minReplicas: {{ $v.clustering.autoscaling.minReplicas }}
   maxReplicas: {{ $v.clustering.autoscaling.maxReplicas }}

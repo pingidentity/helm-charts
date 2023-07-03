@@ -17,6 +17,8 @@ pingfederate-admin:
 
 pingfederate-engine:
   enabled: true
+  workload:
+    type: StatefulSet
 
 pingaccess-engine:
   enabled: true
@@ -43,39 +45,63 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: autoscaling-pingfederate-admin
+spec:
+  scaleTargetRef:
+    kind: Deployment
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: autoscaling-pingfederate-engine
+spec:
+  scaleTargetRef:
+    kind: StatefulSet
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: autoscaling-pingaccess-engine
+spec:
+  scaleTargetRef:
+    kind: Deployment
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: autoscaling-pingdataconsole
+spec:
+  scaleTargetRef:
+    kind: Deployment
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: autoscaling-pingauthorize
+spec:
+  scaleTargetRef:
+    kind: Deployment
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: autoscaling-pingauthorizepap
+spec:
+  scaleTargetRef:
+    kind: Deployment
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: autoscaling-pingcentral
+spec:
+  scaleTargetRef:
+    kind: Deployment
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: autoscaling-pingdelegator
+spec:
+  scaleTargetRef:
+    kind: Deployment
 ---
