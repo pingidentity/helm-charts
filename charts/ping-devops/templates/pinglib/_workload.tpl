@@ -60,6 +60,10 @@ spec:
         {{- toYaml $v.workload.annotations | nindent 8 }}
         {{- end }}
     spec:
+      {{- with $v.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       terminationGracePeriodSeconds: {{ $v.container.terminationGracePeriodSeconds }}
       {{/* When a serviceaccount is being generated (either globally or for this specific workload) prefer that
             account to an account specified in the Vault values. */}}
