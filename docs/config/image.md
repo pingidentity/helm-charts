@@ -11,8 +11,10 @@ global:
   image:
     repository: pingidentity
     name:                                 # Set in product section
-    tag: 2201
+    tag: 2307
     pullPolicy: Always
+  imagePullSecrets: []                    # As needed for authentication to private repositories
+  # - name: myregkeysecretname
 ```
 
 ## Product Section
@@ -33,4 +35,4 @@ pingaccess-admin:
         repository: my.company.docker-repo.com
     ```
 
-    This would result in pulling a pingaccess image: `my.company.docker-repo.com/pingaccess:edge`
+    This snippet would result in pulling a PingAccess image: `my.company.docker-repo.com/pingaccess:edge`
