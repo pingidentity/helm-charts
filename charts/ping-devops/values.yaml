@@ -1704,12 +1704,20 @@ testFramework:
   #   - role
   #   - roleBinding (between serviceAccount and role)
   #
+  # @param    testFramework.rbac.serviceAccountImagePullSecrets
+  # @desc     Repository authentication using secrets
+  # @desc     defined as a docker-registry secrets in Kubernetes.
+  # @default  []
+  #
+  # https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  #
   # and apply the serviceAccount to the pod in the tests.
   # The names for these resources will be named using the
   # naming rules for all resources including the ReleaseName
   #########################################################
   rbac:
     enabled: true
+    serviceAccountImagePullSecrets: []
     role:
       rules:
       - apiGroups:
