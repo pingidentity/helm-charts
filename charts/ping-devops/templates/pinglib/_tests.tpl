@@ -99,10 +99,10 @@ metadata:
   annotations:
     "helm.sh/hook": test
   name: {{ include "pinglib.addreleasename" (list $top $v "test-service-account") }}
-  {{- with $testFramework.rbac.serviceAccountImagePullSecrets }}
-  imagePullSecrets:
-    {{- toYaml . | nindent 2 }}
-  {{- end }}
+{{- with $testFramework.rbac.serviceAccountImagePullSecrets }}
+imagePullSecrets:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
 {{- end -}}
 
 {{- define "pinglib.test.role" -}}
