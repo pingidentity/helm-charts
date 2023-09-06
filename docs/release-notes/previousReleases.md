@@ -1,4 +1,8 @@
 # Release Notes
+## Release 0.9.18 (August 28, 2023)
+### Resolved Defects ###
+  - Fixed incorrect yaml formatting when setting `testFramework.rbac.serviceAccountImagePullSecrets`.
+
 ## Release 0.9.17 (August 25, 2023)
 ### Features ###
   - Added support for setting `imagePullSecrets` in workloads.
