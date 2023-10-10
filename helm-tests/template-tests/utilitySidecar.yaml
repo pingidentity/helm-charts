@@ -25,23 +25,23 @@ pingdirectory:
   workload:
     shareProcessNamespace: true
   volumes:
-  - name: temp
-    emptyDir: {}
-  - name: test-cm
-    configMap:
-      name: test-cm
+    - name: temp
+      emptyDir: {}
+    - name: test-cm
+      configMap:
+        name: test-cm
   volumeMounts:
-  - name: temp
-    mountPath: /tmp
+    - name: temp
+      mountPath: /tmp
 
   # Backups, restores, and other CLI tools should be run from the sidecar to prevent interfering
   # with the main PingDirectory container process.
   utilitySidecar:
     enabled: true
     volumes:
-    - name: test-cm
-      mountPath: /opt/in/script.sh
-      subPath: script.sh
+      - name: test-cm
+        mountPath: /opt/in/script.sh
+        subPath: script.sh
 ### SECTION:EXPECTED ###
 # Validate that the sidecar is configured correctly
 apiVersion: apps/v1
@@ -52,39 +52,38 @@ spec:
   template:
     spec:
       containers:
-      - name: pingdirectory
-        volumeMounts:
-        - mountPath: /tmp
-          name: temp
-      - name: utility-sidecar
-        args:
-        - -f
-        - /dev/null
-        command:
-        - tail
-        resources:
-          requests:
-            cpu: "0"
-            memory: 128Mi
-        volumeMounts:
-        - mountPath: /tmp
-          name: temp
-        - mountPath: /opt/in/script.sh
-          name: test-cm
-          subPath: script.sh
+        - name: pingdirectory
+          volumeMounts:
+            - mountPath: /tmp
+              name: temp
+        - name: utility-sidecar
+          args:
+            - -f
+            - /dev/null
+          command:
+            - tail
+          resources:
+            requests:
+              cpu: "0"
+              memory: 128Mi
+          volumeMounts:
+            - mountPath: /tmp
+              name: temp
+            - mountPath: /opt/in/script.sh
+              name: test-cm
+              subPath: script.sh
       securityContext:
         fsGroup: 0
         runAsGroup: 0
         runAsUser: 9031
       shareProcessNamespace: true
       volumes:
-      - emptyDir: {}
-        name: temp
-      - configMap:
+        - emptyDir: {}
+          name: temp
+        - configMap:
+            name: test-cm
           name: test-cm
-        name: test-cm
 ---
-
 # Validate that the configmap is configured correctly
 apiVersion: v1
 kind: ConfigMap
@@ -93,8 +92,10 @@ metadata:
 data:
   script.sh: asdf
 ---
-
 # Validate that the cronjob and corresponding RBAC objects are configured correctly
+# When the testing platform is updated to Kubernetes 1.25+, the API version will need to be modified to read:
+# apiVersion: batch/v1
+# Details: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-25
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
@@ -108,28 +109,26 @@ spec:
       template:
         spec:
           containers:
-          - args:
-            - exec
-            - -ti
-            - sidecar-pingdirectory-0
-            - --container
-            - utility-sidecar
-            - --
-            - /opt/in/script.sh
-            command:
-            - kubectl
-            image: bitnami/kubectl:latest
-            name: sidecar-pingdirectory-cronjob
+            - args:
+                - exec
+                - -ti
+                - sidecar-pingdirectory-0
+                - --container
+                - utility-sidecar
+                - --
+                - /opt/in/script.sh
+              command:
+                - kubectl
+              image: bitnami/kubectl:latest
+              name: sidecar-pingdirectory-cronjob
           serviceAccount: sidecar-pingdirectory-internal-kubectl
 ---
-
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: sidecar-pingdirectory-internal-kubectl
 
 ---
-
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -148,7 +147,6 @@ rules:
     verbs:
       - create
 ---
-
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -160,4 +158,3 @@ roleRef:
   kind: Role
   name: sidecar-pingdirectory-modify-pods
   apiGroup: rbac.authorization.k8s.io
-
