@@ -4,7 +4,12 @@
 {{- define "pingdirectoryproxy.env-vars" -}}
 {{- $top := index . 0 -}}
 data:
+  ORCHESTRATION_TYPE: KUBERNETES
   K8S_STATEFUL_SET_NAME: {{ include "pinglib.fullname" . }}
   K8S_STATEFUL_SET_SERVICE_NAME: {{ include "pinglib.fullclusterservicename" . }}
   LDAPS_PORT: {{ $top.Values.pingdirectoryproxy.services.ldaps.containerPort | quote }}
+  # Default hostname for the first PD pod in the same release, used for proxy automatic server discovery.
+  # These variables won't be used unless JOIN_PD_TOPOLOGY is set to "true" for proxy.
+  PINGDIRECTORY_HOSTNAME: {{ $top.Release.Name }}-pingdirectory-0.{{ $top.Release.Name }}-pingdirectory-cluster
+  PINGDIRECTORY_LDAPS_PORT: {{ $top.Values.pingdirectory.services.ldaps.containerPort | quote }}
 {{- end -}}
