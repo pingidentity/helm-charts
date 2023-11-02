@@ -1,4 +1,8 @@
 # Release Notes
+## Release 0.9.19 (September 6, 2023)
+### Features ###
+  - Updated default global image tag to `2308`.
+
 ## Release 0.9.18 (August 28, 2023)
 ### Resolved Defects ###
   - Fixed incorrect yaml formatting when setting `testFramework.rbac.serviceAccountImagePullSecrets`.
