@@ -9,7 +9,7 @@ metadata:
   {{ include "pinglib.metadata.annotations" .  | nindent 2  }}
   name: {{ include "pinglib.fullname" . }}
 spec:
-  {{- if not $v.container.clustering.autoscaling.enabled }}
+  {{- if not $v.clustering.autoscaling.enabled }}
   replicas: {{ $v.container.replicaCount }}
   {{- end }}
   selector:
