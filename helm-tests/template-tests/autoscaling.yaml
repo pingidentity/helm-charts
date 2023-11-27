@@ -105,3 +105,11 @@ spec:
   scaleTargetRef:
     kind: Deployment
 ---
+
+### SECTION:UNEXPECTED ###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: autoscaling-pingfederate-admin
+spec:
+  replicas: 1
