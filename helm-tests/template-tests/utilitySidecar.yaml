@@ -93,10 +93,7 @@ data:
   script.sh: asdf
 ---
 # Validate that the cronjob and corresponding RBAC objects are configured correctly
-# When the testing platform is updated to Kubernetes 1.25+, the API version will need to be modified to read:
-# apiVersion: batch/v1
-# Details: https://kubernetes.io/docs/reference/using-api/deprecation-guide/#v1-25
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: sidecar-pingdirectory-cronjob
