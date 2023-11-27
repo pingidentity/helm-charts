@@ -2,7 +2,7 @@
 
 This is the documentation for using [Helm](https://helm.sh) to deploy the Ping Identity Docker Images.
 This single chart can be used to deploy any of the available Ping Identity products in a Kubernetes
-environment.
+environment. 
 
 ## DevOps Resources
 
