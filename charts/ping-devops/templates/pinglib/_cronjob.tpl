@@ -5,10 +5,10 @@
 {{- $podName := print $top.Release.Name "-" $v.name "-0" -}}
 {{- $baseArgs := list "exec" "-ti" $podName "--container" "utility-sidecar" "--" -}}
 {{- $args := concat $baseArgs $v.cronjob.args -}}
-{{- if semverCompare "<1.25" $top.Capabilities.KubeVersion.Version }}
-apiVersion: batch/v1beta1
-{{- else }}
+{{- if $top.Capabilities.APIVersions.Has "batch/v1" }}
 apiVersion: batch/v1
+{{- else }}
+apiVersion: batch/v1beta1
 {{- end }}
 kind: CronJob
 metadata:

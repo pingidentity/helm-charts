@@ -30,3 +30,6 @@ type git
 git --version
 type notary
 notary version
+
+type kubectl
+kubectl version
