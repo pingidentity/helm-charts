@@ -1,8 +1,8 @@
 # Release Notes
-## Release 0.9.20 (November 2, 2023)
+## Release 0.9.21 (December 4, 2023)
 ### Features ###
-  - Updated default global image tag to `2310`.
-  - Added environment variables for PingDirectoryProxy to support enabling automatic server discovery.
+  - Updated default global image tag to `2311`.
 
 ### Defects ###
-  - Updated the CronJob template to handle the switch from `batch/v1beta1` to `batch/v1` in Kubernetes `1.25`.
+  - Updated the workload template to avoid setting `replicas` when autoscaling is enabled.
+  - Improved capabilities checks for `apiVersion` field to avoid issues with prerelease Kubernetes versions.
