@@ -264,6 +264,7 @@ spec:
   {{- range $volName, $val := $v.workload.statefulSet.persistentvolume.volumes }}
   - metadata:
       name: {{ $volName }}{{ if eq "none" $v.addReleaseNameToResource }}-{{ $top.Release.Name }}{{ end }}
+      annotations: {{ toYaml $v.annotations | nindent 8 }}
     spec:
       {{ toYaml $val.persistentVolumeClaim | nindent 6 }}
   {{- end }}

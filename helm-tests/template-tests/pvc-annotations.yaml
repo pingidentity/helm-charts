@@ -1,0 +1,31 @@
+# This test is meant to show a simple example of how to format
+# a test file for the test_helm_template.py script.
+
+### SECTION:PARAMETERS ###
+# The PARAMETERS section is required.
+# If the releaseName parameter is not set, then a default release name
+# matching the name of the file (without the extension) will be used.
+releaseName: pvc-annotations
+# Set skipTest to true to make the script skip this test
+skipTest: false
+### SECTION:VALUES ###
+global:
+  annotations:
+    testannotation: "XYZXYZ"
+pingaccess-admin:
+  enabled: true
+### SECTION:EXPECTED ###
+# Validate the annotations are attached to the PVC
+# Source: ping-devops/templates/pingaccess-admin/workload.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  annotations:
+    testannotation: XYZXYZ
+  name: pvc-annotations-pingaccess-admin
+spec:
+  volumeClaimTemplates:
+  - metadata:
+      annotations:
+        testannotation: XYZXYZ
+
