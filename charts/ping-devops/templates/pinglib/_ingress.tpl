@@ -16,6 +16,9 @@ metadata:
   name: {{ include "pinglib.fullname" . }}
   annotations: {{ toYaml $v.ingress.annotations  | nindent 4 }}
 spec:
+  {{- if $v.ingress.spec.ingressClassName }}
+  ingressClassName: {{ $v.ingress.spec.ingressClassName }}
+  {{- end}}
   {{- if $v.ingress.tls }}
   tls:
   {{- range $v.ingress.tls }}

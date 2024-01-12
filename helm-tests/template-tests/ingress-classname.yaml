@@ -1,0 +1,26 @@
+# This test is meant to show a simple example of how to format
+# a test file for the test_helm_template.py script.
+
+### SECTION:PARAMETERS ###
+# The PARAMETERS section is required.
+# If the releaseName parameter is not set, then a default release name
+# matching the name of the file (without the extension) will be used.
+releaseName: ingress-classname
+# Set skipTest to true to make the script skip this test
+skipTest: false
+### SECTION:VALUES ###
+global:
+  ingress:
+    enabled: true
+    spec:
+      ingressClassName: nginx-public
+pingfederate-admin:
+  enabled: true
+### SECTION:EXPECTED ###
+# Validate that the ingress class name is included in generated yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-classname-pingfederate-admin
+spec:
+  ingressClassName: nginx-public
