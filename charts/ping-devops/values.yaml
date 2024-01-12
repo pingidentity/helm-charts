@@ -69,6 +69,8 @@ global:
   #
   # @param    global.ingress.annotations
   # @default  {}
+  #
+  # @param    global.ingress.spec.ingressClassName
   ############################################################
   ingress:
     enabled: false
@@ -76,9 +78,10 @@ global:
     defaultDomain: example.com
     defaultTlsSecret:
     annotations: {}
-      # nginx example
-      # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-      # kubernetes.io/ingress.class: "nginx-public"
+#    nginx annotation example with spec classname
+#      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+#    spec:
+#      ingressClassName: nginx-public
 
   ############################################################
   # Internal Certificates
