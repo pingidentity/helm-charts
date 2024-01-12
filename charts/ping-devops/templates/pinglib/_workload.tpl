@@ -215,6 +215,11 @@ spec:
         {{- if $v.utilitySidecar.volumes }}
           {{ toYaml $v.utilitySidecar.volumes | nindent 8 }}
         {{- end }}
+        # Environment variables for sidecar
+        {{- if $v.utilitySidecar.env }}
+        env:
+          {{ toYaml $v.utilitySidecar.env | nindent 10 }}
+        {{- end }}
       {{- end }}
 
       {{/*---------------- Security Context -------------*/}}
@@ -258,7 +263,7 @@ spec:
       {{/*--------------------- Volumes (defined in product.workload.volumes) ------------------*/}}
       {{- include "pinglib.workload.volumes" $v | nindent 6 }}
 
-  {{/*----------------- VolumeClameTemplates ------------------*/}}
+  {{/*----------------- VolumeClaimTemplates ------------------*/}}
   {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
   volumeClaimTemplates:
   {{- range $volName, $val := $v.workload.statefulSet.persistentvolume.volumes }}

@@ -755,6 +755,8 @@ global:
   #
   # @param    global.utilitySidecar.resources Set k8s resources yaml for the sidecar spec
   # @default  1 CPU and 2g memory limit, 0 CPU and 128Mi memory request
+  #
+  # @param    global.utilitySidecar.env Environment variables for the sidecar
   utilitySidecar:
     enabled: false
     # CSD and other command line tools can require a lot of resources.
@@ -766,6 +768,10 @@ global:
       requests:
         cpu: "0"
         memory: "128Mi"
+    # Environment variables for the sidecar if needed
+    # env:
+    #   - name: LOG_LEVEL
+    #     value: "INFO"
 
   #############################################################
   # Includes for sidecars, initContainers and volumes
