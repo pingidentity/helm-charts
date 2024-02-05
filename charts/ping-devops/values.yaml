@@ -80,7 +80,7 @@ global:
     annotations: {}
 #    nginx annotation example with spec classname
 #      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-#    spec:
+    spec: {}
 #      ingressClassName: nginx-public
 
   ############################################################
