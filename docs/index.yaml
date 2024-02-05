@@ -3,6 +3,18 @@ entries:
   ping-devops:
   - apiVersion: v2
     appVersion: "2401"
+    created: "2024-02-05T13:41:18.809025-06:00"
+    description: Ping Identity helm charts - 02/05/2024
+    digest: 88aaf84b4df457cf4e7c4afdede3933cb17ff4818fc93dc2de187683ee71a71f
+    home: https://helm.pingidentity.com/
+    icon: https://helm.pingidentity.com/img/logos/ping.png
+    name: ping-devops
+    type: application
+    urls:
+    - https://github.com/pingidentity/helm-charts/releases/download/ping-devops-0.10.1/ping-devops-0.10.1.tgz
+    version: 0.10.1
+  - apiVersion: v2
+    appVersion: "2401"
     created: "2024-01-30T16:55:05.778799-06:00"
     description: Ping Identity helm charts - 01/31/2023
     digest: 057678fcb332e150fc60df33ef30354d3d76a333b44b342a3610890aecaf5522
@@ -1092,4 +1104,4 @@ entries:
     urls:
     - https://github.com/pingidentity/helm-charts/releases/download/ping-devops-0.2.0/ping-devops-0.2.0.tgz
     version: 0.2.0
-generated: "2024-01-30T16:55:05.774248-06:00"
+generated: "2024-02-05T13:41:18.804362-06:00"
