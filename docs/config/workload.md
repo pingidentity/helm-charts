@@ -80,10 +80,10 @@ global:
     ```
 
 !!! note "WaitFor"
-    For each product, a `waitFor` structure providing the name, service and timeout, in seconds,
-    that should be waited (defaults to 300 if not provided) on before the running container con continue.  This
-    will inject an initContainer using the PingToolkit wait-for utility until it
-    can `nc host:port` before continuing.
+    For each product, you can provide a `waitFor` structure indicating the name, service
+    and timeout (in seconds) for which the container should wait, (default `300`) before continuing.
+    This setting will inject an initContainer using the PingToolkit wait-for utility that
+    relies on `nc host:port` before continuing.
 
     Example: PingFederate Admin waiting on pingdirectory ldaps service to be available
     ```yaml

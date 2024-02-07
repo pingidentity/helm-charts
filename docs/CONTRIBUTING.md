@@ -1,6 +1,6 @@
 # Contributing to the Ping Identity DevOps Program
 
-Thanks for taking the time to contribute!
+Thanks for taking the time to help us improve our Helm chart!
 
 ## How can I contribute?
 
@@ -8,8 +8,8 @@ Thanks for taking the time to contribute!
 
 #### How do I submit a bug report?
 
-Bugs are tracked as [GitHub issues](https://guides.github.com/features/issues/). You can report a bug by submitting an issue in the project's issue tracker. 
-To help the maintainers understand and reproduce the problem, please try to provide information like the following:
+Bugs are tracked as [GitHub issues](https://github.com/pingidentity/helm-charts/issues/). You can report a bug by submitting an issue in the project's issue tracker.
+To help the maintainers understand and reproduce the problem, please try to provide information such as following:
 
 * A clear and descriptive title.
 * A description of what happened and a description of what you expected to happen.
@@ -19,9 +19,9 @@ Please understand that bug reports are reviewed and prioritized internally, and 
 
 #### Suggesting enhancements
 
-As with bugs, requests are tracked as [GitHub issues](https://guides.github.com/features/issues/). You can suggest an enhancement by submitting an issue in the project's issue tracker.
+As with bugs, requests are tracked as [GitHub issues](https://github.com/pingidentity/helm-charts/issues/). You can suggest an enhancement by submitting an issue in the project's issue tracker.
 
-Please understand that enhancement requests are reviewed and prioritized internally, and we may not be able to address all requests or provide an estimated time for resolution.
+Please understand that enhancement requests are handled in the same way as bug reports, and we may not be able to address all enhancement requests or provide an estimated time for resolution.
 
 #### Alternate routes for submitting bugs and suggesting enhancements
 

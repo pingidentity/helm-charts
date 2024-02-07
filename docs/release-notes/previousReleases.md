@@ -199,7 +199,7 @@
 
 ## Release 0.8.5 (Feb 7, 2022)
 ### Features ###
-  - PingCentral now supported. Example values application found [here](../examples/pingcentral/pingcentral.yaml)
+  - PingCentral now supported. Example values application found [here](https://raw.githubusercontent.com/pingidentity/pingidentity-devops-getting-started/master/30-helm/pingcentral.yaml)
 ### Issues Resolved ###
   - [Issue #119](https://github.com/pingidentity/helm-charts/issues/119) Workload template not honoring false values from values.yaml. Previously, false did not overwrite true in the Ping Identity Helm Chart template. This fix in _merge-util.tpl will resolve multiple cases within the Ping Identity Helm Chart.
     ```
@@ -1061,7 +1061,7 @@
   shouldn't use image name for service name.
 
 * [Issue #114](https://github.com/pingidentity/helm-charts/issues/114) - Revamp vault.hashicorp.secrets value .yaml and support per path secret
-  Detailed documentation on this can be found the [Vault Config](config/vault.md) docs
+  Detailed documentation on this can be found the [Vault Config](../config/vault.md) docs
 
 ## Release 0.5.1
 
@@ -1127,7 +1127,7 @@
     Updated ability to add any hashicorp.vault annotation to the workload.  As part of this effort, the ***existing
     name/values have been deprecated***, however will continue to work for a period of time.
 
-    Updated details can be found in the [Vault Config](config/vault.md) docs.
+    Updated details can be found in the [Vault Config](../config/vault.md) docs.
 
 
 * [Issue #97](https://github.com/pingidentity/helm-charts/issues/97) - Add the ability to add annotations to all resources generated
@@ -1300,7 +1300,7 @@
 
 * Added support for PingAccess clustering between pingaccess-admin and multiple
   pingaccess-engine containers.
-      * See [everything.yaml](examples/everything.yaml) for example of deploying
+      * See [everything.yaml](https://raw.githubusercontent.com/pingidentity/pingidentity-devops-getting-started/master/30-helm/everything.yaml) for example of deploying
         a PingAccess cluster using PingFederate/PingDirectory to authenticate
       * It is *required* to either:
           * generate the private cert (see above)
@@ -1410,7 +1410,7 @@
 ## Release 0.3.6
 
 * Cleaning up and making services/ingresses easier to use together.  Incorporating all the ports
-  used in both a service and ingress into the same location of the [services structure](config/service.md).
+  used in both a service and ingress into the same location of the [services structure](../config/service.md).
 
     The example below shows a container/service/ingress and how to specify the ports at each
     level.

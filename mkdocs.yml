@@ -50,6 +50,7 @@ nav:
   - Welcome:
       - Installation: "index.md"
       - Getting Started: "getting-started.md"
+      - Issues or Suggestions: "CONTRIBUTING.md"
   - Value Configs:
       - Introduction: "config/index.md"
       - global: "config/global.md"
