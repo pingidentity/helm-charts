@@ -9,11 +9,12 @@ Default yaml defined in the global ingress section, followed by definitions for 
 ```yaml
 global:
   ingress:
-    enabled: true
+    enabled: false
     addReleaseNameToHost: subdomain
     defaultDomain: example.com
     defaultTlsSecret:
     annotations: {}
+    spec: {}
 ```
 
 | Ingress Parameters   | Description                                                                                 | Options                                | Default Value |
@@ -23,12 +24,20 @@ global:
 | defaultDomain        | Default DNS domain to use.  Replaces the string "\_defaultDomain\_".                        |                                        | example.com   |
 | defaultTlsSecret     | Default TLS Secret to use.  Replaces the string "\_defaultTlsSecret\_".                     |                                        |               |
 | annotations          | Annotations are used to provide configuration details to specific ingress controller types. | * see option for nginx ingress         | {}            |
+| spec.ingressClassName   | This value is replacing the `kubernetes.io/ingress.class` annotation.  See [this page](https://kubernetes.github.io/ingress-nginx/user-guide/k8s-122-migration/#what-is-the-flag-watch-ingress-without-class) for details. | name of the IngressClass resource         | {}             |
+
 
 !!! note "Annotations example for nginx ingress"
     ```yaml
         annotations:
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-          kubernetes.io/ingress.class: "nginx-public"
+    ```
+
+!!! note "ingressClassName specification example for nginx ingress"
+    ```yaml
+        spec:
+          # Must match the name of the IngressClass resource
+          ingressClassName: nginx-public
     ```
 
 ## Product Section
@@ -74,9 +83,9 @@ Default yaml defined in the product ingress section, followed by definitions for
 
 ## Example Ingress Manifest
 
-Example product ingress for pingfederate-admin when deployed by helm with a release-name of acme.
-Includes an ingress for admin service (9999) using the default domain and tls secret, defined
-in the global section, if set.
+Example product ingress for `pingfederate-admin` when deployed by helm with a release-name of `acme`.
+Includes an ingress for the admin service (9999) using the default domain and tls secret, defined
+in the global section (if set).
 
 ```yaml
 kind: Ingress

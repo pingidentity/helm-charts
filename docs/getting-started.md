@@ -84,7 +84,7 @@ helm install pf pingidentity/ping-devops \
 
 ## Accessing Deployments
 
-Components of the release will be prefixed with `pf`.  Use `kubectl` to see the pods created.
+[By default](./config/global.md), the components of a release are prefixed with the release name.  Continuing this example, everything will be prefixed with `pf`.  Use `kubectl` to see the pods created.
 
 View kubernetes resources installed:
 

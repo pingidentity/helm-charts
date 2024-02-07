@@ -4,8 +4,7 @@ Provides support for mounting secret or configMap volumes on a workload containe
 
 ## Global/Product Section
 
-Adds ability to use secret and configMap data in a container via a VolumeMount.  A common use for this - bringing product
-licenses or scripts into the container.
+Adds ability to use **secret** and **configMap** data in a container via a VolumeMount.  A common use for this configuration is bringing product licenses or scripts into the container.
 
 !!! note "Example of creating 2 volume mounts in container from secret and configMap"
     ```yaml
@@ -27,8 +26,8 @@ licenses or scripts into the container.
 
 > [Secrets](https://kubernetes.io/docs/tasks/configmap-secret/managing-secret-using-kubectl) and [ConfigMaps](https://kubernetes.io/docs/concepts/configuration/configmap/) must be created in the cluster prior to deploying the helm chart.
 
-In this case, a secret (called pingfederate-license) and configMap (called pingfederate-props) will bring in a
-couple of key values (license, hello) and (pf-props) into the container as specific files. The results will looks like:
+In this case, a secret (called `pingfederate-license`) and configMap (called `pingfederate-props`) will bring in a
+couple of key values (license, hello) and (pf-props) into the container as specific files. The resulting object will look like:
 
 !!! note "Example of kubectl describe of pingfederate-admin container"
     ```
