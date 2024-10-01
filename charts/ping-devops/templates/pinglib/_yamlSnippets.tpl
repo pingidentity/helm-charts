@@ -33,7 +33,7 @@ app.kubernetes.io/instance: {{ $top.Release.Name }}
   {{- if $v.annotations }}
 annotations:
   {{- toYaml $v.annotations | nindent 2 }}
-  {{- end }}
+  {{ end }}
 {{- end -}}
 
 {{/**********************************************************************
