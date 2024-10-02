@@ -7,6 +7,8 @@ skipTest: false
 ### SECTION:VALUES ###
 # Set typical Helm values here
 global:
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::xxxxxxx:role/example
   envs:
     PING_IDENTITY_ACCEPT_EULA: "YES"
   rbac:
