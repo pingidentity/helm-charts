@@ -7,7 +7,16 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   {{- include "pinglib.metadata.labels" .  | nindent 2  }}
-  {{- include "pinglib.metadata.annotations" .  | nindent 2 }}
+    {{- if $v.rbac.serviceAccountLabels }}
+    {{ toYaml $v.rbac.serviceAccountLabels | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- if $v.annotations }}
+    {{ toYaml $v.annotations | nindent 4 }}
+    {{- end }}
+    {{- if $v.rbac.serviceAccountAnnotations }}
+    {{ toYaml $v.rbac.serviceAccountAnnotations | nindent 4 }}
+    {{- end }}
   name: {{ include "pinglib.rbac.service-account-name" (append . $v.rbac.serviceAccountName) }}
 {{- end -}}
 {{- end -}}
@@ -21,7 +30,16 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   {{- include "pinglib.metadata.labels" .  | nindent 2  }}
-  {{- include "pinglib.metadata.annotations" .  | nindent 2 }}
+    {{- if $v.rbac.roleLabels }}
+    {{ toYaml $v.rbac.roleLabels | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- if $v.annotations }}
+    {{ toYaml $v.annotations | nindent 4 }}
+    {{- end }}
+    {{- if $v.rbac.roleAnnotations }}
+    {{ toYaml $v.rbac.roleAnnotations | nindent 4 }}
+    {{- end }}
   name: {{ include "pinglib.fullname" . }}-role
 {{ toYaml $v.rbac.role }}
 {{- end -}}
@@ -37,7 +55,16 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   {{- include "pinglib.metadata.labels" .  | nindent 2  }}
-  {{- include "pinglib.metadata.annotations" .  | nindent 2 }}
+    {{- if $v.rbac.roleBindingLabels }}
+    {{ toYaml $v.rbac.roleBindingLabels | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- if $v.annotations }}
+    {{ toYaml $v.annotations | nindent 4 }}
+    {{- end }}
+    {{- if $v.rbac.roleBindingAnnotations }}
+    {{ toYaml $v.rbac.roleBindingAnnotations | nindent 4 }}
+    {{- end }}
   name: {{ include "pinglib.fullname" . }}-role-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io

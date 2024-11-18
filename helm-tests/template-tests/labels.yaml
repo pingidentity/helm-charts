@@ -1,0 +1,221 @@
+# This test verifies that you can set custom labels across
+# various resources in the chart.
+### SECTION:PARAMETERS ###
+releaseName: labels
+### SECTION:PARAMETERS ###
+skipTest: false
+### SECTION:VALUES ###
+# This is not specific to any particular product
+global:
+  labels:
+    globalLabel: val
+  
+  workload:
+    labels:
+      globalWorkloadLabel: val
+    statefulSet:
+      labels:
+        globalSSLabel: val
+    deployment:
+      labels:
+        globalDepLabel: val
+  
+  rbac:
+    generateGlobalServiceAccount: true
+    generateGlobalRoleAndRoleBinding: true
+    serviceAccountLabels:
+      globalServiceAccountLabel: val
+    roleLabels:
+      globalRoleLabel: val
+    roleBindingLabels:
+      globalRoleBindingLabel: val
+
+  services:
+    labels:
+      globalServiceLabel: val
+    clusterServiceLabels:
+      globalClusterServiceLabel: val
+
+pingdirectory:
+  enabled: true
+  labels:
+    pdLabel: val
+  workload:
+    labels:
+      pdWorkloadLabel: val
+    statefulSet:
+      labels:
+        pdSSLabel: val
+  rbac:
+    generateServiceAccount: true
+    generateRoleAndRoleBinding: true
+    role:
+      rules:
+      - apiGroups: [""]
+        resources: ["secrets"]
+        verbs: ["get", "list"]
+    serviceAccountLabels:
+      pdServiceAccountLabel: val
+    roleLabels:
+      pdRoleLabel: val
+    roleBindingLabels:
+      pdRoleBindingLabel: val
+  services:
+    labels:
+      pdServiceLabel: val
+    clusterServiceLabels:
+      pdClusterServiceLabel: val
+
+pingdataconsole:
+  enabled: true
+  workload:
+    deployment:
+      labels:
+        pdcDepLabel: val
+
+### SECTION:EXPECTED ###
+# Check for labels on statefulset
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: labels-pingdirectory
+  labels:
+    globalLabel: val
+    pdLabel: val
+    globalSSLabel: val
+    pdSSLabel: val
+spec:
+  template:
+    metadata:
+      labels:
+        globalWorkloadLabel: val
+        pdWorkloadLabel: val
+
+# Check for labels on deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: labels-pingdataconsole
+  labels:
+    globalLabel: val
+    globalDepLabel: val
+    pdcDepLabel: val
+spec:
+  template:
+    metadata:
+      labels:
+        globalWorkloadLabel: val
+
+# Check for labels on the services
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    globalLabel: val
+    pdLabel: val
+    globalClusterServiceLabel: val
+    pdClusterServiceLabel: val
+  name: labels-pingdirectory-cluster
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    globalLabel: val
+    pdLabel: val
+    globalServiceLabel: val
+    pdServiceLabel: val
+  name: labels-pingdirectory
+
+# Check for labels on the RBAC objects
+---
+# PD-specific RBAC
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: labels-pingdirectory-service-account
+  labels:
+    globalLabel: val
+    pdLabel: val
+    globalServiceAccountLabel: val
+    pdServiceAccountLabel: val
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: labels-pingdirectory-role
+  labels:
+    globalLabel: val
+    pdLabel: val
+    globalRoleLabel: val
+    pdRoleLabel: val
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: labels-pingdirectory-role-binding
+  labels:
+    globalLabel: val
+    pdLabel: val
+    globalRoleBindingLabel: val
+    pdRoleBindingLabel: val
+
+# Globals
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: labels-global-service-account
+  labels:
+    globalLabel: val
+    globalServiceAccountLabel: val
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: labels-global-role
+  labels:
+    globalLabel: val
+    globalRoleLabel: val
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: labels-global-role-binding
+  labels:
+    globalLabel: val
+    globalRoleBindingLabel: val
+
+### SECTION:UNEXPECTED ###
+# Ensure global RBAC objects do not include PD-specific labels
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: labels-global-service-account
+  labels:
+    globalLabel: val
+    pdLabel: val
+    globalServiceAccountLabel: val
+    pdServiceAccountLabel: val
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: labels-global-role
+  labels:
+    globalLabel: val
+    pdLabel: val
+    globalRoleLabel: val
+    pdRoleLabel: val
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: labels-global-role-binding
+  labels:
+    globalLabel: val
+    pdLabel: val
+    globalRoleBindingLabel: val
+    pdRoleBindingLabel: val

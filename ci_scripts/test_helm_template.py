@@ -243,7 +243,7 @@ def matchFound(actual, expected, warnForNoVersionKindNameMatch):
 args = parseArgs()
 operation = args.get("--operation")
 testFile = args.get("--test-file")
-retainTmpFiles = args.get("--retain-temp-files")
+retainTmpFiles = args.get("--retain-tmp-files")
 if "--verbose" in args:
     verbose = True
 
