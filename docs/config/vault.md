@@ -4,6 +4,8 @@ The current helm chart support is provided for Hashicorp Vault annotations and u
 Hashicorp injector.
 More information on Hashicorp Vault annotations can be found [here](https://www.vaultproject.io/docs/platform/k8s/injector/annotations).
 
+> Note: the PingIdentity DevOps images and Helm chart only support version 2 of the KV secrets engine API for Vault secrets. PingDirectory itself currently only supports KV version 1 for password storage schemes. Learn more in the [Vault KV secrets engine documentation](https://developer.hashicorp.com/vault/api-docs/secret/kv).
+
 ## Vault Secret Values
 
 An example vault values section looks like:
