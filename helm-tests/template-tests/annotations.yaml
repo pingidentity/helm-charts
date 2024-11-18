@@ -1,0 +1,221 @@
+# This test verifies that you can set custom annotations across
+# various resources in the chart.
+### SECTION:PARAMETERS ###
+releaseName: annotations
+### SECTION:PARAMETERS ###
+skipTest: false
+### SECTION:VALUES ###
+# This is not specific to any particular product
+global:
+  annotations:
+    globalAnnotation: val
+  
+  workload:
+    annotations:
+      globalWorkloadAnnotation: val
+    statefulSet:
+      annotations:
+        globalSSAnnotation: val
+    deployment:
+      annotations:
+        globalDepAnnotation: val
+  
+  rbac:
+    generateGlobalServiceAccount: true
+    generateGlobalRoleAndRoleBinding: true
+    serviceAccountAnnotations:
+      globalServiceAccountAnnotation: val
+    roleAnnotations:
+      globalRoleAnnotation: val
+    roleBindingAnnotations:
+      globalRoleBindingAnnotation: val
+
+  services:
+    annotations:
+      globalServiceAnnotation: val
+    clusterServiceAnnotations:
+      globalClusterServiceAnnotation: val
+
+pingdirectory:
+  enabled: true
+  annotations:
+    pdAnnotation: val
+  workload:
+    annotations:
+      pdWorkloadAnnotation: val
+    statefulSet:
+      annotations:
+        pdSSAnnotation: val
+  rbac:
+    generateServiceAccount: true
+    generateRoleAndRoleBinding: true
+    role:
+      rules:
+      - apiGroups: [""]
+        resources: ["secrets"]
+        verbs: ["get", "list"]
+    serviceAccountAnnotations:
+      pdServiceAccountAnnotation: val
+    roleAnnotations:
+      pdRoleAnnotation: val
+    roleBindingAnnotations:
+      pdRoleBindingAnnotation: val
+  services:
+    annotations:
+      pdServiceAnnotation: val
+    clusterServiceAnnotations:
+      pdClusterServiceAnnotation: val
+
+pingdataconsole:
+  enabled: true
+  workload:
+    deployment:
+      annotations:
+        pdcDepAnnotation: val
+
+### SECTION:EXPECTED ###
+# Check for annotations on statefulset
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: annotations-pingdirectory
+  annotations:
+    globalAnnotation: val
+    pdAnnotation: val
+    globalSSAnnotation: val
+    pdSSAnnotation: val
+spec:
+  template:
+    metadata:
+      annotations:
+        globalWorkloadAnnotation: val
+        pdWorkloadAnnotation: val
+
+# Check for labels on deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: annotations-pingdataconsole
+  annotations:
+    globalAnnotation: val
+    globalDepAnnotation: val
+    pdcDepAnnotation: val
+spec:
+  template:
+    metadata:
+      annotations:
+        globalWorkloadAnnotation: val
+
+# Check for annotations on the services
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    globalAnnotation: val
+    pdAnnotation: val
+    globalClusterServiceAnnotation: val
+    pdClusterServiceAnnotation: val
+  name: annotations-pingdirectory-cluster
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    globalAnnotation: val
+    pdAnnotation: val
+    globalServiceAnnotation: val
+    pdServiceAnnotation: val
+  name: annotations-pingdirectory
+
+# Check for annotations on the RBAC objects
+---
+# PD-specific RBAC
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: annotations-pingdirectory-service-account
+  annotations:
+    globalAnnotation: val
+    pdAnnotation: val
+    globalServiceAccountAnnotation: val
+    pdServiceAccountAnnotation: val
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: annotations-pingdirectory-role
+  annotations:
+    globalAnnotation: val
+    pdAnnotation: val
+    globalRoleAnnotation: val
+    pdRoleAnnotation: val
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: annotations-pingdirectory-role-binding
+  annotations:
+    globalAnnotation: val
+    pdAnnotation: val
+    globalRoleBindingAnnotation: val
+    pdRoleBindingAnnotation: val
+
+# Globals
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: annotations-global-service-account
+  annotations:
+    globalAnnotation: val
+    globalServiceAccountAnnotation: val
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: annotations-global-role
+  annotations:
+    globalAnnotation: val
+    globalRoleAnnotation: val
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: annotations-global-role-binding
+  annotations:
+    globalAnnotation: val
+    globalRoleBindingAnnotation: val
+
+### SECTION:UNEXPECTED ###
+# Ensure global RBAC objects do not include PD-specific annotations
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: annotations-global-service-account
+  annotations:
+    globalAnnotation: val
+    pdAnnotation: val
+    globalServiceAccountAnnotation: val
+    pdServiceAccountAnnotation: val
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: annotations-global-role
+  annotations:
+    globalAnnotation: val
+    pdAnnotation: val
+    globalRoleAnnotation: val
+    pdRoleAnnotation: val
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: annotations-global-role-binding
+  annotations:
+    globalAnnotation: val
+    pdAnnotation: val
+    globalRoleBindingAnnotation: val
+    pdRoleBindingAnnotation: val

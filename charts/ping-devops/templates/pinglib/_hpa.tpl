@@ -9,7 +9,16 @@ apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
   {{ include "pinglib.metadata.labels" . | nindent 2  }}
-  {{ include "pinglib.metadata.annotations" .  | nindent 2  }}
+  {{- if $v.clustering.autoscaling.labels }}
+    {{ toYaml $v.clustering.autoscaling.labels | nindent 4 }}
+  {{- end }}
+  annotations:
+  {{- if $v.annotations }}
+    {{ toYaml $v.annotations | nindent 4 }}
+  {{- end }}
+  {{- if $v.clustering.autoscaling.annotations }}
+    {{ toYaml $v.clustering.autoscaling.annotations | nindent 4 }}
+  {{- end }}
   name: {{ include "pinglib.fullname" . }}
 spec:
   scaleTargetRef:

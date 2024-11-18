@@ -5,12 +5,19 @@ apiVersion: v1
 kind: Service
 metadata:
   {{ include "pinglib.metadata.labels" .  | nindent 2  }}
-  {{ include "pinglib.metadata.annotations" .  | nindent 2  }}
-{{- if $v.services.dataExternalDNSHostname }}
+    {{- if $v.services.labels }}
+    {{ toYaml $v.services.labels | nindent 4}}
+    {{- end }}
   annotations:
-    {{ include "pinglib.metadata.annotations" . | nindent 2 }}
+    {{- if $v.annotations }}
+    {{ toYaml $v.annotations | nindent 4 }}
+    {{- end }}
+    {{- if $v.services.annotations }}
+    {{ toYaml $v.services.annotations | nindent 4 }}
+    {{- end }}
+    {{- if $v.services.dataExternalDNSHostname }}
     external-dns.alpha.kubernetes.io/hostname: {{ $v.services.dataExternalDNSHostname }}
-{{- end }}
+    {{- end }}
   name: {{ include "pinglib.fullname" . }}
 spec:
   {{- if $v.services.useLoadBalancerForDataService }}

@@ -6,7 +6,22 @@ apiVersion: apps/v1
 kind: {{ $v.workload.type }}
 metadata:
   {{ include "pinglib.metadata.labels" .  | nindent 2  }}
-  {{ include "pinglib.metadata.annotations" .  | nindent 2  }}
+  {{- if and (eq $v.workload.type "Deployment") $v.workload.deployment.labels }}
+    {{ toYaml $v.workload.deployment.labels | nindent 4}}
+  {{- end }}
+  {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.labels }}
+    {{ toYaml $v.workload.statefulSet.labels | nindent 4}}
+  {{- end }}
+  annotations:
+  {{- if $v.annotations }}
+    {{ toYaml $v.annotations | nindent 4 }}
+  {{- end }}
+  {{- if and (eq $v.workload.type "Deployment") $v.workload.deployment.annotations }}
+    {{ toYaml $v.workload.deployment.annotations | nindent 4 }}
+  {{- end }}
+  {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.annotations }}
+    {{ toYaml $v.workload.statefulSet.annotations | nindent 4}}
+  {{- end }}
   name: {{ include "pinglib.fullname" . }}
 spec:
   {{- if not $v.clustering.autoscaling.enabled }}
@@ -40,6 +55,9 @@ spec:
     metadata:
       {{ include "pinglib.metadata.labels" .  | nindent 6  }}
         {{ include "pinglib.selector.labels" . | nindent 8 }}
+        {{- if $v.workload.labels }}
+        {{ toYaml $v.workload.labels | nindent 8}}
+        {{- end }}
       annotations:
         {{ include "pinglib.annotations.vault" $v.vault | nindent 8 }}
         {{/* When a serviceaccount is being generated (either globally or for this specific workload) prefer that

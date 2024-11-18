@@ -17,7 +17,7 @@
 global:
   ############################################################
   # @param    global.annotations Annotations listed, will be
-  # @desc     added to the kubernetes resource
+  # @desc     added to all Kubernetes resources.
   # @default  {}
   ############################################################
   annotations: {}
@@ -261,6 +261,25 @@ global:
   # @desc     generateRoleAndRoleBinding and/or generateGlobalRoleAndRoleBinding are true.
   # @desc     The rules for the Role can be set here.
   # @default  get, watch, and list verbs for the pods resource
+  #
+  # @param    global.rbac.serviceAccountAnnotations
+  # @desc     Any custom annotations to add to the service account.
+  #
+  # @param    global.rbac.roleAnnotations
+  # @desc     Any custom annotations to add to the role.
+  #
+  # @param    global.rbac.roleBindingAnnotations
+  # @desc     Any custom annotations to add to the role binding.
+  #
+  # @param    global.rbac.serviceAccountLabels
+  # @desc     Any custom labels to add to the service account.
+  #
+  # @param    global.rbac.roleLabels
+  # @desc     Any custom labels to add to the role.
+  #
+  # @param    global.rbac.roleBindingLabels
+  # @desc     Any custom labels to add to the role binding.
+  #
   ############################################################
   rbac:
     generateServiceAccount: false
@@ -274,6 +293,12 @@ global:
       - apiGroups: [""]
         resources: ["pods"]
         verbs: ["get", "watch", "list"]
+    serviceAccountAnnotations: {}
+    roleAnnotations: {}
+    roleBindingAnnotations: {}
+    serviceAccountLabels: {}
+    roleLabels: {}
+    roleBindingLabels: {}
 
   ############################################################
   # External Images (typically for initContainers)
@@ -363,6 +388,14 @@ global:
   #
   # @param    global.services.serviceName.ingressPort Port available from the kubernetes ingress
   #
+  # @param    global.services.annotations Any custom annotations to add to the service.
+  #
+  # @param    global.services.clusterServiceAnnotations Any custom annotations to add to the ClusterIP service.
+  #
+  # @param    global.services.labels Any custom labels to add to the service.
+  #
+  # @param    global.services.clusterServiceLabels Any custom labels to add to the ClusterIP service.
+  #
   # https://kubernetes.io/docs/concepts/services-networking/service/
   ############################################################
   services: {}
@@ -382,6 +415,10 @@ global:
   #  clusterExternalDNSHostname:
   #  clusterServiceName:
   #  useLoadBalancerForDataService: false
+  #  annotations: {}
+  #  clusterServiceAnnotations: {}
+  #  labels: {}
+  #  clusterServiceLabels: {}
 
 
   ############################################################
@@ -396,8 +433,15 @@ global:
     # @default  Deployment
     type: Deployment
 
-    # @param global.workload.annotations Workload annotations
+    # @param global.workload.annotations Annotations to apply to the template in the workload.
+    # @desc  To apply top-level annotations to the Deployment or StatefulSet itself, use
+    # @desc  global.workload.deployment.annotations or global.workload.statefulSet.annotations.
     annotations: {}
+
+    # @param global.workload.labels Labels to apply to the template in the workload.
+    # @desc  To apply top-level labels to the Deployment or StatefulSet itself, use
+    # @desc  global.workload.deployment.labels or global.workload.statefulSet.labels.
+    labels: {}
 
     ############################################################
     # @param    global.workload.schedulerName K8s scheduler
@@ -451,6 +495,16 @@ global:
     # @desc     only applicable for RollingUpdate type
     # @default  0
     #
+    # @param    global.workload.deployment.annotations
+    # @desc     Annotations to apply to the top-level Deployment.
+    # @desc     To apply annotations to the template within the Deployment, use
+    # @desc     global.workload.annotations.
+    #
+    # @param    global.workload.deployment.labels
+    # @desc     Labels to apply to the top-level Deployment.
+    # @desc     To apply labels to the template within the Deployment, use
+    # @desc     global.workload.labels.
+    #
     # https://kubernetes.io/docs/concepts/workloads/controllers/deployment
     ############################################################
     deployment:
@@ -460,6 +514,8 @@ global:
         rollingUpdate:
           maxSurge: 1
           maxUnavailable: 0
+      annotations: {}
+      labels: {}
 
     ############################################################
     # StatefulSets
@@ -524,6 +580,18 @@ global:
       # @default  OrderedReady
       podManagementPolicy: OrderedReady
 
+      # @param global.workload.statefulSet.annotations
+      # @desc  Annotations to apply to the top-level StatefulSet.
+      # @desc  To apply annotations to the template within the StatefulSet, use
+      # @desc  global.workload.annotations.
+      annotations: {}
+
+      # @param global.workload.statefulSet.labels
+      # @desc  Labels to apply to the top-level StatefulSet.
+      # @desc  To apply labels to the template within the StatefulSet, use
+      # @desc  global.workload.labels.
+      labels: {}
+
     ############################################################
     # @param    global.workload.securityContext securityContext for the workload Pod spec.
     # @desc     The securityContext defined will be inserted directly into the Pod spec.
@@ -564,6 +632,10 @@ global:
   #
   # @param    global.clustering.autoscaling.targetMemoryUtilizationPercentage Target memory utilization
   #
+  # @param    global.clustering.autoscaling.annotations Custom annotations for the HPA.
+  #
+  # @param    global.clustering.autoscaling.labels Custom labels for the HPA.
+  #
   # @param    global.clustering.autoscaling.behavior Custom HPA behavior yaml
   # @default  {}
   #
@@ -577,6 +649,8 @@ global:
       maxReplicas: 4
       targetCPUUtilizationPercentage: 75
       # targetMemoryUtilizationPercentage: 50
+      annotations: {}
+      labels: {}
       behavior: { }
       # Custom Horizontal Pod Scaling behavior
       # ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#default-behavior
