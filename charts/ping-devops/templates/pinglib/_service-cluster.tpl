@@ -24,7 +24,7 @@ spec:
   clusterIP: None
   ports:
   {{- range $serviceName, $val := $v.services }}
-  {{- if kindIs "map" $val }}
+  {{- if and (kindIs "map" $val) (not (include "pinglib.is_reserved_block_name" $serviceName)) }}
   {{- if $val.clusterService }}
     - name: {{ $serviceName }}
       port: {{ required "containerPort is required for services with clusterService:true" $val.containerPort }}

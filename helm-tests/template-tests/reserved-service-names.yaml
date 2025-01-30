@@ -1,0 +1,133 @@
+# This test verifies that extra service port array entries are not created
+# as a side effect of setting service annotations or labels
+### SECTION:PARAMETERS ###
+releaseName: reservednames
+### SECTION:PARAMETERS ###
+skipTest: false
+### SECTION:VALUES ###
+# This is not specific to any particular product
+global:
+  services:
+    annotations:
+      globalServiceAnnotation: val
+      containerPort: 1234
+    clusterServiceAnnotations:
+      globalClusterServiceAnnotation: val
+      containerPort: 1234
+    labels:
+      globalServiceLabel: val
+      containerPort: 1234
+    clusterServiceLabels:
+      globalClusterServiceLabel: val
+      containerPort: 1234
+
+pingdirectory:
+  enabled: true
+  services:
+    annotations:
+      pdServiceAnnotation: val
+      containerPort: 1234
+    clusterServiceAnnotations:
+      pdClusterServiceAnnotation: val
+      containerPort: 1234
+    labels:
+      pdServiceLabel: val
+      containerPort: 1234
+    clusterServiceLabels:
+      pdClusterServiceLabel: val
+      containerPort: 1234
+
+pingdataconsole:
+  enabled: true
+
+### SECTION:UNEXPECTED ###
+# Check for services that should not exist on PD statefulset
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: reservednames-pingdirectory
+spec:
+  template:
+    spec:
+      containers:
+      - ports:
+        - name: annotations
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: reservednames-pingdirectory
+spec:
+  template:
+    spec:
+      containers:
+      - ports:
+        - name: clusterServiceAnnotations
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: reservednames-pingdirectory
+spec:
+  template:
+    spec:
+      containers:
+      - ports:
+        - name: labels
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: reservednames-pingdirectory
+spec:
+  template:
+    spec:
+      containers:
+      - ports:
+        - name: clusterServiceLabels
+
+---
+# Check for services that should not exist on PDC deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reservednames-pingdataconsole
+spec:
+  template:
+    spec:
+      containers:
+      - ports:
+        - name: annotations
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reservednames-pingdataconsole
+spec:
+  template:
+    spec:
+      containers:
+      - ports:
+        - name: clusterServiceAnnotations
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reservednames-pingdataconsole
+spec:
+  template:
+    spec:
+      containers:
+      - ports:
+        - name: labels
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reservednames-pingdataconsole
+spec:
+  template:
+    spec:
+      containers:
+      - ports:
+        - name: clusterServiceLabels
