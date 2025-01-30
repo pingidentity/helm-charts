@@ -33,3 +33,6 @@ notary version
 
 type kubectl
 kubectl version
+
+type helm
+helm version

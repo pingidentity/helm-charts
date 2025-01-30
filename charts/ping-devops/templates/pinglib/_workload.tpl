@@ -141,9 +141,11 @@ spec:
         {{- with $v.services }}
         ports:
         {{- range $serviceName, $val := . }}
-        {{- if kindIs "map" $val }}
+        {{- if and (kindIs "map" $val) (not (include "pinglib.is_reserved_block_name" $serviceName)) }}
+        {{- if $val.containerPort }}
         - containerPort: {{ $val.containerPort }}
           name: {{ $serviceName }}
+        {{- end }}
         {{- end }}
         {{- end }}
         {{- end }}

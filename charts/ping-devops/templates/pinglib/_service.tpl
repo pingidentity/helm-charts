@@ -25,7 +25,7 @@ spec:
   {{- end }}
   ports:
   {{- range $serviceName, $val := $v.services }}
-  {{- if kindIs "map" $val }}
+  {{- if and (kindIs "map" $val) (not (include "pinglib.is_reserved_block_name" $serviceName)) }}
   {{- if $val.dataService }}
     - name: {{ $serviceName }}
       port: {{ $val.servicePort }}

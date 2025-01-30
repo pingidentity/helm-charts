@@ -33,7 +33,7 @@ data:
 {{- with (index $top.Values $prodName) }}
   {{ $envPrefix }}_PRIVATE_HOSTNAME: {{ include "pinglib.addreleasename" (list $top $v .name) | quote }}
   {{- range $serviceName, $val := .services }}
-    {{- if kindIs "map" $val }}
+    {{- if and (kindIs "map" $val) (not (include "pinglib.is_reserved_block_name" $serviceName)) }}
       {{- if $val.dataService }}
   {{ $envPrefix }}_PRIVATE_PORT_{{ $serviceName | replace "-" "_" | upper }}: {{ $val.servicePort | quote }}
       {{- end }}

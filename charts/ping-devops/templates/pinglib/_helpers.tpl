@@ -69,3 +69,15 @@
 {{- define "pinglib.var_dump" -}}
 {{- . | mustToPrettyJson | printf "\nJSON dumped variable: \n%s" | fail }}
 {{- end -}}
+
+{{/**********************************************************************
+   ** Check if the provided name is reserved and not allowed as a service.
+   ** One argument expected, set to a string.
+   ** Reserved names are "annotations", "labels", "clusterServiceAnnotations",
+   ** and "clusterServiceLabels".
+   **********************************************************************/}}
+{{- define "pinglib.is_reserved_block_name" -}}
+{{- if or (eq . "annotations") (eq . "labels") (eq . "clusterServiceAnnotations") (eq . "clusterServiceLabels") -}}
+true
+{{- end -}}
+{{- end -}}
