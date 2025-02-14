@@ -192,7 +192,7 @@ global:
   # By default the images uses will be indicated by these
   # variables.  An example might look like:
   #
-  #   pingidentity/pingdataconsole:2501 (January, 2025)
+  #   pingidentity/pingdataconsole:2501.1 (January, 2025)
   #
   # @param    global.image.repository Default image registry
   # @desc     is not the fully-qualified name of the image
@@ -208,7 +208,7 @@ global:
   # @desc     Example: image.name: pingfederate
   #
   # @param    global.image.tag Default image tag
-  # @default  2501
+  # @default  2501.1
   #
   # @param    global.image.pullPolicy Default image pull policy
   # @default  IfNotPresent
@@ -217,7 +217,7 @@ global:
     repository: pingidentity
     repositoryFqn:
     name:
-    tag: "2501"
+    tag: "2501.1"
     pullPolicy: IfNotPresent
 
   ############################################################
@@ -882,7 +882,7 @@ sidecars: {}
 # sidecars:
 #   logger:
 #     name: log-container
-#     image: pingidentity/pingtoolkit:2501
+#     image: pingidentity/pingtoolkit:2501.1
 #     volumeMounts:
 #       - mountPath: /tmp/logs/
 #         name: logger
@@ -899,7 +899,7 @@ initContainers: {}
 # initContainers:
 #   init-example:
 #     name: 01-init
-#     image: pingidentity/pingtoolkit:2501
+#     image: pingidentity/pingtoolkit:2501.1
 #     command: ['sh', '-c', 'echo "InitContainer 1"']
 
 #############################################################
@@ -948,7 +948,7 @@ ldap-sdk-tools:
     name: ldap-sdk-tools
     repository: pingidentity
     repositoryFqn:
-    tag: "2501"
+    tag: "2501.1"
     pullPolicy: IfNotPresent
 
   container:
@@ -1749,7 +1749,7 @@ pd-replication-timing:
     name: pingtoolkit
     repository: pingidentity
     repositoryFqn:
-    tag: "2501"
+    tag: "2501.1"
     pullPolicy: IfNotPresent
 
   envs:
@@ -1771,7 +1771,7 @@ pingtoolkit:
     name: pingtoolkit
     repository: pingidentity
     repositoryFqn:
-    tag: "2501"
+    tag: "2501.1"
     pullPolicy: IfNotPresent
 
 #############################################################
