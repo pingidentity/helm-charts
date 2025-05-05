@@ -1,0 +1,33 @@
+# This test covers PDI-2215 - Global configMap names were being indented two spaces too far
+# when global annotations were set, leading to invalid generated k8s yaml.
+### SECTION:PARAMETERS ###
+releaseName: globalannotationconfigmap
+# Set skipTest to true to make the script skip this test
+skipTest: false
+### SECTION:VALUES ###
+# Set typical Helm values here
+global:
+  annotations:
+    mycustom: customguy
+
+configMaps:
+  myconfigmap:
+    data:
+      example.sh: |-
+        #!/bin/sh
+
+### SECTION:EXPECTED ###
+
+# Validate that the config map has the expected name and annotations
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: global
+    app.kubernetes.io/instance: globalannotationconfigmap
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    mycustom: customguy
+  name: myconfigmap
+data:
+  example.sh: '#!/bin/sh'
