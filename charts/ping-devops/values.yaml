@@ -693,11 +693,10 @@ global:
     ############################################################
     # @param    global.workload.container.securityContext securityContext at the container
     # @desc     level for the workload. The securityContext defined will be inserted
-    # @desc     directly into the spec for the main container of the Pod. By default no
-    # @desc     container securityContext is defined. In Kubernetes when a container-level
-    # @desc     securityContext is set, it will overwrite any corresponding values from the
+    # @desc     directly into the spec for the main container of the Pod. Container-level
+    # @desc     securityContext values will overwrite any corresponding values from the
     # @desc     Pod-level securityContext.
-    # @default  null
+    # @default  allowPrivilegeEscalation: false, capabilities: drop: ALL
     #
     # See https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
     ############################################################
@@ -845,6 +844,22 @@ global:
       requests:
         cpu: "0"
         memory: "128Mi"
+    ############################################################
+    # @param    global.utilitySidecar.securityContext securityContext at the container
+    # @desc     level for the sidecar. The securityContext defined will be inserted
+    # @desc     directly into the spec for the sidecar. By default no
+    # @desc     container securityContext is defined. In Kubernetes when a container-level
+    # @desc     securityContext is set, it will overwrite any corresponding values from the
+    # @desc     Pod-level securityContext.
+    # @default  allowPrivilegeEscalation: false, capabilities: drop: ALL
+    #
+    # See https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+    ############################################################
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
     # Environment variables for the sidecar if needed
     # env:
     #   - name: LOG_LEVEL
@@ -1103,11 +1118,12 @@ pingdirectory:
   # @param    pingdirectory.cronjob.enabled Enable the PingDirectory CronJob
   # @default  false
   #
-  # @param    pingdirectory.cronjob.spec yaml to insert into the created CronJob spec. If a jobTemplate is not
-  # @desc     provided, a default template will be inserted. A schedule value must be provided
+  # @param    pingdirectory.cronjob.spec yaml to insert into the created CronJob spec. If specified,
+  # @desc     this will override any other specified values for the CronJob.
   #
   # @param    pingdirectory.cronjob.spec.jobTemplate
-  # @desc     yaml to override default jobTemplate.
+  # @desc     yaml to override default jobTemplate. If a jobTemplate is not
+  # @desc     overridden, a default template will be inserted.
   #
   # @param    pingdirectory.cronjob.image Image to run the Jobs. The image must include kubectl
   # @default  bitname/kubectl:latest
@@ -1116,6 +1132,22 @@ pingdirectory:
   # @default  []
   cronjob:
     enabled: false
+    ############################################################
+    # @param    pingdirectory.cronjob.podSecurityContext securityContext for the pod
+    # @desc     in the jobTemplate. This will be used if a jobTemplate is not specified.
+    # @default  null
+    ############################################################
+    podSecurityContext: null
+    ############################################################
+    # @param    pingdirectory.cronjob.podSecurityContext securityContext for the container
+    # @desc     in the jobTemplate. This will be used if a jobTemplate is not specified.
+    # @default  allowPrivilegeEscalation: false, capabilities: drop: ALL
+    ############################################################
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
     spec: {}
       # A schedule must be set for cronjobs.
       # Example running once every six hours:

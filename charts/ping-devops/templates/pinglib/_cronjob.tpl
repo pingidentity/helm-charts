@@ -29,9 +29,15 @@ spec:
         spec:
           serviceAccount: {{ include "pinglib.fullname" . }}-internal-kubectl
           restartPolicy: OnFailure
+          {{- if $v.cronjob.podSecurityContext }}
+          securityContext: {{ toYaml $v.cronjob.podSecurityContext | nindent 12 }}
+          {{- end }}
           containers:
           - name: {{ include "pinglib.fullname" . }}-cronjob
             image: {{ $v.cronjob.image }}
+            {{- if $v.cronjob.containerSecurityContext }}
+            securityContext: {{ toYaml $v.cronjob.containerSecurityContext | nindent 14 }}
+            {{- end }}
             command: ["kubectl"]
             args:
               {{- range $args }}
