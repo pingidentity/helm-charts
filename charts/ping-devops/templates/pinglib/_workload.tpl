@@ -222,6 +222,11 @@ spec:
         {{ end -}}
         command: ["tail"]
         args: ["-f", "/dev/null"]
+        {{/*---------------- Sidecar Security Context -------------*/}}
+        {{/* Note: this will override the Pod-level securityContext if set */}}
+        {{- if $v.utilitySidecar.securityContext }}
+        securityContext: {{ toYaml $v.utilitySidecar.securityContext | nindent 10 }}
+        {{- end }}
         {{- if $v.utilitySidecar.resources }}
         resources:
           {{ toYaml $v.utilitySidecar.resources | nindent 10 }}

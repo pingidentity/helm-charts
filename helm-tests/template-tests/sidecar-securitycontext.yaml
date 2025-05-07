@@ -1,8 +1,7 @@
-# This test covers enabling a utility sidecar for a workload, along with a cronjob running a script
-# stored in a ConfigMap.
+# This test covers enabling a utility sidecar for a workload with a custom securityContext.
 
 ### SECTION:PARAMETERS ###
-releaseName: sidecar
+releaseName: sidecar-securitycontext
 # Set skipTest to true to make the script skip this test
 skipTest: false
 ### SECTION:VALUES ###
@@ -38,6 +37,11 @@ pingdirectory:
   # with the main PingDirectory container process.
   utilitySidecar:
     enabled: true
+    # Set custom security context
+    securityContext:
+      allowPrivilegeEscalation: true
+      runAsGroup: 1234
+      runAsUser: 2345
     volumes:
       - name: test-cm
         mountPath: /opt/in/script.sh
@@ -50,7 +54,7 @@ pingdirectory:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: sidecar-pingdirectory
+  name: sidecar-securitycontext-pingdirectory
 spec:
   template:
     spec:
@@ -61,10 +65,9 @@ spec:
               name: temp
         - name: utility-sidecar
           securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-              - ALL
+            allowPrivilegeEscalation: true
+            runAsGroup: 1234
+            runAsUser: 2345
           args:
             - -f
             - /dev/null
@@ -95,19 +98,11 @@ spec:
             name: test-cm
           name: test-cm
 ---
-# Validate that the configmap is configured correctly
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: test-cm
-data:
-  script.sh: asdf
----
 # Validate that the cronjob and corresponding RBAC objects are configured correctly
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: sidecar-pingdirectory-cronjob
+  name: sidecar-securitycontext-pingdirectory-cronjob
 spec:
   schedule: 0 */6 * * *
   successfulJobsHistoryLimit: 0
@@ -120,7 +115,7 @@ spec:
             - args:
                 - exec
                 - -ti
-                - sidecar-pingdirectory-0
+                - sidecar-securitycontext-pingdirectory-0
                 - --container
                 - utility-sidecar
                 - --
@@ -128,41 +123,10 @@ spec:
               command:
                 - kubectl
               image: bitnami/kubectl:latest
-              name: sidecar-pingdirectory-cronjob
-          serviceAccount: sidecar-pingdirectory-internal-kubectl
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: sidecar-pingdirectory-internal-kubectl
-
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: sidecar-pingdirectory-modify-pods
-rules:
-  - apiGroups: [""]
-    resources:
-      - pods
-    verbs:
-      - get
-      - list
-      - delete
-  - apiGroups: [""]
-    resources:
-      - pods/exec
-    verbs:
-      - create
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: sidecar-pingdirectory-modify-pods-to-sa
-subjects:
-  - kind: ServiceAccount
-    name: sidecar-pingdirectory-internal-kubectl
-roleRef:
-  kind: Role
-  name: sidecar-pingdirectory-modify-pods
-  apiGroup: rbac.authorization.k8s.io
+              name: sidecar-securitycontext-pingdirectory-cronjob
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                  - ALL
+          serviceAccount: sidecar-securitycontext-pingdirectory-internal-kubectl

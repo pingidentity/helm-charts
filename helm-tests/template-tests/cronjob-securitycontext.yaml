@@ -1,0 +1,63 @@
+# This test covers setting a custom pod and/or container security context for a cronjob for PD
+### SECTION:PARAMETERS ###
+releaseName: cronjob-securitycontext
+# Set skipTest to true to make the script skip this test
+skipTest: false
+### SECTION:VALUES ###
+# Set typical Helm values here
+pingdirectory:
+  # Use a cronJob to run backups every six hours
+  cronjob:
+    enabled: true
+    podSecurityContext:
+      allowPrivilegeEscalation: true
+      runAsGroup: 1234
+      runAsUser: 2345
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      runAsGroup: 12345
+      runAsUser: 23456
+    args:
+      - /opt/in/backup.sh
+  enabled: true
+
+### SECTION:EXPECTED ###
+
+# Validate that expected Cronjob is generated
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cronjob-securitycontext-pingdirectory-cronjob
+spec:
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - args:
+            - exec
+            - -ti
+            - cronjob-securitycontext-pingdirectory-0
+            - --container
+            - utility-sidecar
+            - --
+            - /opt/in/backup.sh
+            command:
+            - kubectl
+            image: bitnami/kubectl:latest
+            name: cronjob-securitycontext-pingdirectory-cronjob
+            securityContext:
+              allowPrivilegeEscalation: false
+              # This is included in the default containerSecurityContext in values.yaml
+              capabilities:
+                drop:
+                - ALL
+              runAsGroup: 12345
+              runAsUser: 23456
+          securityContext:
+            allowPrivilegeEscalation: true
+            runAsGroup: 1234
+            runAsUser: 2345
+---
+
