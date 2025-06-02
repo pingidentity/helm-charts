@@ -1,0 +1,108 @@
+# This test covers setting values for a cronjob if the cronjob is enabled in the values.yaml file
+# but values for the cronjob are not set.
+### SECTION:PARAMETERS ###
+releaseName: cronjob-defaults
+# Set skipTest to true to make the script skip this test
+skipTest: false
+### SECTION:VALUES ###
+# Set typical Helm values here
+pingfederate-engine:
+  enabled: true
+  cronjob:
+    enabled: true
+    spec: 
+      schedule: '9 * * 9 *'
+      successfulJobsHistoryLimit: 99
+    args:
+      - /opt/in/engine.sh
+
+pingfederate-admin:
+  enabled: true
+  cronjob:
+    enabled: true
+    spec:
+      failedJobsHistoryLimit: 777
+      schedule: '7 * * 7 *'
+      successfulJobsHistoryLimit: 77
+      jobTemplate:
+        spec:
+          template:
+            spec:
+              serviceAccount: pinglib-internal-kubectl
+              restartPolicy: OnFailure
+              containers:
+                - name: pinglib-cronjob
+                  image: image
+                  command: ["kubectl"]
+                  args:
+                    - .
+
+pingdirectory:
+  enabled: true
+  cronjob:
+    enabled: true
+    spec:
+      schedule: '* */8 * * *'
+      failedJobsHistoryLimit: 888
+    args:
+      - /opt/in/pingdirectory.sh
+
+### SECTION:EXPECTED ###
+# Validate that expected Cronjobs are generated
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cronjob-defaults-pingfederate-engine-cronjob
+spec:
+  schedule: '9 * * 9 *'
+  successfulJobsHistoryLimit: 99
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - args:
+            - -c
+            - kubectl exec -ti $(kubectl get pod -l app.kubernetes.io/name=pingfederate-engine,app.kubernetes.io/instance=cronjob-defaults -o jsonpath='{.items[0].metadata.name}') --container utility-sidecar -- /opt/in/engine.sh
+            command:
+            - sh
+            image: bitnami/kubectl:latest
+            name: cronjob-defaults-pingfederate-engine-cronjob
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                - ALL
+          restartPolicy: OnFailure
+          serviceAccount: cronjob-defaults-pingfederate-engine-internal-kubectl
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cronjob-defaults-pingfederate-admin-cronjob
+spec:
+  failedJobsHistoryLimit: 777
+  schedule: '7 * * 7 *'
+  successfulJobsHistoryLimit: 77
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - args:
+            - .
+            command:
+            - kubectl
+            image: image
+            name: pinglib-cronjob
+          restartPolicy: OnFailure
+          serviceAccount: pinglib-internal-kubectl 
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cronjob-defaults-pingdirectory-cronjob
+spec:
+  failedJobsHistoryLimit: 888
+  schedule: '* */8 * * *'
+---

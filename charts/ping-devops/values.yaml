@@ -990,6 +990,54 @@ ldap-sdk-tools:
 # @default  false
 #############################################################
 pingfederate-admin:
+  # @param    pingfederate-admin.cronjob CronJobs run a kubectl exec command to run commands on
+  # @desc     a utility sidecar container. They will also create the necessary ServiceAccount, Role,
+  # @desc     and RoleBinding to run the jobs
+  #
+  # @param    pingfederate-admin.cronjob.enabled Enable the PingFederate Admin CronJob
+  # @default  false
+  #
+  # @param    pingfederate-admin.cronjob.spec yaml to insert into the created CronJob spec. If specified,
+  # @desc     this will override any other specified values for the CronJob.
+  #
+  # @param    pingfederate-admin.cronjob.spec.jobTemplate
+  # @desc     yaml to override default jobTemplate. If a jobTemplate is not
+  # @desc     overridden, a default template will be inserted.
+  #
+  # @param    pingfederate-admin.cronjob.image Image to run the Jobs. The image must include kubectl
+  # @default  bitname/kubectl:latest
+  #
+  # @param    pingfederate-admin.cronjob.args Job arguments
+  # @default  []
+  cronjob:
+    enabled: false
+    ############################################################
+    # @param    pingfederate-admin.cronjob.podSecurityContext securityContext for the pod
+    # @desc     in the jobTemplate. This will be used if a jobTemplate is not specified.
+    # @default  null
+    ############################################################
+    podSecurityContext: null
+    ############################################################
+    # @param    pingfederate-admin.cronjob.podSecurityContext securityContext for the container
+    # @desc     in the jobTemplate. This will be used if a jobTemplate is not specified.
+    # @default  allowPrivilegeEscalation: false, capabilities: drop: ALL
+    ############################################################
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+    spec: {}
+      # A schedule must be set for cronjobs.
+      # This chart does not provide a default schedule, so it must be set, e.g.:
+      # schedule: "0 */6 * * *"
+      # Kubernetes will default the successfulJobsHistoryLimit and failedJobsHistoryLimit to 3 and 1 respectively.
+      # If you want to change these values, you can set them in the spec, e.g.:
+      # successfulJobsHistoryLimit: 0
+      # failedJobsHistoryLimit: 1
+    # The image can be replaced with any desired image that includes kubectl
+    image: bitnami/kubectl:latest
+    args: []
   enabled: false
   name: pingfederate-admin
   image:
@@ -1054,6 +1102,54 @@ pingfederate-admin:
 # @default  false
 #############################################################
 pingfederate-engine:
+  # @param    pingfederate-engine.cronjob CronJobs run a kubectl exec command to run commands on
+  # @desc     a utility sidecar container. They will also create the necessary ServiceAccount, Role,
+  # @desc     and RoleBinding to run the jobs
+  #
+  # @param    pingfederate-engine.cronjob.enabled Enable the PingFederate engine CronJob
+  # @default  false
+  #
+  # @param    pingfederate-engine.cronjob.spec yaml to insert into the created CronJob spec. If specified,
+  # @desc     this will override any other specified values for the CronJob.
+  #
+  # @param    pingfederate-engine.cronjob.spec.jobTemplate
+  # @desc     yaml to override default jobTemplate. If a jobTemplate is not
+  # @desc     overridden, a default template will be inserted.
+  #
+  # @param    pingfederate-engine.cronjob.image Image to run the Jobs. The image must include kubectl
+  # @default  bitname/kubectl:latest
+  #
+  # @param    pingfederate-engine.cronjob.args Job arguments
+  # @default  []
+  cronjob:
+    enabled: false
+    ############################################################
+    # @param    pingfederate-engine.cronjob.podSecurityContext securityContext for the pod
+    # @desc     in the jobTemplate. This will be used if a jobTemplate is not specified.
+    # @default  null
+    ############################################################
+    podSecurityContext: null
+    ############################################################
+    # @param    pingfederate-engine.cronjob.podSecurityContext securityContext for the container
+    # @desc     in the jobTemplate. This will be used if a jobTemplate is not specified.
+    # @default  allowPrivilegeEscalation: false, capabilities: drop: ALL
+    ############################################################
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+    spec: {}
+      # A schedule must be set for cronjobs.
+      # This chart does not provide a default schedule, so it must be set, e.g.:
+      # schedule: "0 */6 * * *"
+      # Kubernetes will default the successfulJobsHistoryLimit and failedJobsHistoryLimit to 3 and 1 respectively.
+      # If you want to change these values, you can set them in the spec, e.g.:
+      # successfulJobsHistoryLimit: 0
+      # failedJobsHistoryLimit: 1
+    # The image can be replaced with any desired image that includes kubectl
+    image: bitnami/kubectl:latest
+    args: []
   enabled: false
   name: pingfederate-engine
   image:
@@ -1150,8 +1246,10 @@ pingdirectory:
         - ALL
     spec: {}
       # A schedule must be set for cronjobs.
-      # Example running once every six hours:
+      # This chart does not provide a default schedule, so it must be set, e.g.:
       # schedule: "0 */6 * * *"
+      # Kubernetes will default the successfulJobsHistoryLimit and failedJobsHistoryLimit to 3 and 1 respectively.
+      # If you want to change these values, you can set them in the spec, e.g.:
       # successfulJobsHistoryLimit: 0
       # failedJobsHistoryLimit: 1
     # The image can be replaced with any desired image that includes kubectl
