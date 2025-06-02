@@ -113,15 +113,10 @@ spec:
         spec:
           containers:
             - args:
-                - exec
-                - -ti
-                - sidecar-securitycontext-pingdirectory-0
-                - --container
-                - utility-sidecar
-                - --
-                - /opt/in/script.sh
+              - -c
+              - kubectl exec -ti sidecar-securitycontext-pingdirectory-0 --container utility-sidecar -- /opt/in/script.sh
               command:
-                - kubectl
+              - sh
               image: bitnami/kubectl:latest
               name: sidecar-securitycontext-pingdirectory-cronjob
               securityContext:

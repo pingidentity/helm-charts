@@ -29,22 +29,16 @@ kind: CronJob
 metadata:
   name: cronjob-securitycontext-pingdirectory-cronjob
 spec:
-  failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
       template:
         spec:
           containers:
           - args:
-            - exec
-            - -ti
-            - cronjob-securitycontext-pingdirectory-0
-            - --container
-            - utility-sidecar
-            - --
-            - /opt/in/backup.sh
+            - -c
+            - kubectl exec -ti cronjob-securitycontext-pingdirectory-0 --container utility-sidecar -- /opt/in/backup.sh
             command:
-            - kubectl
+            - sh
             image: bitnami/kubectl:latest
             name: cronjob-securitycontext-pingdirectory-cronjob
             securityContext:
