@@ -1,0 +1,202 @@
+# This test covers RBAC objects created for a Cronjob in PingDirectory.
+### SECTION:PARAMETERS ###
+releaseName: cronjob-rbac
+# Set skipTest to true to make the script skip this test
+skipTest: false
+### SECTION:VALUES ###
+# Set typical Helm values here
+global:
+  annotations:
+    example: "This is a test annotation"
+  workload:
+    annotations:
+      anotherOne: "This is another test annotation"
+pingdirectory:
+  cronjob:
+    enabled: true
+    spec:
+      schedule: "0 */6 * * *"
+      successfulJobsHistoryLimit: 0
+      failedJobsHistoryLimit: 1
+      jobTemplate:
+        spec:
+          template:
+            spec:
+              serviceAccount: pinglib-internal-kubectl
+              restartPolicy: OnFailure
+              containers:
+                - name: pinglib-cronjob
+                  image: image
+                  command: ["kubectl"]
+                  args:
+                    - .
+    args:
+      - /opt/in/backup.sh
+  enabled: true
+
+pingfederate-engine:
+  enabled: true
+  cronjob:
+    enabled: true
+    spec: 
+      schedule: '9 * * 9 *'
+      successfulJobsHistoryLimit: 99
+    args:
+      - /opt/in/engine.sh
+
+pingfederate-admin:
+  enabled: true
+  cronjob:
+    enabled: true
+    spec:
+      failedJobsHistoryLimit: 777
+      schedule: '7 * * 7 *'
+      successfulJobsHistoryLimit: 77
+      jobTemplate:
+        spec:
+          template:
+            spec:
+              serviceAccount: pinglib-internal-kubectl
+              restartPolicy: OnFailure
+              containers:
+                - name: pinglib-cronjob
+                  image: image
+                  command: ["kubectl"]
+                  args:
+                    - .
+
+### SECTION:EXPECTED ###
+
+# Validate that expected Cronjob RBAC objects are generated
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    example: "This is a test annotation"
+    
+  name: cronjob-rbac-pingdirectory-internal-kubectl
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    example: "This is a test annotation"
+    
+  name: cronjob-rbac-pingdirectory-modify-pods
+rules:
+  - apiGroups: [""]
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - delete
+  - apiGroups: [""]
+    resources: 
+      - pods/exec
+    verbs: 
+      - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations:
+    example: "This is a test annotation"
+    
+  name: cronjob-rbac-pingdirectory-modify-pods-to-sa
+subjects:
+  - kind: ServiceAccount
+    name: cronjob-rbac-pingdirectory-internal-kubectl
+roleRef:
+  kind: Role
+  name: cronjob-rbac-pingdirectory-modify-pods
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    example: "This is a test annotation"
+    
+  name: cronjob-rbac-pingfederate-admin-internal-kubectl
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    example: "This is a test annotation"
+    
+  name: cronjob-rbac-pingfederate-admin-modify-pods
+rules:
+  - apiGroups: [""]
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - delete
+  - apiGroups: [""]
+    resources: 
+      - pods/exec
+    verbs: 
+      - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations:
+    example: "This is a test annotation"
+    
+  name: cronjob-rbac-pingfederate-admin-modify-pods-to-sa
+subjects:
+  - kind: ServiceAccount
+    name: cronjob-rbac-pingfederate-admin-internal-kubectl
+roleRef:
+  kind: Role
+  name: cronjob-rbac-pingfederate-admin-modify-pods
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    example: "This is a test annotation"
+    
+  name: cronjob-rbac-pingfederate-engine-internal-kubectl
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    example: "This is a test annotation"
+    
+  name: cronjob-rbac-pingfederate-engine-modify-pods
+rules:
+  - apiGroups: [""]
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - delete
+  - apiGroups: [""]
+    resources: 
+      - pods/exec
+    verbs: 
+      - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations:
+    example: "This is a test annotation"
+    
+  name: cronjob-rbac-pingfederate-engine-modify-pods-to-sa
+subjects:
+  - kind: ServiceAccount
+    name: cronjob-rbac-pingfederate-engine-internal-kubectl
+roleRef:
+  kind: Role
+  name: cronjob-rbac-pingfederate-engine-modify-pods
+  apiGroup: rbac.authorization.k8s.io
+
