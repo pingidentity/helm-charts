@@ -1,0 +1,33 @@
+# This test covers PDI-2238 - Including dnsConfig in the pod spec
+### SECTION:PARAMETERS ###
+releaseName: dnsconfig
+# Set skipTest to true to make the script skip this test
+skipTest: false
+### SECTION:VALUES ###
+pingfederate-admin:
+  enabled: true
+  dnsConfig:
+    nameservers:
+    - 172.0.0.1
+    options:
+    - name: ndots
+      value: "5"
+    searches:
+    - dns-config.svc.cluster.local
+### SECTION:EXPECTED ###
+# Validate that dnsConfig is in the spec for the PF Admin Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dnsconfig-pingfederate-admin
+spec:
+  template:
+    spec:
+      dnsConfig:
+        nameservers:
+        - 172.0.0.1
+        options:
+        - name: ndots
+          value: "5"
+        searches:
+        - dns-config.svc.cluster.local
