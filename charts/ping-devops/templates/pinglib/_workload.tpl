@@ -80,6 +80,10 @@ spec:
         {{- toYaml $v.workload.annotations | nindent 8 }}
         {{- end }}
     spec:
+      {{- with $v.dnsConfig }}
+      dnsConfig:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with $v.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -102,7 +106,7 @@ spec:
       {{- range $v.workload.topologySpreadConstraints }}
       - {{ . | toYaml | indent 8 | trim }}
         labelSelector:
-          matchLabels: 
+          matchLabels:
           {{- include "pinglib.selector.labels" (list $top $v) | nindent 12 -}}
       {{- end }}
       enableServiceLinks: {{ $v.workload.enableServiceLinks }}
