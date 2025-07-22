@@ -46,6 +46,31 @@ markdown_extensions:
       # insert a blank space before the character
       permalink: " ¶"
 
+plugins:
+  - redirects:
+      redirect_maps:
+        "docs/index.md": "https://developer.pingidentity.com/helm/helm-charts-landing-page.html"
+        "docs/getting-started.md": "https://developer.pingidentity.com/helm/getting-started.html"
+        "docs/CONTRIBUTING.md": "https://developer.pingidentity.com/helm/getting-started/feedback.html"
+        "docs/config/index.md": "https://developer.pingidentity.com/helm/configs/index.html"
+        "docs/config/global.md": "https://developer.pingidentity.com/helm/configs/global.html"
+        "docs/config/container.md": "https://developer.pingidentity.com/helm/configs/container.html"
+        "docs/config/external-image.md": "https://developer.pingidentity.com/helm/configs/external-image.html"
+        "docs/config/image.md": "https://developer.pingidentity.com/helm/configs/image.html"
+        "docs/config/ingress.md": "https://developer.pingidentity.com/helm/configs/ingress.html"
+        "docs/config/license.md": "https://developer.pingidentity.com/helm/configs/license.html"
+        "docs/config/private-cert.md": "https://developer.pingidentity.com/helm/configs/privatecerts.html"
+        "docs/config/service.md": "https://developer.pingidentity.com/helm/configs/service.html"
+        "docs/config/vault.md": "https://developer.pingidentity.com/helm/configs/vault.html"
+        "docs/config/volume-mounts.md": "https://developer.pingidentity.com/helm/configs/volumemounts.html"
+        "docs/config/workload.md": "https://developer.pingidentity.com/helm/configs/workload.html"
+        "docs/config/supported-values.md": "https://developer.pingidentity.com/helm/configs/supported-values.html"
+        "docs/config/openshift.md": "https://developer.pingidentity.com/helm/configs/openshift-config.html"
+        "docs/examples/index.md": "https://developer.pingidentity.com/helm/examples/index.html"
+        "docs/howto/updatetags.md": "https://developer.pingidentity.com/helm/how-to/index.html"
+        "docs/release-notes/currentRelease.md": "https://developer.pingidentity.com/helm/release-notes/index.html"
+        "docs/release-notes/previousReleases.md": "https://developer.pingidentity.com/helm/release-notes/previous-releases.html"
+
 nav:
   - Welcome:
       - Installation: "index.md"
@@ -71,5 +96,5 @@ nav:
   - How To:
       - Update Tags: "howto/updatetags.md"
   - Release Notes:
-    - Current Release: "release-notes/currentRelease.md"
-    - Previous Releases: "release-notes/previousReleases.md"
+      - Current Release: "release-notes/currentRelease.md"
+      - Previous Releases: "release-notes/previousReleases.md"
