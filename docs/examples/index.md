@@ -1,6 +1,3 @@
-# Helm Chart Examples
+# Content Moved
 
-The example deployments of various configurations and combinations of Ping products with these charts are provided on the [Ping Identity DevOps Portal](https://devops.pingidentity.com/deployment/deployHelm/).
-
-!!! note "Configuration required"
-    Install and configure Helm according to the [Getting Started](../getting-started.md) page before trying the examples.
+This content has moved to [developer.pingidentity.com/helm/examples](https://developer.pingidentity.com/helm/examples/index.html)
