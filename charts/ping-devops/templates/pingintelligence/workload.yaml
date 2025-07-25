@@ -1,6 +1,0 @@
-{{- include "pinglib.workload" (list . "pingintelligence") -}}
-
-
-
-{{- define "pingintelligence.workload" -}}
-{{- end -}}

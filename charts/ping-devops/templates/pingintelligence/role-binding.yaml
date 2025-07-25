@@ -1,4 +1,0 @@
-{{- include "pinglib.rbac.role-binding" (list . "pingintelligence") -}}
-
-{{- define "pingintelligence.rbac.role-binding" -}}
-{{- end -}}
