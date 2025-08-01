@@ -1,7 +1,13 @@
 # Release Notes
-## Release 0.11.9 (July 2, 2025)
+## Release 0.11.10 (August 4, 2025)
 ### Features ###
-  - Updated default global image tag to `2506`.
+  - Updated default global image tag to `2507`.
 
-### Bug fixes ###
-  - Fix incorrect indentation of cronjob RBAC object names when setting global annotations.
+### Enhancements
+  - Added support for configuring `dnsConfig` in workload pods.
+
+### Breaking changes
+  - References to `pingintelligence` have been removed from the chart.
+
+### Documentation ###
+  - Migrated Helm documentation to https://developer.pingidentity.com/.
