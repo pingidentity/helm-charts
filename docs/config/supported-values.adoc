@@ -126,7 +126,7 @@ These are the values supported in the ping-devops chart. In general, values spec
 
 |`global.image.tag`
 |Default image tag
-|`2507`
+|`2508`
 
 |`global.image.pullPolicy`
 |Default image pull policy
@@ -185,7 +185,7 @@ These are the values supported in the ping-devops chart. In general, values spec
 |
 
 |`global.externalImage`
-|Provides ability to use external images for various purposes such as using curl, waitfor, etc. A pingtoolkit image is included by default for running waitFor and generating private cert initContainers. A pingaccess image is also included by default to allow generating an encrypted PEM-formatted cert that is compatible with FIPS mode. Any values specified on the image will be copied directly to the k8s spec for the container, except for the externalImage.\{name\}.image section, which follows the format of the global.image section. If no image section is specified (the default), the corresponding value from the product values section will be used. For example, if externalImage.pingtoolkit.image is empty, the values from the top-level pingtoolkit.image section will be used.
+|Provides ability to use external images for various purposes such as using curl, waitfor, etc. A pingtoolkit image is included by default for running waitFor and generating private cert initContainers. A pingaccess image is also included by default to allow generating an encrypted PEM-formatted cert that is compatible with FIPS mode. Any values specified on the image will be copied directly to the k8s spec for the container, except for the externalImage.{name}.image section, which follows the format of the global.image section. If no image section is specified (the default), the corresponding value from the product values section will be used. For example, if externalImage.pingtoolkit.image is empty, the values from the top-level pingtoolkit.image section will be used.
 |`{pingtoolkit, pingaccess}`
 
 |`global.services`
@@ -317,7 +317,7 @@ These are the values supported in the ping-devops chart. In general, values spec
 
 |`global.workload.statefulSet.persistentvolume.volumes`
 |For every volume defined in the volumes list, 3 items will be created in the StatefulSet: 1. container.volumeMounts - name and mountPath. 2. template.spec.volume - name and persistentVolumeClaim.claimName. 3. spec.volumeClaimTemplates - persistentVolumeClaim.
-|`\{out-dir\}`
+|`{out-dir}`
 
 |`global.workload.statefulSet.persistentvolume.volumes.volumeName.mountPath`
 |Mount path for the volume
