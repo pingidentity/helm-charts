@@ -122,7 +122,7 @@ spec:
               - kubectl exec -ti sidecar-pingdirectory-0 --container utility-sidecar -- /opt/in/script.sh
               command:
               - sh
-              image: bitnami/kubectl:latest
+              image: pingidentity/pingtoolkit:latest
               name: sidecar-pingdirectory-cronjob
           serviceAccount: sidecar-pingdirectory-internal-kubectl
 ---

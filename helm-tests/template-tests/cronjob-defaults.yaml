@@ -66,7 +66,7 @@ spec:
             - kubectl exec -ti $(kubectl get pod -l app.kubernetes.io/name=pingfederate-engine,app.kubernetes.io/instance=cronjob-defaults -o jsonpath='{.items[0].metadata.name}') --container utility-sidecar -- /opt/in/engine.sh
             command:
             - sh
-            image: bitnami/kubectl:latest
+            image: pingidentity/pingtoolkit:latest
             name: cronjob-defaults-pingfederate-engine-cronjob
             securityContext:
               allowPrivilegeEscalation: false

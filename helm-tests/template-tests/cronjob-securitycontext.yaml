@@ -39,7 +39,7 @@ spec:
             - kubectl exec -ti cronjob-securitycontext-pingdirectory-0 --container utility-sidecar -- /opt/in/backup.sh
             command:
             - sh
-            image: bitnami/kubectl:latest
+            image: pingidentity/pingtoolkit:latest
             name: cronjob-securitycontext-pingdirectory-cronjob
             securityContext:
               allowPrivilegeEscalation: false

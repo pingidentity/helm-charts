@@ -117,7 +117,7 @@ spec:
               - kubectl exec -ti sidecar-securitycontext-pingdirectory-0 --container utility-sidecar -- /opt/in/script.sh
               command:
               - sh
-              image: bitnami/kubectl:latest
+              image: pingidentity/pingtoolkit:latest
               name: sidecar-securitycontext-pingdirectory-cronjob
               securityContext:
                 allowPrivilegeEscalation: false

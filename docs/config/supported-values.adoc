@@ -539,8 +539,8 @@ These are the values supported in the ping-devops chart. In general, values spec
 |
 
 |`pingfederate-admin.cronjob.image`
-|Image to run the Jobs. The image must include kubectl
-|`bitname/kubectl:latest`
+|Image to run the jobs. The image must include kubectl and sh.
+|`pingidentity/pingtoolkit:latest`
 
 |`pingfederate-admin.cronjob.args`
 |Job arguments
@@ -579,8 +579,8 @@ These are the values supported in the ping-devops chart. In general, values spec
 |
 
 |`pingfederate-engine.cronjob.image`
-|Image to run the Jobs. The image must include kubectl
-|`bitname/kubectl:latest`
+|Image to run the Jobs. The image must include kubectl and sh.
+|`pingidentity/pingtoolkit:latest`
 
 |`pingfederate-engine.cronjob.args`
 |Job arguments
@@ -619,8 +619,8 @@ These are the values supported in the ping-devops chart. In general, values spec
 |
 
 |`pingdirectory.cronjob.image`
-|Image to run the Jobs. The image must include kubectl
-|`bitname/kubectl:latest`
+|Image to run the Jobs. The image must include kubectl and sh.
+|`pingidentity/pingtoolkit:latest`
 
 |`pingdirectory.cronjob.args`
 |Job arguments
