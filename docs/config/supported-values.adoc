@@ -126,7 +126,7 @@ These are the values supported in the ping-devops chart. In general, values spec
 
 |`global.image.tag`
 |Default image tag
-|`2508`
+|`2509`
 
 |`global.image.pullPolicy`
 |Default image pull policy
