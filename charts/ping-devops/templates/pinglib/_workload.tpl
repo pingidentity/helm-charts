@@ -84,6 +84,9 @@ spec:
       dnsConfig:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with $v.dnsPolicy }}
+      dnsPolicy: {{ . }}
+      {{- end }}
       {{- with $v.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
