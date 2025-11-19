@@ -1,0 +1,35 @@
+# This test covers 2309- Including dnsPolicy in the pod spec
+### SECTION:PARAMETERS ###
+releaseName: dnspolicy
+# Set skipTest to true to make the script skip this test
+skipTest: false
+### SECTION:VALUES ###
+pingfederate-admin:
+  enabled: true
+  dnsConfig:
+    nameservers:
+    - 172.0.0.1
+    options:
+    - name: ndots
+      value: "5"
+    searches:
+    - dns-policy.svc.cluster.local
+  dnsPolicy: None
+### SECTION:EXPECTED ###
+# Validate that dnsPolicy is changed to None in the pod spec
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dnspolicy-pingfederate-admin
+spec:
+  template:
+    spec:
+      dnsConfig:
+        nameservers:
+        - 172.0.0.1
+        options:
+        - name: ndots
+          value: "5"
+        searches:
+        - dns-policy.svc.cluster.local
+      dnsPolicy: None
