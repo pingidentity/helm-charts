@@ -124,6 +124,44 @@ CI_SCRIPTS_DIR="${CI_PROJECT_DIR:-.}/ci_scripts"
 test -z "${PING_IDENTITY_DEVOPS_USER}" && usage "Env Variable PING_IDENTITY_DEVOPS_USER is required"
 test -z "${PING_IDENTITY_DEVOPS_KEY}" && usage "Env Variable PING_IDENTITY_DEVOPS_KEY is required"
 
+_httpcan_values_opt=()
+_post_renderer_script=""
+
+# Auto-detect httpcan requirement
+_httpcan_config_source=""
+_httpcan_candidate_files=()
+if test -n "${_integration_to_run}" && test -d "${_integration_to_run}"; then
+    while IFS= read -r _candidate; do
+        _httpcan_candidate_files+=("${_candidate}")
+    done < <(find "${_integration_to_run}" -maxdepth 1 -type f \( -name '*.yaml' -o -name '*.yml' \) | sort)
+elif test -n "${_integration_to_run}"; then
+    _httpcan_candidate_files=("${_integration_to_run}")
+fi
+
+for _candidate in "${_httpcan_candidate_files[@]}"; do
+    if perl -0777 -ne 'exit 0 if /httpcan:[^\n]*\n(?:[ \t]+.*\n)*?[ \t]+enabled:\s*true\b/; exit 1' "${_candidate}"; then
+        _httpcan_config_source="${_candidate}"
+        break
+    fi
+done
+
+if test -n "${_httpcan_config_source}"; then
+    echo "Auto-detected httpcan requirement from ${_httpcan_config_source}. Applying post-renderer."
+    _auto_pr_script="${CI_SCRIPTS_DIR}/httpcan/post-renderer.sh"
+    if test -f "${_auto_pr_script}"; then
+        _post_renderer_script="${_auto_pr_script}"
+
+        _httpcan_env_values_file="${_tmpDir}/httpcan-env-values.yaml"
+        cat > "${_httpcan_env_values_file}" << EOF
+global:
+  envs:
+    HTTPCAN_PRIVATE_HOSTNAME: httpcan
+    HTTPCAN_PRIVATE_PORT_HTTP: "80"
+EOF
+        _httpcan_values_opt=(--helm-file-values "${_httpcan_env_values_file}")
+    fi
+fi
+
 ################################################################################
 # _final
 ################################################################################
@@ -168,10 +206,13 @@ _start=$(date '+%s')
 
 test -n "${_namespace_to_use}" && NS_OPT=(--namespace "${_namespace_to_use}")
 test -n "${HELM_CHART_NAME}" && HELM_CHART_OPT=(--helm-chart "${HELM_CHART_NAME}")
+test -n "${_post_renderer_script}" && POST_RENDERER_OPT=(--post-renderer "${_post_renderer_script}")
 "${CI_SCRIPTS_DIR}/run_helm_tests.sh" \
     --helm-test "${_integration_to_run}" \
+    "${_httpcan_values_opt[@]}" \
     "${_addl_helm_file_values[@]}" \
     "${_addl_helm_set_values[@]}" \
+    "${POST_RENDERER_OPT[@]}" \
     "${NS_OPT[@]}" \
     "${HELM_CHART_OPT[@]}"
 
