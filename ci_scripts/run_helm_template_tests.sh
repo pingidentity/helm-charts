@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Copyright © 2026 Ping Identity Corporation
+
 #
 # Ping Identity DevOps - CI scripts
 #
