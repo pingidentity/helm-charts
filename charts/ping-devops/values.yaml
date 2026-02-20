@@ -84,13 +84,50 @@ global:
 #      ingressClassName: nginx-public
 
   ############################################################
+  # Gateway API (HTTPRoute)
+  #
+  # @param    global.gateway.enabled
+  # @default  false
+  #
+  # @param    global.gateway.apiVersion
+  # @default  gateway.networking.k8s.io/v1
+  #
+  # @param    global.gateway.parentRefs Parent Gateway references
+  # @default  []
+  #
+  # @param    global.gateway.addReleaseNameToHost Add release to host.
+  # @desc     One of `{prepend, append, subdomain, none}`
+  # @default  subdomain
+  #
+  # @param    global.gateway.defaultDomain Replaces with
+  # @desc     "_defaultDomain_" in host fields
+  # @default  example.com
+  #
+  # @param    global.gateway.hosts Gateway route hosts/paths for HTTPRoute.
+  # @desc     pathType must be one of `{Exact, PathPrefix, RegularExpression}` and
+  # @desc     this can also be set per-product at {product}.gateway.hosts.
+  # @default  []
+  #
+  # @param    global.gateway.annotations
+  # @default  {}
+  ############################################################
+  gateway:
+    enabled: false
+    apiVersion: gateway.networking.k8s.io/v1
+    parentRefs: []
+    addReleaseNameToHost: subdomain
+    defaultDomain: example.com
+    hosts: []
+    annotations: {}
+
+  ############################################################
   # Internal Certificates
   #
   # @param    global.privateCert.generate If true, then an internal certificate
   # @desc     secret will be created along with mount of the certificate in
   # @desc     /run/secrets/internal-cert (creates a tls.crt and tls.key).
   # @desc     By default the Issuer of the cert will be the service name
-  # @desc     created by the Helm Chart.  Additionally, the ingress hosts,
+  # @desc     created by the Helm Chart.  Additionally, the ingress and gateway hosts,
   # @desc     if enabled, will be added to the list of X509v3 Subject Alternative Name
   # @default  false
   #
@@ -388,6 +425,8 @@ global:
   #
   # @param    global.services.serviceName.ingressPort Port available from the kubernetes ingress
   #
+  # @param    global.services.serviceName.gatewayPort Port available from the kubernetes gateway
+  #
   # @param    global.services.annotations Any custom annotations to add to the service.
   #
   # @param    global.services.clusterServiceAnnotations Any custom annotations to add to the ClusterIP service.
@@ -403,6 +442,7 @@ global:
   #    containerPort: 9999
   #    servicePort: 9999
   #    ingressPort: 9999
+  #    gatewayPort: 9999
   #    dataService: true
   #  clusterbind:
   #    containerPort: 7600
@@ -1072,6 +1112,7 @@ pingfederate-admin:
       servicePort: 9999
       containerPort: 9999
       ingressPort: 443
+      gatewayPort: 443
       dataService: true
     clusterbind:
       servicePort: 7600
@@ -1178,6 +1219,7 @@ pingfederate-engine:
       servicePort: 9031
       containerPort: 9031
       ingressPort: 443
+      gatewayPort: 443
       dataService: true
     clusterbind:
       servicePort: 7600
@@ -1354,6 +1396,7 @@ pingdirectory:
       servicePort: 443
       containerPort: 1443
       ingressPort: 443
+      gatewayPort: 443
       dataService: true
     replication:
       containerPort: 8989
@@ -1412,6 +1455,7 @@ pingdirectoryproxy:
       servicePort: 443
       containerPort: 1443
       ingressPort: 443
+      gatewayPort: 443
       dataService: true
     clusterServiceName: pingdirectoryproxy-cluster
 
@@ -1463,6 +1507,7 @@ pingdelegator:
       servicePort: 6443
       containerPort: 6443
       ingressPort: 443
+      gatewayPort: 443
       dataService: true
 
   ingress:
@@ -1513,6 +1558,7 @@ pingdatasync:
       servicePort: 443
       containerPort: 1443
       ingressPort: 443
+      gatewayPort: 443
       dataService: true
     clusterServiceName: pingdatasync-cluster
 
@@ -1555,6 +1601,7 @@ pingauthorize:
       servicePort: 443
       containerPort: 1443
       ingressPort: 443
+      gatewayPort: 443
       dataService: true
     ldaps:
       servicePort: 636
@@ -1604,6 +1651,7 @@ pingauthorizepap:
       servicePort: 8443
       containerPort: 8443
       ingressPort: 443
+      gatewayPort: 443
       dataService: true
 
   ingress:
@@ -1657,6 +1705,7 @@ pingaccess-admin:
       servicePort: 9000
       containerPort: 9000
       ingressPort: 443
+      gatewayPort: 443
       dataService: true
     clusterconfig:
       servicePort: 9090
@@ -1706,6 +1755,7 @@ pingaccess-engine:
       servicePort: 3000
       containerPort: 3000
       ingressPort: 443
+      gatewayPort: 443
       dataService: true
 
   ingress:
@@ -1747,6 +1797,7 @@ pingcentral:
       containerPort: 9022
       servicePort: 9022
       ingressPort: 443
+      gatewayPort: 443
       dataService: true
 
   ingress:
@@ -1804,6 +1855,7 @@ pingdataconsole:
       containerPort: 8443
       servicePort: 8443
       ingressPort: 443
+      gatewayPort: 443
       dataService: true
 
   ingress:

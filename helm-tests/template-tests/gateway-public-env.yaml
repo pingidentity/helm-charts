@@ -1,0 +1,81 @@
+# Verify that gateway hostnames drive public env vars when Gateway API is enabled.
+
+### SECTION:PARAMETERS ###
+releaseName: gatewayenv
+skipTest: false
+### SECTION:VALUES ###
+global:
+  ingress:
+    enabled: true
+    addReleaseNameToHost: prepend
+    defaultDomain: ingress.example
+  gateway:
+    enabled: true
+    addReleaseNameToHost: append
+    defaultDomain: gateway.example
+pingfederate-admin:
+  enabled: true
+  ingress:
+    hosts:
+    - host: pf-ingress._defaultDomain_
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          serviceName: https
+  gateway:
+    hosts:
+    - host: pf-gateway._defaultDomain_
+      paths:
+      - path: /
+        pathType: PathPrefix
+        backend:
+          serviceName: https
+pingauthorizepap:
+  enabled: true
+  ingress:
+    hosts:
+    - host: pap-ingress._defaultDomain_
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          serviceName: https
+  gateway:
+    hosts:
+    - host: pap-gateway._defaultDomain_
+      paths:
+      - path: /
+        pathType: PathPrefix
+        backend:
+          serviceName: https
+### SECTION:EXPECTED ###
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gatewayenv-global-env-vars
+data:
+  PF_ADMIN_PUBLIC_HOSTNAME: pf-gateway-gatewayenv.gateway.example
+  PF_ADMIN_PUBLIC_PORT_HTTPS: "443"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gatewayenv-pingfederate-admin-env-vars
+data:
+  PF_ADMIN_PUBLIC_BASEURL: https://pf-gateway-gatewayenv.gateway.example
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gatewayenv-pingauthorizepap-env-vars
+data:
+  PING_EXTERNAL_BASE_URL: pap-gateway-gatewayenv.gateway.example:443
+---
+### SECTION:UNEXPECTED ###
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gatewayenv-global-env-vars
+data:
+  PF_ADMIN_PUBLIC_HOSTNAME: gatewayenv-pf-gateway.ingress.example

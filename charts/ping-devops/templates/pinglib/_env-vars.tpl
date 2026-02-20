@@ -51,30 +51,40 @@ data:
    **********************************************************************/}}
 {{- define "global.public.host.port" -}}
 {{- $top := index . 0 }}
-{{- $v := index . 1 }}
 {{- $envPrefix := index . 2 }}
 {{- $prodName := index . 3 }}
-{{- $services := (index $top.Values $prodName).services }}
-{{- with (index $top.Values $prodName) }}
-  {{- if .ingress }}
-    {{- if .ingress.enabled }}
-      {{- range .ingress.hosts }}
-  {{ $envPrefix }}_PUBLIC_HOSTNAME: {{ include "pinglib.ingress.hostname" (list $top $v .host) | quote }}
+{{- $globalValues := deepCopy $top.Values.global -}}
+{{- $prodValues := deepCopy (index $top.Values $prodName) -}}
+{{- $mergedValues := mergeOverwrite $globalValues $prodValues -}}
+{{- $services := $mergedValues.services -}}
+{{- with $mergedValues }}
+  {{- $gatewayHosts := default (list) .gateway.hosts -}}
+  {{- if and .gateway.enabled (gt (len $gatewayHosts) 0) }}
+    {{- range $gatewayHosts }}
+  {{ $envPrefix }}_PUBLIC_HOSTNAME: {{ include "pinglib.gateway.hostname" (list $top $mergedValues .host) | quote }}
 
-        {{- range .paths }}
-  {{ $envPrefix }}_PUBLIC_PORT_{{ .backend.serviceName | replace "-" "_" | upper }}: {{ (index $services .backend.serviceName).ingressPort | quote }}
-        {{- end }}
-
+      {{- range .paths }}
+  {{ $envPrefix }}_PUBLIC_PORT_{{ .backend.serviceName | replace "-" "_" | upper }}: {{ required (printf "Missing services.%s.gatewayPort for gateway route" .backend.serviceName) (index $services .backend.serviceName).gatewayPort | quote }}
       {{- end }}
-    {{- else }}
-      {{- range .ingress.hosts }}
+
+    {{- end }}
+  {{- else if .ingress.enabled }}
+    {{- range .ingress.hosts }}
+  {{ $envPrefix }}_PUBLIC_HOSTNAME: {{ include "pinglib.ingress.hostname" (list $top $mergedValues .host) | quote }}
+
+      {{- range .paths }}
+  {{ $envPrefix }}_PUBLIC_PORT_{{ .backend.serviceName | replace "-" "_" | upper }}: {{ (index $services .backend.serviceName).ingressPort | quote }}
+      {{- end }}
+
+    {{- end }}
+  {{- else }}
+    {{- range .ingress.hosts }}
   {{ $envPrefix }}_PUBLIC_HOSTNAME: localhost
 
-        {{- range .paths }}
+      {{- range .paths }}
   {{ $envPrefix }}_PUBLIC_PORT_{{ .backend.serviceName | replace "-" "_" | upper }}: {{ (index $services .backend.serviceName).containerPort | quote }}
-        {{- end }}
-
       {{- end }}
+
     {{- end }}
   {{- end }}
 {{- end }}
@@ -97,30 +107,40 @@ data:
 
    **********************************************************************/}}
 {{- define "pinglib.env-vars.pingfederate" -}}
-{{- $top := index . 0 }}
-{{- $v := index . 1 }}
-{{- $pingfedAdmin := index $top.Values "pingfederate-admin" }}
-{{- $httpsService := $pingfedAdmin.services.https }}
-  CLUSTER_BIND_ADDRESS: "NON_LOOPBACK"
-  CLUSTER_NAME: {{ $top.Release.Name | quote }}
-  DNS_QUERY_LOCATION: "{{ include "pinglib.fullclusterservicename" . }}.{{ $top.Release.Namespace }}.svc.cluster.local"
-  DNS_RECORD_TYPE: "A"
-  {{- if $pingfedAdmin.ingress.enabled }}
-    {{- range $pingfedAdmin.ingress.hosts }}
-      {{ $ingressHost := include "pinglib.ingress.hostname" (list $top $v .host) }}
-      {{- $ingressPort := $httpsService.ingressPort | int }}
-      {{- if eq $ingressPort 443 }}
-  PF_ADMIN_PUBLIC_BASEURL: {{ printf "https://%s" $ingressHost }}
-      {{- else }}
-  PF_ADMIN_PUBLIC_BASEURL: {{ printf "https://%s:%d" $ingressHost $ingressPort }}
-      {{- end }}
-    {{- end }}
-  {{- else }}
-    {{- $containerPort := $httpsService.containerPort | int }}
-    {{- if eq $containerPort 443 }}
-  PF_ADMIN_PUBLIC_BASEURL: "https://localhost"
+{{- $top := index . 0 -}}
+{{- $pingfedAdmin := mergeOverwrite (deepCopy $top.Values.global) (deepCopy (index $top.Values "pingfederate-admin")) -}}
+{{- $httpsService := $pingfedAdmin.services.https -}}
+{{- $gatewayHosts := default (list) $pingfedAdmin.gateway.hosts -}}
+CLUSTER_BIND_ADDRESS: "NON_LOOPBACK"
+CLUSTER_NAME: {{ $top.Release.Name | quote }}
+DNS_QUERY_LOCATION: "{{ include "pinglib.fullclusterservicename" . }}.{{ $top.Release.Namespace }}.svc.cluster.local"
+DNS_RECORD_TYPE: "A"
+{{- if and $pingfedAdmin.gateway.enabled (gt (len $gatewayHosts) 0) }}
+  {{- range $gatewayHosts }}
+    {{- $gatewayHost := include "pinglib.gateway.hostname" (list $top $pingfedAdmin .host) -}}
+    {{- $gatewayPort := required "Missing pingfederate-admin.services.https.gatewayPort for gateway mode" $httpsService.gatewayPort | int -}}
+    {{- if eq $gatewayPort 443 }}
+PF_ADMIN_PUBLIC_BASEURL: {{ printf "https://%s" $gatewayHost }}
     {{- else }}
-  PF_ADMIN_PUBLIC_BASEURL: {{ printf "https://localhost:%d" $containerPort }}
+PF_ADMIN_PUBLIC_BASEURL: {{ printf "https://%s:%d" $gatewayHost $gatewayPort }}
     {{- end }}
   {{- end }}
+{{- else if $pingfedAdmin.ingress.enabled }}
+  {{- range $pingfedAdmin.ingress.hosts }}
+    {{- $ingressHost := include "pinglib.ingress.hostname" (list $top $pingfedAdmin .host) -}}
+    {{- $ingressPort := $httpsService.ingressPort | int -}}
+    {{- if eq $ingressPort 443 }}
+PF_ADMIN_PUBLIC_BASEURL: {{ printf "https://%s" $ingressHost }}
+    {{- else }}
+PF_ADMIN_PUBLIC_BASEURL: {{ printf "https://%s:%d" $ingressHost $ingressPort }}
+    {{- end }}
+  {{- end }}
+{{- else }}
+  {{- $containerPort := $httpsService.containerPort | int -}}
+  {{- if eq $containerPort 443 }}
+PF_ADMIN_PUBLIC_BASEURL: "https://localhost"
+  {{- else }}
+PF_ADMIN_PUBLIC_BASEURL: {{ printf "https://localhost:%d" $containerPort }}
+  {{- end }}
+{{- end }}
 {{- end -}}

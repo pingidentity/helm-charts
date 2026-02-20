@@ -1,0 +1,9 @@
+{{- $mergedValues := mergeOverwrite (deepCopy .Values.global) (deepCopy (index .Values "pingauthorizepap")) -}}
+{{- if $mergedValues.gateway.enabled }}
+{{- include "pinglib.gateway" (list . "pingauthorizepap") -}}
+{{- end -}}
+
+
+
+{{- define "pingauthorizepap.gateway" -}}
+{{- end -}}

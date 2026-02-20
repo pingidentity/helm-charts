@@ -1,0 +1,49 @@
+# Verify that gateway-native RegularExpression path matches are rendered.
+
+### SECTION:PARAMETERS ###
+releaseName: gatewayregex
+skipTest: false
+### SECTION:VALUES ###
+global:
+  gateway:
+    enabled: true
+    addReleaseNameToHost: prepend
+    defaultDomain: pingdemo.example
+pingfederate-admin:
+  enabled: true
+  gateway:
+    hosts:
+    - host: pingfederate-admin._defaultDomain_
+      paths:
+      - path: /pf-admin-api/.*
+        pathType: RegularExpression
+        backend:
+          serviceName: https
+### SECTION:EXPECTED ###
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: gatewayregex-pingfederate-admin
+spec:
+  hostnames:
+  - gatewayregex-pingfederate-admin.pingdemo.example
+  rules:
+  - matches:
+    - path:
+        type: RegularExpression
+        value: "/pf-admin-api/.*"
+    backendRefs:
+    - name: gatewayregex-pingfederate-admin
+      port: 9999
+---
+### SECTION:UNEXPECTED ###
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: gatewayregex-pingfederate-admin
+spec:
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: "/pf-admin-api/.*"

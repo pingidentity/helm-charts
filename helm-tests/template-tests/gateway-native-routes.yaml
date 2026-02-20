@@ -1,0 +1,62 @@
+# Verify that gateway-native hosts are used for HTTPRoute rendering when provided.
+
+### SECTION:PARAMETERS ###
+releaseName: gatewaynative
+skipTest: false
+### SECTION:VALUES ###
+global:
+  ingress:
+    enabled: true
+    addReleaseNameToHost: prepend
+    defaultDomain: ingress.example
+  gateway:
+    enabled: true
+    addReleaseNameToHost: append
+    defaultDomain: gateway.example
+    parentRefs:
+    - name: ping-devops-gateway
+      namespace: pinghelm
+      sectionName: https
+pingfederate-admin:
+  enabled: true
+  ingress:
+    hosts:
+    - host: pf-ingress._defaultDomain_
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          serviceName: https
+  gateway:
+    hosts:
+    - host: pf-gateway._defaultDomain_
+      paths:
+      - path: /gateway
+        pathType: Exact
+        backend:
+          serviceName: https
+### SECTION:EXPECTED ###
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: gatewaynative-pingfederate-admin
+spec:
+  hostnames:
+  - pf-gateway-gatewaynative.gateway.example
+  rules:
+  - matches:
+    - path:
+        type: Exact
+        value: "/gateway"
+    backendRefs:
+    - name: gatewaynative-pingfederate-admin
+      port: 9999
+---
+### SECTION:UNEXPECTED ###
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: gatewaynative-pingfederate-admin
+spec:
+  hostnames:
+  - gatewaynative-pf-gateway.ingress.example

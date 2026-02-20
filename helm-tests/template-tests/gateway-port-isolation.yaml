@@ -1,0 +1,99 @@
+# Verify ingress and gateway port values are isolated.
+# When gateway mode is active, generated ports and URLs must use gatewayPort.
+
+### SECTION:PARAMETERS ###
+releaseName: gatewayportisol
+skipTest: false
+### SECTION:VALUES ###
+global:
+  ingress:
+    enabled: true
+    addReleaseNameToHost: none
+    defaultDomain: ingress.example
+  gateway:
+    enabled: true
+    addReleaseNameToHost: none
+    defaultDomain: gateway.example
+pingfederate-admin:
+  enabled: true
+  services:
+    https:
+      ingressPort: 9443
+      gatewayPort: 7443
+  ingress:
+    hosts:
+    - host: pf-ingress._defaultDomain_
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          serviceName: https
+  gateway:
+    hosts:
+    - host: pf-gateway._defaultDomain_
+      paths:
+      - path: /
+        pathType: PathPrefix
+        backend:
+          serviceName: https
+pingauthorizepap:
+  enabled: true
+  services:
+    https:
+      ingressPort: 9444
+      gatewayPort: 7444
+  ingress:
+    hosts:
+    - host: pap-ingress._defaultDomain_
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          serviceName: https
+  gateway:
+    hosts:
+    - host: pap-gateway._defaultDomain_
+      paths:
+      - path: /
+        pathType: PathPrefix
+        backend:
+          serviceName: https
+### SECTION:EXPECTED ###
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gatewayportisol-global-env-vars
+data:
+  PF_ADMIN_PUBLIC_HOSTNAME: pf-gateway.gateway.example
+  PF_ADMIN_PUBLIC_PORT_HTTPS: "7443"
+  PAZP_ENGINE_PUBLIC_HOSTNAME: pap-gateway.gateway.example
+  PAZP_ENGINE_PUBLIC_PORT_HTTPS: "7444"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gatewayportisol-pingfederate-admin-env-vars
+data:
+  PF_ADMIN_PUBLIC_BASEURL: https://pf-gateway.gateway.example:7443
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gatewayportisol-pingauthorizepap-env-vars
+data:
+  PING_EXTERNAL_BASE_URL: pap-gateway.gateway.example:7444
+---
+### SECTION:UNEXPECTED ###
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gatewayportisol-pingfederate-admin-env-vars
+data:
+  PF_ADMIN_PUBLIC_BASEURL: https://pf-gateway.gateway.example:9443
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gatewayportisol-pingauthorizepap-env-vars
+data:
+  PING_EXTERNAL_BASE_URL: pap-gateway.gateway.example:9444
