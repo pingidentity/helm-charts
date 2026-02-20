@@ -1,0 +1,9 @@
+{{- $mergedValues := mergeOverwrite (deepCopy .Values.global) (deepCopy (index .Values "pingfederate-admin")) -}}
+{{- if $mergedValues.gateway.enabled }}
+{{- include "pinglib.gateway" (list . "pingfederate-admin") -}}
+{{- end -}}
+
+
+
+{{- define "pingfederate-admin.gateway" -}}
+{{- end -}}

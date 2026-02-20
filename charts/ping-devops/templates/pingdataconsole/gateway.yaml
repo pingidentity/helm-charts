@@ -1,0 +1,9 @@
+{{- $mergedValues := mergeOverwrite (deepCopy .Values.global) (deepCopy (index .Values "pingdataconsole")) -}}
+{{- if $mergedValues.gateway.enabled }}
+{{- include "pinglib.gateway" (list . "pingdataconsole") -}}
+{{- end -}}
+
+
+
+{{- define "pingdataconsole.gateway" -}}
+{{- end -}}

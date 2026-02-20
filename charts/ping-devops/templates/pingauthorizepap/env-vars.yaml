@@ -6,13 +6,12 @@
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
 data:
-  {{- if $v.ingress.enabled }}
+  {{- $gatewayHosts := default (list) $v.gateway.hosts -}}
+  {{- if and $v.gateway.enabled (gt (len $gatewayHosts) 0) }}
+  PING_EXTERNAL_BASE_URL: {{ printf "%s:%s" (include "pinglib.gateway.hostname" (list $top $v (index $gatewayHosts 0).host)) (toString (required "Missing pingauthorizepap.services.https.gatewayPort for gateway mode" $v.services.https.gatewayPort)) }}
+  {{- else if $v.ingress.enabled }}
   PING_EXTERNAL_BASE_URL: {{ printf "%s:%s" (include "pinglib.ingress.hostname" (list $top $v (index $v.ingress.hosts 0).host)) (toString $v.services.https.ingressPort) }}
   {{- else }}
   PING_EXTERNAL_BASE_URL: localhost:8443
   {{- end -}}
-{{- end -}}
-
-
-{{- define "pingauthorizepap.env-vars" -}}
 {{- end -}}

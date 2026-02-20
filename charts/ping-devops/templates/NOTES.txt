@@ -14,7 +14,7 @@
 #
 #  {{ printf $format " " "       Product       " "  tag  " "typ" " #" " cpu" " " "R/L " " mem" " " "R/L " "Ing"}}
 #  {{ printf $format " " "---------------------" "-------" "---" "--" "----" "-" "----" "----" "-" "----" "---"}}
-#  {{ printf $format " " "global" (toString $.Values.global.image.tag) "" "" (toString $.Values.global.container.resources.requests.cpu) "/" (toString $.Values.global.container.resources.limits.cpu) (toString $.Values.global.container.resources.requests.memory) "/" (toString $.Values.global.container.resources.limits.memory) (ternary " √ " "" $.Values.global.ingress.enabled) }}
+#  {{ printf $format " " "global" (toString $.Values.global.image.tag) "" "" (toString $.Values.global.container.resources.requests.cpu) "/" (toString $.Values.global.container.resources.limits.cpu) (toString $.Values.global.container.resources.requests.memory) "/" (toString $.Values.global.container.resources.limits.memory) (ternary " √ " "" (or $.Values.global.ingress.enabled $.Values.global.gateway.enabled)) }}
 #
 {{- $products := list "pingaccess-admin" "pingaccess-engine" "pingauthorize" "pingauthorizepap" "pingcentral" "pingdataconsole" "pingdatasync" "pingdelegator" "pingdirectory" "pingdirectoryproxy" "pingfederate-admin" "pingfederate-engine" "---" "ldap-sdk-tools" "pd-replication-timing" "pingtoolkit"}}
 {{- range $prodName := $products }}
@@ -49,7 +49,11 @@
     {{- end }}
     {{- $ingEnabled := "" }}
     {{- if .ingress }}
-        {{- $ingEnabled = .enabled | ternary (ternary " √ " "" .ingress.enabled) "" }}
+        {{- $gatewayEnabled := false }}
+        {{- if .gateway }}
+            {{- $gatewayEnabled = .gateway.enabled }}
+        {{- end }}
+        {{- $ingEnabled = .enabled | ternary (ternary " √ " "" (or .ingress.enabled $gatewayEnabled)) "" }}
     {{- end }}
 #  {{ printf $format $prodEnabled $prodName $tag $workload $numReplica $cpur $slash $cpul $memr $slash $meml $ingEnabled  }}
 {{- if .enabled }}

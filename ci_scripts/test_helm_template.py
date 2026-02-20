@@ -283,8 +283,18 @@ if operation == Operation.test:
     if 'releaseName' in params:
         releaseName = params['releaseName']
 
-    # Run helm template based on the test params, write to a file
-    helmCommand = "helm template " + releaseName + " charts/ping-devops -f /tmp/values.yaml > /tmp/template.yaml"
+    # Run helm template based on the test params, write to a file.
+    # Include Gateway API versions so local template tests can exercise HTTPRoute rendering paths.
+    gatewayApiVersions = [
+        "gateway.networking.k8s.io/v1",
+        "gateway.networking.k8s.io/v1/HTTPRoute",
+        "gateway.networking.k8s.io/v1beta1",
+        "gateway.networking.k8s.io/v1beta1/HTTPRoute",
+        "gateway.networking.k8s.io/v1alpha2",
+        "gateway.networking.k8s.io/v1alpha2/HTTPRoute",
+    ]
+    helmApiArgs = " ".join(["--api-versions " + v for v in gatewayApiVersions])
+    helmCommand = "helm template " + releaseName + " charts/ping-devops " + helmApiArgs + " -f /tmp/values.yaml > /tmp/template.yaml"
     printVerbose("Running helm template command: " + helmCommand + " ...")
     exitCode = os.system(helmCommand)
     if exitCode != 0:

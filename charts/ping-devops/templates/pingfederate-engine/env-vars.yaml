@@ -2,9 +2,7 @@
 
 
 {{- define "pingfederate-engine.env-vars" -}}
-{{- $top := index . 0 -}}
-{{- $v := index . 1 -}}
 data:
   OPERATIONAL_MODE: CLUSTERED_ENGINE
-{{ include "pinglib.env-vars.pingfederate" . }}
+{{ include "pinglib.env-vars.pingfederate" . | nindent 2 }}
 {{- end -}}

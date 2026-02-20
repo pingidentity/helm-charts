@@ -45,9 +45,14 @@ annotations:
 {{- $subjectCN := include "pinglib.addreleasename" (append . $v.name) -}}
 {{- $alt := dict "ips" (list) "names" (list $subjectCN ) -}}
 {{- if $v.ingress.enabled }}
-    {{- range $v.ingress.hosts }}
-        {{- $noop := concat $alt.names (list (include "pinglib.ingress.hostname" (list $top $v .host))) | set $alt "names" }}
-    {{- end }}
+  {{- range $v.ingress.hosts }}
+    {{- $noop := concat $alt.names (list (include "pinglib.ingress.hostname" (list $top $v .host))) | set $alt "names" }}
+  {{- end }}
+{{- end }}
+{{- if $v.gateway.enabled }}
+  {{- range (default (list) $v.gateway.hosts) }}
+    {{- $noop := concat $alt.names (list (include "pinglib.gateway.hostname" (list $top $v .host))) | set $alt "names" }}
+  {{- end }}
 {{- end }}
 {{- if $v.privateCert.additionalIPs }}
     {{- $noop := set $alt "ips" $v.privateCert.additionalIPs  }}
