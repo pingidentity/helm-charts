@@ -25,7 +25,7 @@ These are the values supported in the ping-devops chart. In general, values spec
 |`prepend`
 
 |`global.ingress.enabled`
-|
+|If true, deploy Ingress resources.
 |`false`
 
 |`global.ingress.addReleaseToHost`
@@ -41,15 +41,43 @@ These are the values supported in the ping-devops chart. In general, values spec
 |
 
 |`global.ingress.annotations`
-|
+|Annotations to apply to Ingress resources.
 |`{}`
 
 |`global.ingress.spec.ingressClassName`
-|
+|IngressClassName used by the generated Ingress resources.
 |
 
+|`global.gateway.enabled`
+|If true, deploy Gateway API HTTPRoute resources.
+|`false`
+
+|`global.gateway.apiVersion`
+|Gateway API version used for HTTPRoute resources.
+|`gateway.networking.k8s.io/v1`
+
+|`global.gateway.parentRefs`
+|Parent Gateway references
+|`[]`
+
+|`global.gateway.addReleaseNameToHost`
+|Add release to host. One of `{prepend, append, subdomain, none}`
+|`subdomain`
+
+|`global.gateway.defaultDomain`
+|Replaces with "_defaultDomain_" in host fields
+|`example.com`
+
+|`global.gateway.hosts`
+|Gateway route hosts/paths for HTTPRoute. pathType must be one of `{Exact, PathPrefix, RegularExpression}` and this can also be set per-product at {product}.gateway.hosts.
+|`[]`
+
+|`global.gateway.annotations`
+|Annotations to apply to Gateway API HTTPRoute resources.
+|`{}`
+
 |`global.privateCert.generate`
-|If true, then an internal certificate secret will be created along with mount of the certificate in /run/secrets/internal-cert (creates a tls.crt and tls.key). By default the Issuer of the cert will be the service name created by the Helm Chart. Additionally, the ingress hosts, if enabled, will be added to the list of X509v3 Subject Alternative Name
+|If true, then an internal certificate secret will be created along with mount of the certificate in /run/secrets/internal-cert (creates a tls.crt and tls.key). By default the Issuer of the cert will be the service name created by the Helm Chart. Additionally, the ingress and gateway hosts, if enabled, will be added to the list of X509v3 Subject Alternative Name
 |`false`
 
 |`global.privateCert.format`
@@ -126,7 +154,7 @@ These are the values supported in the ping-devops chart. In general, values spec
 
 |`global.image.tag`
 |Default image tag
-|`2601`
+|`2602`
 
 |`global.image.pullPolicy`
 |Default image pull policy
@@ -222,6 +250,10 @@ These are the values supported in the ping-devops chart. In general, values spec
 
 |`global.services.serviceName.ingressPort`
 |Port available from the kubernetes ingress
+|
+
+|`global.services.serviceName.gatewayPort`
+|Port available from the kubernetes gateway
 |
 
 |`global.services.annotations`

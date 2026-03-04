@@ -54,6 +54,7 @@ global:
   # Ingress
   #
   # @param    global.ingress.enabled
+  # @desc     If true, deploy Ingress resources.
   # @default  false
   #
   # @param    global.ingress.addReleaseToHost Add release to host.
@@ -68,9 +69,11 @@ global:
   # @desc     "_defaultTlsSecret_" in tls.secretName
   #
   # @param    global.ingress.annotations
+  # @desc     Annotations to apply to Ingress resources.
   # @default  {}
   #
   # @param    global.ingress.spec.ingressClassName
+  # @desc     IngressClassName used by the generated Ingress resources.
   ############################################################
   ingress:
     enabled: false
@@ -87,9 +90,11 @@ global:
   # Gateway API (HTTPRoute)
   #
   # @param    global.gateway.enabled
+  # @desc     If true, deploy Gateway API HTTPRoute resources.
   # @default  false
   #
   # @param    global.gateway.apiVersion
+  # @desc     Gateway API version used for HTTPRoute resources.
   # @default  gateway.networking.k8s.io/v1
   #
   # @param    global.gateway.parentRefs Parent Gateway references
@@ -109,6 +114,7 @@ global:
   # @default  []
   #
   # @param    global.gateway.annotations
+  # @desc     Annotations to apply to Gateway API HTTPRoute resources.
   # @default  {}
   ############################################################
   gateway:
@@ -229,7 +235,7 @@ global:
   # By default the images uses will be indicated by these
   # variables.  An example might look like:
   #
-  #   pingidentity/pingdataconsole:2601 (January 2026)
+  #   pingidentity/pingdataconsole:2602 (February 2026)
   #
   # @param    global.image.repository Default image registry
   # @desc     is not the fully-qualified name of the image
@@ -245,7 +251,7 @@ global:
   # @desc     Example: image.name: pingfederate
   #
   # @param    global.image.tag Default image tag
-  # @default  2601
+  # @default  2602
   #
   # @param    global.image.pullPolicy Default image pull policy
   # @default  IfNotPresent
@@ -254,7 +260,7 @@ global:
     repository: pingidentity
     repositoryFqn:
     name:
-    tag: "2601"
+    tag: "2602"
     pullPolicy: IfNotPresent
 
   ############################################################
@@ -937,7 +943,7 @@ sidecars: {}
 # sidecars:
 #   logger:
 #     name: log-container
-#     image: pingidentity/pingtoolkit:2601
+#     image: pingidentity/pingtoolkit:2602
 #     volumeMounts:
 #       - mountPath: /tmp/logs/
 #         name: logger
@@ -954,7 +960,7 @@ initContainers: {}
 # initContainers:
 #   init-example:
 #     name: 01-init
-#     image: pingidentity/pingtoolkit:2601
+#     image: pingidentity/pingtoolkit:2602
 #     command: ['sh', '-c', 'echo "InitContainer 1"']
 
 #############################################################
@@ -1003,7 +1009,7 @@ ldap-sdk-tools:
     name: ldap-sdk-tools
     repository: pingidentity
     repositoryFqn:
-    tag: "2601"
+    tag: "2602"
     pullPolicy: IfNotPresent
 
   container:
@@ -1884,7 +1890,7 @@ pd-replication-timing:
     name: pingtoolkit
     repository: pingidentity
     repositoryFqn:
-    tag: "2601"
+    tag: "2602"
     pullPolicy: IfNotPresent
 
   envs:
@@ -1906,7 +1912,7 @@ pingtoolkit:
     name: pingtoolkit
     repository: pingidentity
     repositoryFqn:
-    tag: "2601"
+    tag: "2602"
     pullPolicy: IfNotPresent
 
 #############################################################
