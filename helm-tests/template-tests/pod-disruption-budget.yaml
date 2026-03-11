@@ -1,0 +1,80 @@
+# This test covers rendering PodDisruptionBudget resources for both Deployments and StatefulSets.
+### SECTION:PARAMETERS ###
+releaseName: pdbtest
+skipTest: false
+### SECTION:VALUES ###
+global:
+  labels:
+    globalLabel: val
+  annotations:
+    globalAnnotation: val
+  envs:
+    PING_IDENTITY_ACCEPT_EULA: "YES"
+
+pingfederate-admin:
+  enabled: true
+  workload:
+    podDisruptionBudget:
+      enabled: true
+      minAvailable: 0
+      annotations:
+        pdbAnnotation: pf-admin
+      labels:
+        pdbLabel: pf-admin
+
+pingdirectory:
+  enabled: true
+  workload:
+    podDisruptionBudget:
+      enabled: true
+      maxUnavailable: "50%"
+      annotations:
+        pdbAnnotation: pingdirectory
+      labels:
+        pdbLabel: pingdirectory
+
+### SECTION:EXPECTED ###
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pdbtest-pingfederate-admin
+  labels:
+    app.kubernetes.io/name: pingfederate-admin
+    app.kubernetes.io/instance: pdbtest
+    globalLabel: val
+    pdbLabel: pf-admin
+  annotations:
+    globalAnnotation: val
+    pdbAnnotation: pf-admin
+spec:
+  minAvailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pingfederate-admin
+      app.kubernetes.io/instance: pdbtest
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pdbtest-pingdirectory
+  labels:
+    app.kubernetes.io/name: pingdirectory
+    app.kubernetes.io/instance: pdbtest
+    globalLabel: val
+    pdbLabel: pingdirectory
+  annotations:
+    globalAnnotation: val
+    pdbAnnotation: pingdirectory
+spec:
+  maxUnavailable: 50%
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pingdirectory
+      app.kubernetes.io/instance: pdbtest
+---
+### SECTION:UNEXPECTED ###
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pdbtest-pingaccess-engine
+---

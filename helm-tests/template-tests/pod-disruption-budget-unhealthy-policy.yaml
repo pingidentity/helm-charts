@@ -1,0 +1,31 @@
+# This test covers unhealthyPodEvictionPolicy rendering on supported Kubernetes versions.
+### SECTION:PARAMETERS ###
+releaseName: pdbunhealthy
+skipTest: false
+kubeVersion: v1.31.0
+### SECTION:VALUES ###
+global:
+  envs:
+    PING_IDENTITY_ACCEPT_EULA: "YES"
+
+pingfederate-admin:
+  enabled: true
+  workload:
+    podDisruptionBudget:
+      enabled: true
+      minAvailable: 1
+      unhealthyPodEvictionPolicy: AlwaysAllow
+### SECTION:EXPECTED ###
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pdbunhealthy-pingfederate-admin
+spec:
+  minAvailable: 1
+  unhealthyPodEvictionPolicy: AlwaysAllow
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pingfederate-admin
+      app.kubernetes.io/instance: pdbunhealthy
+---
+### SECTION:UNEXPECTED ###

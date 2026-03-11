@@ -1,0 +1,4 @@
+{{- include "pinglib.podDisruptionBudget" (list . "pingdirectory") -}}
+
+{{- define "pingdirectory.podDisruptionBudget" -}}
+{{- end -}}
