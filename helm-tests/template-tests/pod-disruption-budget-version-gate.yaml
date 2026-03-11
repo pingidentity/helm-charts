@@ -1,0 +1,21 @@
+# This test covers version-gated unhealthyPodEvictionPolicy rendering.
+### SECTION:PARAMETERS ###
+releaseName: pdbversiongate
+skipTest: false
+kubeVersion: v1.30.0
+expectHelmTemplateFailure: true
+expectedHelmTemplateError: requires Kubernetes v1.31+
+### SECTION:VALUES ###
+global:
+  envs:
+    PING_IDENTITY_ACCEPT_EULA: "YES"
+
+pingfederate-admin:
+  enabled: true
+  workload:
+    podDisruptionBudget:
+      enabled: true
+      minAvailable: 1
+      unhealthyPodEvictionPolicy: AlwaysAllow
+### SECTION:EXPECTED ###
+### SECTION:UNEXPECTED ###

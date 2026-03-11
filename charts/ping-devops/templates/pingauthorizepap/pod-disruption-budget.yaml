@@ -1,0 +1,4 @@
+{{- include "pinglib.podDisruptionBudget" (list . "pingauthorizepap") -}}
+
+{{- define "pingauthorizepap.podDisruptionBudget" -}}
+{{- end -}}

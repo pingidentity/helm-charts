@@ -524,6 +524,43 @@ global:
     topologySpreadConstraints: []
 
     ############################################################
+    # PodDisruptionBudget
+    #
+    # @param    global.workload.podDisruptionBudget PodDisruptionBudget configuration
+    #
+    # @param    global.workload.podDisruptionBudget.enabled Enable PodDisruptionBudget generation
+    # @default  false
+    #
+    # @param    global.workload.podDisruptionBudget.minAvailable Minimum available pods
+    # @desc     Set exactly one of minAvailable or maxUnavailable. Accepts integer or percentage string.
+    #
+    # @param    global.workload.podDisruptionBudget.maxUnavailable Maximum unavailable pods
+    # @desc     Set exactly one of minAvailable or maxUnavailable. Accepts integer or percentage string.
+    #
+    # @param    global.workload.podDisruptionBudget.unhealthyPodEvictionPolicy
+    # @desc     Optional unhealthy pod eviction policy for the generated PodDisruptionBudget.
+    # @desc     Requires Kubernetes v1.31+.
+    # @desc     If set on Kubernetes versions older than v1.31, template rendering fails.
+    #
+    # @param    global.workload.podDisruptionBudget.annotations Annotations for the PodDisruptionBudget
+    #
+    # @param    global.workload.podDisruptionBudget.labels Labels for the PodDisruptionBudget
+    #
+    # @desc     PodDisruptionBudgets only affect voluntary disruptions that use the Eviction API.
+    # @desc     They do not prevent involuntary disruptions, direct pod deletion, workload deletion,
+    # @desc     or workload rolling updates.
+    # @desc     Percentage values round up, which can allow full disruption of single-replica workloads.
+    # @desc     Strict budgets such as maxUnavailable: 0 or minAvailable: 100% can block kubectl drain.
+    ############################################################
+    podDisruptionBudget:
+      enabled: false
+      minAvailable:
+      maxUnavailable:
+      unhealthyPodEvictionPolicy:
+      annotations: {}
+      labels: {}
+
+    ############################################################
     # Deployments
     #
     # @param    global.workload.deployment Deployment workload configuration
@@ -1359,6 +1396,10 @@ pingdirectory:
 
   workload:
     type: StatefulSet
+    # Example PodDisruptionBudget override:
+    # podDisruptionBudget:
+    #   enabled: true
+    #   minAvailable: 1
     statefulSet:
       podManagementPolicy: OrderedReady
       persistentvolume:

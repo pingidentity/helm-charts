@@ -1,0 +1,20 @@
+# This test covers invalid PodDisruptionBudget configuration using both minAvailable and maxUnavailable.
+### SECTION:PARAMETERS ###
+releaseName: pdbinvalid
+skipTest: false
+expectHelmTemplateFailure: true
+expectedHelmTemplateError: must set only one of minAvailable or maxUnavailable
+### SECTION:VALUES ###
+global:
+  envs:
+    PING_IDENTITY_ACCEPT_EULA: "YES"
+
+pingfederate-admin:
+  enabled: true
+  workload:
+    podDisruptionBudget:
+      enabled: true
+      minAvailable: 1
+      maxUnavailable: 0
+### SECTION:EXPECTED ###
+### SECTION:UNEXPECTED ###

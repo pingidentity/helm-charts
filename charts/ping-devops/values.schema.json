@@ -88,6 +88,46 @@
         }
       },
       "additionalProperties": false
+    },
+    "podDisruptionBudget": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "minAvailable": {
+          "type": [
+            "integer",
+            "string",
+            "null"
+          ]
+        },
+        "maxUnavailable": {
+          "type": [
+            "integer",
+            "string",
+            "null"
+          ]
+        },
+        "unhealthyPodEvictionPolicy": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "AlwaysAllow",
+            "IfHealthyBudget",
+            null
+          ]
+        },
+        "annotations": {
+          "type": "object"
+        },
+        "labels": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
     }
   },
   "properties": {
@@ -427,6 +467,9 @@
             "enableServiceLinks": {
               "type": "boolean"
             },
+            "podDisruptionBudget": {
+              "$ref": "#/definitions/podDisruptionBudget"
+            },
             "deployment": {
               "type": "object",
               "properties": {
@@ -759,6 +802,9 @@
         "workload": {
           "type": "object",
           "properties": {
+            "podDisruptionBudget": {
+              "$ref": "#/definitions/podDisruptionBudget"
+            },
             "deployment": {
               "type": "object",
               "properties": {
@@ -1199,6 +1245,9 @@
             "type": {
               "type": "string"
             },
+            "podDisruptionBudget": {
+              "$ref": "#/definitions/podDisruptionBudget"
+            },
             "statefulSet": {
               "type": "object",
               "properties": {
@@ -1402,6 +1451,9 @@
           "properties": {
             "type": {
               "type": "string"
+            },
+            "podDisruptionBudget": {
+              "$ref": "#/definitions/podDisruptionBudget"
             },
             "statefulSet": {
               "type": "object",
@@ -1750,6 +1802,9 @@
           "properties": {
             "type": {
               "type": "string"
+            },
+            "podDisruptionBudget": {
+              "$ref": "#/definitions/podDisruptionBudget"
             },
             "statefulSet": {
               "type": "object",
@@ -2237,6 +2292,9 @@
           "properties": {
             "type": {
               "type": "string"
+            },
+            "podDisruptionBudget": {
+              "$ref": "#/definitions/podDisruptionBudget"
             }
           }
         },

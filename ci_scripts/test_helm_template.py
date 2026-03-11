@@ -9,6 +9,7 @@
 
 import enum
 import os
+import subprocess
 import sys
 import yaml
 
@@ -23,7 +24,8 @@ def cleanupTmpFiles():
         printVerbose("Cleaning up tmp files...")
         for file in filesCreated:
             printVerbose("Removing file " + file)
-            os.remove(file)
+            if os.path.exists(file):
+                os.remove(file)
 
 # Print the relevant error message and exit.
 def exit(errorMessage):
@@ -122,6 +124,14 @@ def printActualTemplate():
     with open('/tmp/template.yaml', 'r') as template:
         for line in template:
             print(line.rstrip())
+
+def printCommandOutput():
+    outputFile = '/tmp/template-output.txt'
+    if os.path.exists(outputFile):
+        print("helm template command output:")
+        with open(outputFile, 'r') as output:
+            for line in output:
+                print(line.rstrip())
 
 class Section(enum.Enum):
     params = 1
@@ -282,6 +292,11 @@ if operation == Operation.test:
     releaseName = os.path.splitext(os.path.basename(testFile))[0]
     if 'releaseName' in params:
         releaseName = params['releaseName']
+    kubeVersionArg = ""
+    if 'kubeVersion' in params and params['kubeVersion']:
+        kubeVersionArg = " --kube-version " + str(params['kubeVersion'])
+    expectHelmTemplateFailure = bool(params.get('expectHelmTemplateFailure', False))
+    expectedHelmTemplateError = params.get('expectedHelmTemplateError')
 
     # Run helm template based on the test params, write to a file.
     # Include Gateway API versions so local template tests can exercise HTTPRoute rendering paths.
@@ -294,12 +309,30 @@ if operation == Operation.test:
         "gateway.networking.k8s.io/v1alpha2/HTTPRoute",
     ]
     helmApiArgs = " ".join(["--api-versions " + v for v in gatewayApiVersions])
-    helmCommand = "helm template " + releaseName + " charts/ping-devops " + helmApiArgs + " -f /tmp/values.yaml > /tmp/template.yaml"
+    helmCommand = "helm template " + releaseName + " charts/ping-devops " + helmApiArgs + kubeVersionArg + " -f /tmp/values.yaml"
     printVerbose("Running helm template command: " + helmCommand + " ...")
-    exitCode = os.system(helmCommand)
-    if exitCode != 0:
+    result = subprocess.run(helmCommand, shell=True, text=True, capture_output=True)
+    with open('/tmp/template-output.txt', 'w') as f:
+        f.write(result.stdout)
+        f.write(result.stderr)
+        filesCreated.append('/tmp/template-output.txt')
+    if expectHelmTemplateFailure:
+        if result.returncode == 0:
+            printCommandOutput()
+            exit("Expected helm template command to fail")
+        if expectedHelmTemplateError and expectedHelmTemplateError not in result.stderr and expectedHelmTemplateError not in result.stdout:
+            printCommandOutput()
+            exit("Helm template command failed, but expected error text was not found")
+        print("Test passed!")
+        cleanupTmpFiles()
+        printVerbose("Test script complete!")
+        exitSuccess()
+    if result.returncode != 0:
+        printCommandOutput()
         exit("Helm template command failed")
     else:
+        with open('/tmp/template.yaml', 'w') as f:
+            f.write(result.stdout)
         filesCreated.append("/tmp/template.yaml")
 
     # Parse the template yaml file in

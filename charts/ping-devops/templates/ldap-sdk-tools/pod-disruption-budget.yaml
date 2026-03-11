@@ -1,0 +1,4 @@
+{{- include "pinglib.podDisruptionBudget" (list . "ldap-sdk-tools" ) -}}
+
+{{- define "ldap-sdk-tools.podDisruptionBudget" -}}
+{{- end -}}
