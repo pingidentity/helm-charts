@@ -1,0 +1,41 @@
+# This test covers StatefulSet out-dir preservation for the utility sidecar.
+
+### SECTION:PARAMETERS ###
+releaseName: utility-sidecar-statefulset-out-dir
+skipTest: false
+### SECTION:VALUES ###
+pingdirectory:
+  enabled: true
+  utilitySidecar:
+    enabled: true
+### SECTION:EXPECTED ###
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: utility-sidecar-statefulset-out-dir-pingdirectory
+spec:
+  template:
+    spec:
+      containers:
+        - name: utility-sidecar
+          volumeMounts:
+            - name: out-dir
+              mountPath: /opt/out
+      volumes:
+        - name: out-dir
+          persistentVolumeClaim:
+            claimName: out-dir
+  volumeClaimTemplates:
+    - metadata:
+        name: out-dir
+### SECTION:UNEXPECTED ###
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: utility-sidecar-statefulset-out-dir-pingdirectory
+spec:
+  template:
+    spec:
+      volumes:
+        - name: out-dir
+          emptyDir: {}

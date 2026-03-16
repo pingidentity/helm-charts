@@ -1,0 +1,43 @@
+# This test covers suppression of fallback utility sidecar volumes when product volumes already exist.
+
+### SECTION:PARAMETERS ###
+releaseName: utility-sidecar-existing-volumes
+skipTest: false
+### SECTION:VALUES ###
+pingdataconsole:
+  enabled: true
+  volumes:
+    - name: temp
+      emptyDir:
+        medium: Memory
+    - name: out-dir
+      configMap:
+        name: out-dir-config
+  utilitySidecar:
+    enabled: true
+### SECTION:EXPECTED ###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: utility-sidecar-existing-volumes-pingdataconsole
+spec:
+  template:
+    spec:
+      volumes:
+        - name: temp
+          emptyDir:
+            medium: Memory
+        - name: out-dir
+          configMap:
+            name: out-dir-config
+### SECTION:UNEXPECTED ###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: utility-sidecar-existing-volumes-pingdataconsole
+spec:
+  template:
+    spec:
+      volumes:
+        - name: out-dir
+          emptyDir: {}

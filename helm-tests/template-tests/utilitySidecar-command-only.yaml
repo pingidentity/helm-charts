@@ -1,0 +1,39 @@
+# This test covers a custom utility sidecar command with no args.
+
+### SECTION:PARAMETERS ###
+releaseName: utility-sidecar-command-only
+skipTest: false
+### SECTION:VALUES ###
+pingdataconsole:
+  enabled: true
+  utilitySidecar:
+    enabled: true
+    command:
+      - /bin/sh
+      - -c
+### SECTION:EXPECTED ###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: utility-sidecar-command-only-pingdataconsole
+spec:
+  template:
+    spec:
+      containers:
+        - name: utility-sidecar
+          command:
+            - /bin/sh
+            - -c
+### SECTION:UNEXPECTED ###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: utility-sidecar-command-only-pingdataconsole
+spec:
+  template:
+    spec:
+      containers:
+        - name: utility-sidecar
+          args:
+            - -f
+            - /dev/null

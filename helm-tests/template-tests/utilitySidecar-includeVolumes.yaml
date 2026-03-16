@@ -1,0 +1,46 @@
+# This test covers suppression of fallback utility sidecar volumes when includeVolumes supplies them.
+
+### SECTION:PARAMETERS ###
+releaseName: utility-sidecar-includevolumes
+skipTest: false
+### SECTION:VALUES ###
+volumes:
+  temp:
+    configMap:
+      name: temp-config
+  out-dir:
+    secret:
+      secretName: out-dir-secret
+pingdataconsole:
+  enabled: true
+  includeVolumes:
+    - temp
+    - out-dir
+  utilitySidecar:
+    enabled: true
+### SECTION:EXPECTED ###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: utility-sidecar-includevolumes-pingdataconsole
+spec:
+  template:
+    spec:
+      volumes:
+        - name: temp
+          configMap:
+            name: temp-config
+        - name: out-dir
+          secret:
+            secretName: out-dir-secret
+### SECTION:UNEXPECTED ###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: utility-sidecar-includevolumes-pingdataconsole
+spec:
+  template:
+    spec:
+      volumes:
+        - name: out-dir
+          emptyDir: {}

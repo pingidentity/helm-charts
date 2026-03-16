@@ -1,0 +1,88 @@
+# This test covers a PingFederate utility sidecar configuration
+
+### SECTION:PARAMETERS ###
+releaseName: utility-sidecar-pf-customer
+skipTest: false
+### SECTION:VALUES ###
+configMaps:
+  pf-sidecar-scripts:
+    data:
+      collect-support-data.sh: |
+        echo collecting support data
+
+pingfederate-engine:
+  enabled: true
+  volumes:
+    - name: pf-sidecar-scripts
+      configMap:
+        name: pf-sidecar-scripts
+  utilitySidecar:
+    enabled: true
+    image:
+      name: pingtoolkit
+      tag: 2607
+    command:
+      - /bin/sh
+      - -c
+    args:
+      - /opt/in/collect-support-data.sh
+    env:
+      - name: VERBOSE
+        value: "true"
+    envFrom:
+      - configMapRef:
+          name: sidecar-env
+      - secretRef:
+          name: sidecar-secret
+    volumes:
+      - name: pf-sidecar-scripts
+        mountPath: /opt/in/collect-support-data.sh
+        subPath: collect-support-data.sh
+### SECTION:EXPECTED ###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: utility-sidecar-pf-customer-pingfederate-engine
+spec:
+  template:
+    spec:
+      containers:
+        - name: utility-sidecar
+          image: "pingidentity/pingtoolkit:2607"
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - /opt/in/collect-support-data.sh
+          env:
+            - name: VERBOSE
+              value: "true"
+          envFrom:
+            - configMapRef:
+                name: sidecar-env
+            - secretRef:
+                name: sidecar-secret
+          volumeMounts:
+            - name: out-dir
+              mountPath: /opt/out
+            - name: temp
+              mountPath: /tmp
+            - name: pf-sidecar-scripts
+              mountPath: /opt/in/collect-support-data.sh
+              subPath: collect-support-data.sh
+      volumes:
+        - name: pf-sidecar-scripts
+          configMap:
+            name: pf-sidecar-scripts
+        - name: temp
+          emptyDir: {}
+        - name: out-dir
+          emptyDir: {}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pf-sidecar-scripts
+data:
+  collect-support-data.sh: |
+    echo collecting support data

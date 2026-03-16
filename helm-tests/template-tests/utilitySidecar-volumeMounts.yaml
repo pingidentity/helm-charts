@@ -1,0 +1,36 @@
+# This test covers additional utility sidecar volumeMounts without implicit pod volume creation.
+
+### SECTION:PARAMETERS ###
+releaseName: utility-sidecar-volumemounts
+skipTest: false
+### SECTION:VALUES ###
+pingdataconsole:
+  enabled: true
+  utilitySidecar:
+    enabled: true
+    volumes:
+      - name: extra-config
+        mountPath: /opt/in/extra-config
+### SECTION:EXPECTED ###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: utility-sidecar-volumemounts-pingdataconsole
+spec:
+  template:
+    spec:
+      containers:
+        - name: utility-sidecar
+          volumeMounts:
+            - name: extra-config
+              mountPath: /opt/in/extra-config
+### SECTION:UNEXPECTED ###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: utility-sidecar-volumemounts-pingdataconsole
+spec:
+  template:
+    spec:
+      volumes:
+        - name: extra-config

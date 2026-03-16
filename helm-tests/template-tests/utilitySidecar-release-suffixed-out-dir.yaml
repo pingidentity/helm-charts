@@ -1,0 +1,43 @@
+# This test covers StatefulSet utility sidecar mounting the resolved release-suffixed out-dir name.
+
+### SECTION:PARAMETERS ###
+releaseName: utility-sidecar-suffixed
+skipTest: false
+### SECTION:VALUES ###
+global:
+  addReleaseNameToResource: none
+pingdirectory:
+  enabled: true
+  utilitySidecar:
+    enabled: true
+### SECTION:EXPECTED ###
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pingdirectory
+spec:
+  template:
+    spec:
+      containers:
+        - name: utility-sidecar
+          volumeMounts:
+            - name: out-dir-utility-sidecar-suffixed
+              mountPath: /opt/out
+      volumes:
+        - name: out-dir-utility-sidecar-suffixed
+          persistentVolumeClaim:
+            claimName: out-dir-utility-sidecar-suffixed
+  volumeClaimTemplates:
+    - metadata:
+        name: out-dir-utility-sidecar-suffixed
+### SECTION:UNEXPECTED ###
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pingdirectory
+spec:
+  template:
+    spec:
+      volumes:
+        - name: out-dir
+          emptyDir: {}

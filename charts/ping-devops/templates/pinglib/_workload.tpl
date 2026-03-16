@@ -1,6 +1,39 @@
 {{- define "pinglib.workload.tpl" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
+{{- $statefulSetPersistentVolumesEnabled := and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled -}}
+{{- $resolvedOutDirVolumeName := "out-dir" -}}
+{{- if $statefulSetPersistentVolumesEnabled -}}
+  {{- range $volName, $val := $v.workload.statefulSet.persistentvolume.volumes -}}
+    {{- if eq $volName "out-dir" -}}
+      {{- $resolvedOutDirVolumeName = printf "%s%s" $volName (ternary (printf "-%s" $top.Release.Name) "" (eq "none" $v.addReleaseNameToResource)) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- $existingVolumeNames := dict -}}
+{{- range $v.includeVolumes -}}
+  {{- $_ := set $existingVolumeNames . true -}}
+{{- end -}}
+{{- range $volume := $v.volumes -}}
+  {{- if $volume.name -}}
+    {{- $_ := set $existingVolumeNames $volume.name true -}}
+  {{- end -}}
+{{- end -}}
+{{- if $statefulSetPersistentVolumesEnabled -}}
+  {{- range $volName, $val := $v.workload.statefulSet.persistentvolume.volumes -}}
+    {{- $_ := set $existingVolumeNames (printf "%s%s" $volName (ternary (printf "-%s" $top.Release.Name) "" (eq "none" $v.addReleaseNameToResource))) true -}}
+  {{- end -}}
+{{- end -}}
+{{- if $v.privateCert.generate -}}
+  {{- $_ := set $existingVolumeNames "private-keystore" true -}}
+  {{- $_ := set $existingVolumeNames "private-cert" true -}}
+{{- end -}}
+{{- range tuple "secretVolumes" "configMapVolumes" -}}
+  {{- $volumeType := . -}}
+  {{- range $volumeName, $volumeValue := (index $v $volumeType) -}}
+    {{- $_ := set $existingVolumeNames $volumeName true -}}
+  {{- end -}}
+{{- end -}}
 apiVersion: apps/v1
 {{/*--------------- Deployment | StatefulSet ---------------*/}}
 kind: {{ $v.workload.type }}
@@ -227,8 +260,21 @@ spec:
         {{ else -}}
         {{ include "pinglib.workload.image" $v.image | nindent 8 }}
         {{ end -}}
-        command: ["tail"]
-        args: ["-f", "/dev/null"]
+        command:
+        {{- if not (empty $v.utilitySidecar.command) }}
+          {{ toYaml $v.utilitySidecar.command | nindent 10 }}
+        {{- else }}
+          - tail
+        {{- end }}
+        {{- if or (not (empty $v.utilitySidecar.args)) (empty $v.utilitySidecar.command) }}
+        args:
+        {{- if not (empty $v.utilitySidecar.args) }}
+          {{ toYaml $v.utilitySidecar.args | nindent 10 }}
+        {{- else }}
+          - -f
+          - /dev/null
+        {{- end }}
+        {{- end }}
         {{/*---------------- Sidecar Security Context -------------*/}}
         {{/* Note: this will override the Pod-level securityContext if set */}}
         {{- if $v.utilitySidecar.securityContext }}
@@ -240,7 +286,7 @@ spec:
         {{- end }}
         # Volume mounts for /opt/out and /tmp shared between containers
         volumeMounts:
-        - name: out-dir
+        - name: {{ $resolvedOutDirVolumeName }}
           mountPath: /opt/out
         - name: temp
           mountPath: /tmp
@@ -251,6 +297,10 @@ spec:
         {{- if $v.utilitySidecar.env }}
         env:
           {{ toYaml $v.utilitySidecar.env | nindent 10 }}
+        {{- end }}
+        {{- if not (empty $v.utilitySidecar.envFrom) }}
+        envFrom:
+          {{ toYaml $v.utilitySidecar.envFrom | nindent 10 }}
         {{- end }}
       {{- end }}
 
@@ -275,11 +325,22 @@ spec:
       {{- end }}
 
       {{/*--------------------- Volumes (defined in workload.statefulSet.persistentvolume.volumes) ------------------*/}}
-      {{- if and (eq $v.workload.type "StatefulSet") $v.workload.statefulSet.persistentvolume.enabled }}
+      {{- if $statefulSetPersistentVolumesEnabled }}
       {{- range $volName, $val := $v.workload.statefulSet.persistentvolume.volumes }}
       - name: {{ $volName }}{{ if eq "none" $v.addReleaseNameToResource }}-{{ $top.Release.Name }}{{ end }}
         persistentVolumeClaim:
           claimName: {{ $volName }}{{ if eq "none" $v.addReleaseNameToResource }}-{{ $top.Release.Name }}{{ end }}
+      {{- end }}
+      {{- end }}
+
+      {{- if $v.utilitySidecar.enabled }}
+      {{- if not (hasKey $existingVolumeNames "temp") }}
+      - name: temp
+        emptyDir: {}
+      {{- end }}
+      {{- if not (hasKey $existingVolumeNames $resolvedOutDirVolumeName) }}
+      - name: {{ $resolvedOutDirVolumeName }}
+        emptyDir: {}
       {{- end }}
       {{- end }}
 

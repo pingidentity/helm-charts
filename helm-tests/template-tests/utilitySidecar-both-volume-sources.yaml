@@ -1,0 +1,57 @@
+# This test covers duplicate suppression when utility sidecar backing volumes exist across multiple sources.
+
+### SECTION:PARAMETERS ###
+releaseName: utility-sidecar-both-volume-sources
+skipTest: false
+### SECTION:VALUES ###
+volumes:
+  temp:
+    configMap:
+      name: temp-config
+pingdataconsole:
+  enabled: true
+  includeVolumes:
+    - temp
+  volumes:
+    - name: out-dir
+      configMap:
+        name: out-dir-config
+  utilitySidecar:
+    enabled: true
+### SECTION:EXPECTED ###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: utility-sidecar-both-volume-sources-pingdataconsole
+spec:
+  template:
+    spec:
+      volumes:
+        - name: temp
+          configMap:
+            name: temp-config
+        - name: out-dir
+          configMap:
+            name: out-dir-config
+### SECTION:UNEXPECTED ###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: utility-sidecar-both-volume-sources-pingdataconsole
+spec:
+  template:
+    spec:
+      volumes:
+        - name: temp
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: utility-sidecar-both-volume-sources-pingdataconsole
+spec:
+  template:
+    spec:
+      volumes:
+        - name: out-dir
+          emptyDir: {}
