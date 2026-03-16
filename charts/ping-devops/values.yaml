@@ -912,12 +912,39 @@ global:
   # @param    global.utilitySidecar.enabled Enable the utility sidecar
   # @default  false
   #
+  # @param    global.utilitySidecar.image Override image fields for the sidecar.
+  # @desc     Any image fields not set here inherit from the product image.
+  #
+  # @param    global.utilitySidecar.command Override the sidecar container command
+  # @default  ["tail"]
+  #
+  # @param    global.utilitySidecar.args Override the sidecar container args
+  # @default  ["-f", "/dev/null"] when command is not overridden
+  #
   # @param    global.utilitySidecar.resources Set k8s resources yaml for the sidecar spec
   # @default  1 CPU and 2g memory limit, 0 CPU and 128Mi memory request
   #
+  # @param    global.utilitySidecar.envFrom Optional envFrom sources for the sidecar
+  # @default  []
+  #
   # @param    global.utilitySidecar.env Environment variables for the sidecar
+  # @default  []
+  #
+  # @param    global.utilitySidecar.volumes Additional sidecar volumeMounts
+  # @desc     This existing field only adds container-level volumeMounts to the utility sidecar.
+  # @desc     It does not create pod-level volumes implicitly.
+  # @desc     The chart automatically creates emptyDir backing volumes for temp and out-dir
+  # @desc     only when the utility sidecar is enabled and the workload does not already define them.
+  # @desc     StatefulSet out-dir PVC behavior remains unchanged when already configured.
+  # @default  []
   utilitySidecar:
     enabled: false
+    # command:
+    #   - tail
+    # args:
+    #   - -f
+    #   - /dev/null
+    # image: {}
     # CSD and other command line tools can require a lot of resources.
     # Modify these values to change the sidecar container's resource requirements.
     resources:
@@ -947,6 +974,12 @@ global:
     # env:
     #   - name: LOG_LEVEL
     #     value: "INFO"
+    # envFrom:
+    #   - configMapRef:
+    #       name: my-sidecar-config
+    # volumes:
+    #   - name: shared-config
+    #     mountPath: /opt/in/shared-config
 
   #############################################################
   # Includes for sidecars, initContainers and volumes

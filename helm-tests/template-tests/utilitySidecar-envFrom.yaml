@@ -1,0 +1,30 @@
+# This test covers envFrom for the utility sidecar.
+
+### SECTION:PARAMETERS ###
+releaseName: utility-sidecar-envfrom
+skipTest: false
+### SECTION:VALUES ###
+pingdataconsole:
+  enabled: true
+  utilitySidecar:
+    enabled: true
+    envFrom:
+      - configMapRef:
+          name: sidecar-config
+      - secretRef:
+          name: sidecar-secret
+### SECTION:EXPECTED ###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: utility-sidecar-envfrom-pingdataconsole
+spec:
+  template:
+    spec:
+      containers:
+        - name: utility-sidecar
+          envFrom:
+            - configMapRef:
+                name: sidecar-config
+            - secretRef:
+                name: sidecar-secret

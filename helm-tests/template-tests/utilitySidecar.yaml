@@ -78,6 +78,8 @@ spec:
               cpu: "0"
               memory: 128Mi
           volumeMounts:
+            - mountPath: /opt/out
+              name: out-dir
             - mountPath: /tmp
               name: temp
             - mountPath: /opt/in/script.sh
@@ -89,11 +91,17 @@ spec:
         runAsUser: 9031
       shareProcessNamespace: true
       volumes:
+        - name: out-dir
+          persistentVolumeClaim:
+            claimName: out-dir
         - emptyDir: {}
           name: temp
         - configMap:
             name: test-cm
           name: test-cm
+  volumeClaimTemplates:
+    - metadata:
+        name: out-dir
 ---
 # Validate that the configmap is configured correctly
 apiVersion: v1

@@ -1,0 +1,41 @@
+# This test covers empty utility sidecar arrays preserving defaults and omitting envFrom.
+
+### SECTION:PARAMETERS ###
+releaseName: utility-sidecar-empty-values
+skipTest: false
+### SECTION:VALUES ###
+pingdataconsole:
+  enabled: true
+  utilitySidecar:
+    enabled: true
+    command: []
+    args: []
+    envFrom: []
+### SECTION:EXPECTED ###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: utility-sidecar-empty-values-pingdataconsole
+spec:
+  template:
+    spec:
+      containers:
+        - name: utility-sidecar
+          command:
+            - tail
+          args:
+            - -f
+            - /dev/null
+### SECTION:UNEXPECTED ###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: utility-sidecar-empty-values-pingdataconsole
+spec:
+  template:
+    spec:
+      containers:
+        - name: utility-sidecar
+          envFrom:
+            - configMapRef:
+                name: should-not-exist

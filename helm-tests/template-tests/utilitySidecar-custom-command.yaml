@@ -1,0 +1,30 @@
+# This test covers custom command and args for the utility sidecar.
+
+### SECTION:PARAMETERS ###
+releaseName: utility-sidecar-custom-command
+skipTest: false
+### SECTION:VALUES ###
+pingdataconsole:
+  enabled: true
+  utilitySidecar:
+    enabled: true
+    command:
+      - /bin/sh
+      - -c
+    args:
+      - echo custom && sleep 3600
+### SECTION:EXPECTED ###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: utility-sidecar-custom-command-pingdataconsole
+spec:
+  template:
+    spec:
+      containers:
+        - name: utility-sidecar
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - echo custom && sleep 3600
