@@ -154,7 +154,7 @@ These are the values supported in the ping-devops chart. In general, values spec
 
 |`global.image.tag`
 |Default image tag
-|`2602`
+|`2603`
 
 |`global.image.pullPolicy`
 |Default image pull policy
@@ -306,6 +306,34 @@ These are the values supported in the ping-devops chart. In general, values spec
 |`global.workload.topologySpreadConstraints`
 |Configuration of pod spread across cluster zones
 |`[]`
+
+|`global.workload.podDisruptionBudget`
+|PodDisruptionBudget configuration
+|
+
+|`global.workload.podDisruptionBudget.enabled`
+|Enable PodDisruptionBudget generation
+|`false`
+
+|`global.workload.podDisruptionBudget.minAvailable`
+|Minimum available pods Set exactly one of minAvailable or maxUnavailable. Accepts integer or percentage string.
+|
+
+|`global.workload.podDisruptionBudget.maxUnavailable`
+|Maximum unavailable pods Set exactly one of minAvailable or maxUnavailable. Accepts integer or percentage string.
+|
+
+|`global.workload.podDisruptionBudget.unhealthyPodEvictionPolicy`
+|Optional unhealthy pod eviction policy for the generated PodDisruptionBudget. Requires Kubernetes v1.31+. If set on Kubernetes versions older than v1.31, template rendering fails.
+|
+
+|`global.workload.podDisruptionBudget.annotations`
+|Annotations for the PodDisruptionBudget
+|
+
+|`global.workload.podDisruptionBudget.labels`
+|Labels for the PodDisruptionBudget PodDisruptionBudgets only affect voluntary disruptions that use the Eviction API. They do not prevent involuntary disruptions, direct pod deletion, workload deletion, or workload rolling updates. Percentage values round up, which can allow full disruption of single-replica workloads. Strict budgets such as maxUnavailable: 0 or minAvailable: 100% can block kubectl drain.
+|
 
 |`global.workload.deployment`
 |Deployment workload configuration
@@ -482,13 +510,33 @@ These are the values supported in the ping-devops chart. In general, values spec
 |Enable the utility sidecar
 |`false`
 
+|`global.utilitySidecar.image`
+|Override image fields for the sidecar. Any image fields not set here inherit from the product image.
+|
+
+|`global.utilitySidecar.command`
+|Override the sidecar container command
+|`["tail"]`
+
+|`global.utilitySidecar.args`
+|Override the sidecar container args
+|`["-f", "/dev/null"] when command is not overridden`
+
 |`global.utilitySidecar.resources`
 |Set k8s resources yaml for the sidecar spec
 |`1 CPU and 2g memory limit, 0 CPU and 128Mi memory request`
 
+|`global.utilitySidecar.envFrom`
+|Optional envFrom sources for the sidecar
+|`[]`
+
 |`global.utilitySidecar.env`
 |Environment variables for the sidecar
-|
+|`[]`
+
+|`global.utilitySidecar.volumes`
+|Additional sidecar volumeMounts This existing field only adds container-level volumeMounts to the utility sidecar. It does not create pod-level volumes implicitly. The chart automatically creates emptyDir backing volumes for temp and out-dir only when the utility sidecar is enabled and the workload does not already define them. StatefulSet out-dir PVC behavior remains unchanged when already configured.
+|`[]`
 
 |`global.utilitySidecar.securityContext`
 |securityContext at the container level for the sidecar. The securityContext defined will be inserted directly into the spec for the sidecar. By default no container securityContext is defined. In Kubernetes when a container-level securityContext is set, it will overwrite any corresponding values from the Pod-level securityContext.
