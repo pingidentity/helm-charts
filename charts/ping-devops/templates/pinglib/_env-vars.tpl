@@ -64,7 +64,7 @@ data:
   {{ $envPrefix }}_PUBLIC_HOSTNAME: {{ include "pinglib.gateway.hostname" (list $top $mergedValues .host) | quote }}
 
       {{- range .paths }}
-  {{ $envPrefix }}_PUBLIC_PORT_{{ .backend.serviceName | replace "-" "_" | upper }}: {{ required (printf "Missing services.%s.gatewayPort for gateway route" .backend.serviceName) (index $services .backend.serviceName).gatewayPort | quote }}
+  {{ $envPrefix }}_PUBLIC_PORT_{{ .backend.serviceName | replace "-" "_" | upper }}: {{ required (printf "Missing services.%s.gatewayPort for gateway route public port" .backend.serviceName) (index $services .backend.serviceName).gatewayPort | quote }}
       {{- end }}
 
     {{- end }}

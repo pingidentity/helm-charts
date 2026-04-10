@@ -1,0 +1,22 @@
+# Verify TCPRoute rendering fails when name is missing.
+
+### SECTION:PARAMETERS ###
+releaseName: gatewaytcpmissingname
+skipTest: false
+expectHelmTemplateFailure: true
+expectedHelmTemplateError: name
+### SECTION:VALUES ###
+global:
+  gateway:
+    parentRefs:
+    - name: shared-gateway
+pingdirectory:
+  enabled: true
+  gateway:
+    enabled: true
+    tcpRoutes:
+    - sectionName: ldaps-1636
+      backend:
+        serviceName: ldaps
+### SECTION:EXPECTED ###
+### SECTION:UNEXPECTED ###

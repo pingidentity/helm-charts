@@ -1,0 +1,40 @@
+# Verify product-level tcpRoutes replace global tcpRoutes.
+
+### SECTION:PARAMETERS ###
+releaseName: gatewaytcpreplace
+skipTest: false
+### SECTION:VALUES ###
+global:
+  gateway:
+    parentRefs:
+    - name: shared-gateway
+      namespace: infra
+    tcpRoutes:
+    - name: global-ldaps
+      sectionName: global-1636
+      backend:
+        serviceName: ldaps
+pingdirectory:
+  enabled: true
+  gateway:
+    enabled: true
+    tcpRoutes:
+    - name: product-ldaps
+      sectionName: product-1636
+      backend:
+        serviceName: ldaps
+### SECTION:EXPECTED ###
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: gatewaytcpreplace-pingdirectory-product-ldaps
+spec:
+  parentRefs:
+  - name: shared-gateway
+    namespace: infra
+    sectionName: product-1636
+### SECTION:UNEXPECTED ###
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: gatewaytcpreplace-pingdirectory-global-ldaps

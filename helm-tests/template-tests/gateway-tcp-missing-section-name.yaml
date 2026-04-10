@@ -1,0 +1,22 @@
+# Verify TCPRoute rendering fails when sectionName is missing.
+
+### SECTION:PARAMETERS ###
+releaseName: gatewaytcpmissingsection
+skipTest: false
+expectHelmTemplateFailure: true
+expectedHelmTemplateError: sectionName
+### SECTION:VALUES ###
+global:
+  gateway:
+    parentRefs:
+    - name: shared-gateway
+pingdirectory:
+  enabled: true
+  gateway:
+    enabled: true
+    tcpRoutes:
+    - name: ldaps
+      backend:
+        serviceName: ldaps
+### SECTION:EXPECTED ###
+### SECTION:UNEXPECTED ###

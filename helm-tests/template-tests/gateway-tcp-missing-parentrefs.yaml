@@ -1,0 +1,22 @@
+# Verify TCPRoute rendering fails when parentRefs are omitted.
+
+### SECTION:PARAMETERS ###
+releaseName: gatewaytcpmissingparentrefs
+skipTest: false
+expectHelmTemplateFailure: true
+expectedHelmTemplateError: gateway.parentRefs must not be empty when gateway.tcpRoutes are configured
+### SECTION:VALUES ###
+global:
+  gateway:
+    enabled: false
+pingdirectory:
+  enabled: true
+  gateway:
+    enabled: true
+    tcpRoutes:
+    - name: ldaps
+      sectionName: ldaps-1636
+      backend:
+        serviceName: ldaps
+### SECTION:EXPECTED ###
+### SECTION:UNEXPECTED ###

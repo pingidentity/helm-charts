@@ -1,0 +1,29 @@
+# Verify TCPRoute rendering fails when backend service exists but servicePort is missing.
+
+### SECTION:PARAMETERS ###
+releaseName: gatewaytcpmissingserviceport
+skipTest: false
+expectHelmTemplateFailure: true
+expectedHelmTemplateError: Missing services.ldaps.servicePort for gateway route backend
+### SECTION:VALUES ###
+global:
+  gateway:
+    parentRefs:
+    - name: shared-gateway
+pingdirectory:
+  enabled: true
+  services:
+    ldaps:
+      servicePort:
+      containerPort: 1636
+      clusterService: true
+      dataService: true
+  gateway:
+    enabled: true
+    tcpRoutes:
+    - name: ldaps
+      sectionName: ldaps-1636
+      backend:
+        serviceName: ldaps
+### SECTION:EXPECTED ###
+### SECTION:UNEXPECTED ###

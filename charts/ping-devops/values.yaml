@@ -87,15 +87,23 @@ global:
 #      ingressClassName: nginx-public
 
   ############################################################
-  # Gateway API (HTTPRoute)
+  # Gateway API (HTTPRoute/TCPRoute)
   #
   # @param    global.gateway.enabled
-  # @desc     If true, deploy Gateway API HTTPRoute resources.
+  # @desc     If true, deploy Gateway API route resources.
   # @default  false
   #
   # @param    global.gateway.apiVersion
+  # @desc     Deprecated HTTPRoute API version fallback. Use global.gateway.httpRouteApiVersion.
+  # @default  gateway.networking.k8s.io/v1
+  #
+  # @param    global.gateway.httpRouteApiVersion
   # @desc     Gateway API version used for HTTPRoute resources.
   # @default  gateway.networking.k8s.io/v1
+  #
+  # @param    global.gateway.tcpRouteApiVersion
+  # @desc     Gateway API version used for TCPRoute resources.
+  # @default  gateway.networking.k8s.io/v1alpha2
   #
   # @param    global.gateway.parentRefs Parent Gateway references
   # @default  []
@@ -114,17 +122,25 @@ global:
   # @default  []
   #
   # @param    global.gateway.annotations
-  # @desc     Annotations to apply to Gateway API HTTPRoute resources.
+  # @desc     Annotations to apply to Gateway API route resources.
   # @default  {}
+  #
+  # @param    global.gateway.tcpRoutes Gateway listener bindings for TCPRoute.
+  # @desc     Each entry requires name, sectionName, and backend.serviceName. This can
+  # @desc     also be set per-product at {product}.gateway.tcpRoutes.
+  # @default  []
   ############################################################
   gateway:
     enabled: false
     apiVersion: gateway.networking.k8s.io/v1
+    httpRouteApiVersion: ""
+    tcpRouteApiVersion: ""
     parentRefs: []
     addReleaseNameToHost: subdomain
     defaultDomain: example.com
     hosts: []
     annotations: {}
+    tcpRoutes: []
 
   ############################################################
   # Internal Certificates

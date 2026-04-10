@@ -1,0 +1,31 @@
+# Verify gateway host env var generation fails when backend service exists but gatewayPort is missing.
+
+### SECTION:PARAMETERS ###
+releaseName: gatewayhttpmissinggatewayport
+skipTest: false
+expectHelmTemplateFailure: true
+expectedHelmTemplateError: Missing services.https.gatewayPort for gateway route public port
+### SECTION:VALUES ###
+global:
+  gateway:
+    parentRefs:
+    - name: shared-gateway
+pingdirectory:
+  enabled: true
+  services:
+    https:
+      servicePort: 443
+      containerPort: 1443
+      gatewayPort:
+      dataService: true
+  gateway:
+    enabled: true
+    hosts:
+    - host: pingdirectory._defaultDomain_
+      paths:
+      - path: /
+        pathType: PathPrefix
+        backend:
+          serviceName: https
+### SECTION:EXPECTED ###
+### SECTION:UNEXPECTED ###
