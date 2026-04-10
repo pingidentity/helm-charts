@@ -307,6 +307,7 @@ if operation == Operation.test:
         "gateway.networking.k8s.io/v1beta1/HTTPRoute",
         "gateway.networking.k8s.io/v1alpha2",
         "gateway.networking.k8s.io/v1alpha2/HTTPRoute",
+        "gateway.networking.k8s.io/v1alpha2/TCPRoute",
     ]
     helmApiArgs = " ".join(["--api-versions " + v for v in gatewayApiVersions])
     helmCommand = "helm template " + releaseName + " charts/ping-devops " + helmApiArgs + kubeVersionArg + " -f /tmp/values.yaml"

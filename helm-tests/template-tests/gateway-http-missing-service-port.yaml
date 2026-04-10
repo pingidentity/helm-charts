@@ -1,0 +1,31 @@
+# Verify HTTPRoute rendering fails when backend service exists but servicePort is missing.
+
+### SECTION:PARAMETERS ###
+releaseName: gatewayhttpmissingserviceport
+skipTest: false
+expectHelmTemplateFailure: true
+expectedHelmTemplateError: Missing services.https.servicePort for gateway route backend
+### SECTION:VALUES ###
+global:
+  gateway:
+    parentRefs:
+    - name: shared-gateway
+pingdirectory:
+  enabled: true
+  services:
+    https:
+      servicePort:
+      containerPort: 1443
+      gatewayPort: 443
+      dataService: true
+  gateway:
+    enabled: true
+    hosts:
+    - host: pingdirectory._defaultDomain_
+      paths:
+      - path: /
+        pathType: PathPrefix
+        backend:
+          serviceName: https
+### SECTION:EXPECTED ###
+### SECTION:UNEXPECTED ###

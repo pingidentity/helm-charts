@@ -1,0 +1,22 @@
+# Verify TCPRoute rendering fails when backend.serviceName is missing.
+
+### SECTION:PARAMETERS ###
+releaseName: gatewaytcpmissingbackend
+skipTest: false
+expectHelmTemplateFailure: true
+expectedHelmTemplateError: serviceName
+### SECTION:VALUES ###
+global:
+  gateway:
+    parentRefs:
+    - name: shared-gateway
+pingdirectory:
+  enabled: true
+  gateway:
+    enabled: true
+    tcpRoutes:
+    - name: ldaps
+      sectionName: ldaps-1636
+      backend: {}
+### SECTION:EXPECTED ###
+### SECTION:UNEXPECTED ###

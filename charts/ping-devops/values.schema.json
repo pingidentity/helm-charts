@@ -54,6 +54,40 @@
         "paths"
       ]
     },
+    "gatewayTcpRouteBackend": {
+      "type": "object",
+      "properties": {
+        "serviceName": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "serviceName"
+      ]
+    },
+    "gatewayTcpRoute": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sectionName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "backend": {
+          "$ref": "#/definitions/gatewayTcpRouteBackend"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "sectionName",
+        "backend"
+      ]
+    },
     "gateway": {
       "type": "object",
       "properties": {
@@ -63,6 +97,14 @@
         "apiVersion": {
           "type": "string",
           "pattern": "^gateway\\.networking\\.k8s\\.io/(v1|v1beta1|v1alpha2)$"
+        },
+        "httpRouteApiVersion": {
+          "type": "string",
+          "pattern": "^$|^gateway\\.networking\\.k8s\\.io/(v1|v1beta1|v1alpha2)$"
+        },
+        "tcpRouteApiVersion": {
+          "type": "string",
+          "pattern": "^$|^gateway\\.networking\\.k8s\\.io/(v1alpha2)$"
         },
         "parentRefs": {
           "type": "array",
@@ -85,6 +127,12 @@
         },
         "annotations": {
           "type": "object"
+        },
+        "tcpRoutes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gatewayTcpRoute"
+          }
         }
       },
       "additionalProperties": false

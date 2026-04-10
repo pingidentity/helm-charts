@@ -49,12 +49,20 @@ These are the values supported in the ping-devops chart. In general, values spec
 |
 
 |`global.gateway.enabled`
-|If true, deploy Gateway API HTTPRoute resources.
+|If true, deploy Gateway API route resources.
 |`false`
 
 |`global.gateway.apiVersion`
+|Deprecated HTTPRoute API version fallback. Use global.gateway.httpRouteApiVersion.
+|`gateway.networking.k8s.io/v1`
+
+|`global.gateway.httpRouteApiVersion`
 |Gateway API version used for HTTPRoute resources.
 |`gateway.networking.k8s.io/v1`
+
+|`global.gateway.tcpRouteApiVersion`
+|Gateway API version used for TCPRoute resources.
+|`gateway.networking.k8s.io/v1alpha2`
 
 |`global.gateway.parentRefs`
 |Parent Gateway references
@@ -73,8 +81,12 @@ These are the values supported in the ping-devops chart. In general, values spec
 |`[]`
 
 |`global.gateway.annotations`
-|Annotations to apply to Gateway API HTTPRoute resources.
+|Annotations to apply to Gateway API route resources.
 |`{}`
+
+|`global.gateway.tcpRoutes`
+|Gateway listener bindings for TCPRoute. Each entry requires name, sectionName, and backend.serviceName. This can also be set per-product at {product}.gateway.tcpRoutes.
+|`[]`
 
 |`global.privateCert.generate`
 |If true, then an internal certificate secret will be created along with mount of the certificate in /run/secrets/internal-cert (creates a tls.crt and tls.key). By default the Issuer of the cert will be the service name created by the Helm Chart. Additionally, the ingress and gateway hosts, if enabled, will be added to the list of X509v3 Subject Alternative Name
