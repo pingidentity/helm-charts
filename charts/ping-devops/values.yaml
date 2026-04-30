@@ -1543,9 +1543,14 @@ pingdirectoryproxy:
         memory: 2Gi
 
   services:
+    ldap:
+      servicePort: 389
+      containerPort: 1389
+      dataService: true
     ldaps:
       servicePort: 636
       containerPort: 1636
+      dataService: true
       clusterService: true
     https:
       servicePort: 443

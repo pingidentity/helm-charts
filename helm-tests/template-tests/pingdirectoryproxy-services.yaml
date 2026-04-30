@@ -1,0 +1,41 @@
+# This test verifies that PingDirectoryProxy DataService and ClusterService
+# expose the correct ports when enabled with default values.
+# The DataService must include ldap (389/1389), ldaps (636/1636),
+# and https (443/1443). The ClusterService must include ldaps (1636).
+### SECTION:PARAMETERS ###
+releaseName: pdp-services
+skipTest: false
+### SECTION:VALUES ###
+pingdirectoryproxy:
+  enabled: true
+### SECTION:EXPECTED ###
+# Validate that the DataService includes all three ports: ldap, ldaps, and https
+apiVersion: v1
+kind: Service
+metadata:
+  name: pdp-services-pingdirectoryproxy
+spec:
+  ports:
+  - name: ldap
+    port: 389
+    protocol: TCP
+    targetPort: 1389
+  - name: ldaps
+    port: 636
+    protocol: TCP
+    targetPort: 1636
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 1443
+---
+# Validate that the ClusterService (headless) includes the ldaps port
+apiVersion: v1
+kind: Service
+metadata:
+  name: pdp-services-pingdirectoryproxy-cluster
+spec:
+  ports:
+  - name: ldaps
+    port: 1636
+    protocol: TCP
