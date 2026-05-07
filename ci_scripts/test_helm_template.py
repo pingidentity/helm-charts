@@ -300,6 +300,7 @@ if operation == Operation.test:
 
     # Run helm template based on the test params, write to a file.
     # Include Gateway API versions so local template tests can exercise HTTPRoute rendering paths.
+    # Include Secrets Store CSI Driver API versions so SPC create:true tests pass the CRD preflight.
     gatewayApiVersions = [
         "gateway.networking.k8s.io/v1",
         "gateway.networking.k8s.io/v1/HTTPRoute",
@@ -308,6 +309,8 @@ if operation == Operation.test:
         "gateway.networking.k8s.io/v1alpha2",
         "gateway.networking.k8s.io/v1alpha2/HTTPRoute",
         "gateway.networking.k8s.io/v1alpha2/TCPRoute",
+        "secrets-store.csi.x-k8s.io/v1",
+        "secrets-store.csi.x-k8s.io/v1/SecretProviderClass",
     ]
     helmApiArgs = " ".join(["--api-versions " + v for v in gatewayApiVersions])
     helmCommand = "helm template " + releaseName + " charts/ping-devops " + helmApiArgs + kubeVersionArg + " -f /tmp/values.yaml"

@@ -28,6 +28,8 @@
   {{- $_ := set $existingVolumeNames "private-keystore" true -}}
   {{- $_ := set $existingVolumeNames "private-cert" true -}}
 {{- end -}}
+{{- $spcAutoWire := dict "inject" false -}}
+{{- if $v.secretProviderClass.enabled -}}{{- $spcVolName := default (printf "%s-%s-spc" $top.Release.Name $v.name) $v.secretProviderClass.name -}}{{- if not (hasKey $existingVolumeNames $spcVolName) -}}{{- $_ := set $existingVolumeNames $spcVolName true -}}{{- $_ := set $spcAutoWire "inject" true -}}{{- end -}}{{- end -}}
 {{- range tuple "secretVolumes" "configMapVolumes" -}}
   {{- $volumeType := . -}}
   {{- range $volumeName, $volumeValue := (index $v $volumeType) -}}
@@ -233,6 +235,11 @@ spec:
           mountPath: /run/secrets/private-keystore
           readOnly: true
         {{- end }}
+        {{- if $v.secretProviderClass.enabled }}
+        - name: {{ default (printf "%s-%s-spc" $top.Release.Name $v.name) $v.secretProviderClass.name }}
+          mountPath: {{ $v.secretProviderClass.mountPath }}
+          readOnly: {{ $v.secretProviderClass.readOnly }}
+        {{- end }}
         {{- include "pinglib.workload.volumeMounts" $v | nindent 8 }}
 
         {{/*---------------- Container Security Context -------------*/}}
@@ -293,6 +300,11 @@ spec:
         {{- if $v.utilitySidecar.volumes }}
           {{ toYaml $v.utilitySidecar.volumes | nindent 8 }}
         {{- end }}
+        {{- if $v.secretProviderClass.enabled }}
+        - name: {{ default (printf "%s-%s-spc" $top.Release.Name $v.name) $v.secretProviderClass.name }}
+          mountPath: {{ $v.secretProviderClass.mountPath }}
+          readOnly: {{ $v.secretProviderClass.readOnly }}
+        {{- end }}
         # Environment variables for sidecar
         {{- if $v.utilitySidecar.env }}
         env:
@@ -351,6 +363,16 @@ spec:
       - name: private-cert
         secret:
           secretName: {{ include "pinglib.fullname" . }}-private-cert
+      {{- end }}
+
+      {{/*--------------------- Volumes (when secretProviderClass is enabled) ------------------*/}}
+      {{- if $spcAutoWire.inject }}
+      - name: {{ default (printf "%s-%s-spc" $top.Release.Name $v.name) $v.secretProviderClass.name }}
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: {{ $v.secretProviderClass.readOnly }}
+          volumeAttributes:
+            secretProviderClass: {{ default (printf "%s-%s-spc" $top.Release.Name $v.name) $v.secretProviderClass.name }}
       {{- end }}
 
       {{/*--------------------- Volumes (defined in product.workload.volumes) ------------------*/}}

@@ -236,6 +236,52 @@ global:
   #         file: devops-secret.env
 
   ############################################################
+  # @param    global.secretProviderClass.enabled Enable Secrets Store CSI Driver
+  # @desc     integration. When true, a CSI volume and volumeMount are
+  # @desc     auto-wired into the pod spec and utility sidecar.
+  # @default  false
+  #
+  # @param    global.secretProviderClass.create When true, a SecretProviderClass
+  # @desc     resource is rendered for each enabled product (requires the
+  # @desc     secrets-store.csi.x-k8s.io/v1 CRD to be pre-installed).
+  # @default  false
+  #
+  # @param    global.secretProviderClass.name Override the generated
+  # @desc     SecretProviderClass resource name. Defaults to
+  # @desc     <release>-<product>-spc when empty.
+  # @default  ""
+  #
+  # @param    global.secretProviderClass.provider CSI driver provider.
+  # @desc     One of: aws, azure, gcp, vault, akeyless, conjur, openbao
+  # @default  ""
+  #
+  # @param    global.secretProviderClass.parameters Provider-specific parameters
+  # @desc     passed through as raw YAML to spec.parameters.
+  # @default  {}
+  #
+  # @param    global.secretProviderClass.secretObjects Kubernetes Secret objects
+  # @desc     to sync from the CSI volume (opaque passthrough).
+  # @default  []
+  #
+  # @param    global.secretProviderClass.mountPath Mount path for the CSI volume
+  # @desc     inside containers.
+  # @default  /run/secrets
+  #
+  # @param    global.secretProviderClass.readOnly Whether the CSI volume mount
+  # @desc     is read-only.
+  # @default  true
+  ############################################################
+  secretProviderClass:
+    enabled: false
+    create: false
+    name: ""
+    provider: ""
+    parameters: {}
+    secretObjects: []
+    mountPath: /run/secrets
+    readOnly: true
+
+  ############################################################
   # @param    global.imagePullSecrets Repository authentication using secret
   # @desc     defined as a docker-registry secret in Kubernetes.
   # @default  []
