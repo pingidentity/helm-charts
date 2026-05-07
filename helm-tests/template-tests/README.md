@@ -4,3 +4,22 @@ In this directory you can add YAML files used to test the template YAML generate
 To run the tests locally, run `ci_scripts/test_helm_template.py test --test-file helm-tests/template-tests/testfile.yaml`. See `ci_scripts/test_helm_template.py help` for more information on running the script.
 
 See the [sample.yaml](sample.yaml) file in this directory for the expected file structure to use when writing tests.
+
+## Directory structure
+
+Tests are organized into subdirectories by feature area. Place new tests in the appropriate subfolder or add a new subfolder when new features are added:
+
+| Directory | Contents |
+|---|---|
+| `gateway/` | Gateway API HTTPRoute and TCPRoute tests |
+| `utility-sidecar/` | utilitySidecar container configuration tests |
+| `secret-provider-class/` | Secrets Store CSI Driver / SecretProviderClass tests |
+| `networking/` | Ingress, DNS, service, and product-specific networking tests |
+| `metadata/` | Annotation and label tests |
+| `workload/` | Autoscaling, scheduling, topology, and startup behavior tests |
+| `pod-disruption-budget/` | PodDisruptionBudget tests |
+| `cronjob/` | CronJob tests |
+| `security/` | Security context and RBAC tests |
+| `secrets/` | Image pull secrets and external secret backend tests (Vault, etc.) |
+
+The CI runner discovers tests recursively, so any `.yaml` file in any subdirectory is picked up automatically.
