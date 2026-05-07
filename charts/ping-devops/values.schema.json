@@ -312,6 +312,39 @@
             "enabled"
           ]
         },
+        "secretProviderClass": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "name": {
+              "type": "string"
+            },
+            "provider": {
+              "type": "string",
+              "enum": ["", "aws", "azure", "gcp", "vault", "akeyless", "conjur", "openbao"]
+            },
+            "parameters": {
+              "type": "object"
+            },
+            "secretObjects": {
+              "type": "array"
+            },
+            "mountPath": {
+              "type": "string"
+            },
+            "readOnly": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "enabled"
+          ]
+        },
         "image": {
           "type": "object",
           "properties": {
