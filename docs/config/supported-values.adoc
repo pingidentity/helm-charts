@@ -148,6 +148,38 @@ These are the values supported in the ping-devops chart. In general, values spec
 |Vault secrets to pull in
 |`{}`
 
+|`global.secretProviderClass.enabled`
+|Enable Secrets Store CSI Driver integration. When true, a CSI volume and volumeMount are auto-wired into the pod spec and utility sidecar.
+|`false`
+
+|`global.secretProviderClass.create`
+|When true, a SecretProviderClass resource is rendered for each enabled product (requires the secrets-store.csi.x-k8s.io/v1 CRD to be pre-installed).
+|`false`
+
+|`global.secretProviderClass.name`
+|Override the generated SecretProviderClass resource name. Defaults to <release>-<product>-spc when empty.
+|`""`
+
+|`global.secretProviderClass.provider`
+|CSI driver provider. One of: aws, azure, gcp, vault, akeyless, conjur, openbao
+|`""`
+
+|`global.secretProviderClass.parameters`
+|Provider-specific parameters passed through as raw YAML to spec.parameters.
+|`{}`
+
+|`global.secretProviderClass.secretObjects`
+|Kubernetes Secret objects to sync from the CSI volume (opaque passthrough).
+|`[]`
+
+|`global.secretProviderClass.mountPath`
+|Mount path for the CSI volume inside containers.
+|`/run/secrets`
+
+|`global.secretProviderClass.readOnly`
+|Whether the CSI volume mount is read-only.
+|`true`
+
 |`global.imagePullSecrets`
 |Repository authentication using secret defined as a docker-registry secret in Kubernetes.
 |`[]`
@@ -166,7 +198,7 @@ These are the values supported in the ping-devops chart. In general, values spec
 
 |`global.image.tag`
 |Default image tag
-|`2604`
+|`2605`
 
 |`global.image.pullPolicy`
 |Default image pull policy

@@ -297,7 +297,7 @@ global:
   # By default the images uses will be indicated by these
   # variables.  An example might look like:
   #
-  #   pingidentity/pingdataconsole:2604 (April 2026)
+  #   pingidentity/pingdataconsole:2605 (May 2026)
   #
   # @param    global.image.repository Default image registry
   # @desc     is not the fully-qualified name of the image
@@ -313,7 +313,7 @@ global:
   # @desc     Example: image.name: pingfederate
   #
   # @param    global.image.tag Default image tag
-  # @default  2604
+  # @default  2605
   #
   # @param    global.image.pullPolicy Default image pull policy
   # @default  IfNotPresent
@@ -322,7 +322,7 @@ global:
     repository: pingidentity
     repositoryFqn:
     name:
-    tag: "2604"
+    tag: "2605"
     pullPolicy: IfNotPresent
 
   ############################################################
@@ -1075,7 +1075,7 @@ sidecars: {}
 # sidecars:
 #   logger:
 #     name: log-container
-#     image: pingidentity/pingtoolkit:2604
+#     image: pingidentity/pingtoolkit:2605
 #     volumeMounts:
 #       - mountPath: /tmp/logs/
 #         name: logger
@@ -1092,7 +1092,7 @@ initContainers: {}
 # initContainers:
 #   init-example:
 #     name: 01-init
-#     image: pingidentity/pingtoolkit:2604
+#     image: pingidentity/pingtoolkit:2605
 #     command: ['sh', '-c', 'echo "InitContainer 1"']
 
 #############################################################
@@ -1141,7 +1141,7 @@ ldap-sdk-tools:
     name: ldap-sdk-tools
     repository: pingidentity
     repositoryFqn:
-    tag: "2604"
+    tag: "2605"
     pullPolicy: IfNotPresent
 
   container:
@@ -2031,7 +2031,7 @@ pd-replication-timing:
     name: pingtoolkit
     repository: pingidentity
     repositoryFqn:
-    tag: "2604"
+    tag: "2605"
     pullPolicy: IfNotPresent
 
   envs:
@@ -2053,7 +2053,7 @@ pingtoolkit:
     name: pingtoolkit
     repository: pingidentity
     repositoryFqn:
-    tag: "2604"
+    tag: "2605"
     pullPolicy: IfNotPresent
 
 #############################################################
