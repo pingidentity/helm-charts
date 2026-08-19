@@ -1,0 +1,88 @@
+name: Helm migration probe
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_template_tests:
+        description: Run Helm template tests
+        type: boolean
+        required: true
+        default: true
+      retain_logs:
+        description: Retain diagnostic logs even when the run succeeds
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: helm-migration-probe
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    name: Hosted runner and template probe
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      RUN_TEMPLATE_TESTS: ${{ inputs.run_template_tests }}
+      RETAIN_LOGS: ${{ inputs.retain_logs }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+          fetch-depth: 1
+
+      - name: Collect runner facts
+        run: |
+          set -euo pipefail
+          {
+            printf 'runner=%s\n' "$RUNNER_NAME"
+            printf 'os=%s\n' "$RUNNER_OS"
+            printf 'architecture=%s\n' "$(uname -m)"
+            printf 'kernel=%s\n' "$(uname -sr)"
+            printf 'cpu_count=%s\n' "$(nproc)"
+            printf 'disk=\n'
+            df -h .
+            printf 'memory=\n'
+            free -h
+          } | tee runner-facts.txt
+
+      - name: Check public network reachability
+        run: |
+          set -euo pipefail
+          : > network-reachability.txt
+          for url in \
+            https://api.github.com \
+            https://get.helm.sh \
+            https://github.com \
+            https://pypi.org; do
+            printf '%s ' "$url" | tee -a network-reachability.txt
+            curl --fail --silent --show-error --location --max-time 15 \
+              -o /dev/null -w '%{http_code}\n' "$url" | tee -a network-reachability.txt
+          done
+
+      - name: Set up tools
+        uses: ./.github/actions/setup-tools
+
+      - name: Run template tests
+        if: ${{ inputs.run_template_tests }}
+        run: |
+          set -o pipefail
+          # The template test path is self-contained and requires no product credentials.
+          ./ci_scripts/run_helm_template_tests.sh 2>&1 | tee template-tests.log
+
+      - name: Upload diagnostic logs
+        if: ${{ always() && (inputs.retain_logs || failure()) }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: helm-migration-probe-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            runner-facts.txt
+            network-reachability.txt
+            template-tests.log

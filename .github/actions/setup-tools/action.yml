@@ -1,0 +1,107 @@
+name: Set up Helm test tools
+description: Install and verify the tools needed by Helm validation on GitHub-hosted Ubuntu runners
+inputs:
+  helm-version:
+    description: Helm version to install when Helm is unavailable or mismatched
+    required: false
+    default: '4.2.4'
+  shfmt-version:
+    description: shfmt release version to install when shfmt is unavailable
+    required: false
+    default: '3.13.1'
+  shellcheck-version:
+    description: shellcheck release version to install when shellcheck is unavailable
+    required: false
+    default: '0.11.0'
+runs:
+  using: composite
+  steps:
+    - name: Install base packages
+      shell: bash
+      run: |
+        set -euo pipefail
+        missing=()
+        for package in jq gettext-base libxml2-utils; do
+          command -v "${package%%-*}" >/dev/null 2>&1 || missing+=("$package")
+        done
+        if [ "${#missing[@]}" -gt 0 ]; then
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y "${missing[@]}"
+        fi
+
+    - name: Install Helm
+      shell: bash
+      env:
+        HELM_VERSION: ${{ inputs.helm-version }}
+      run: |
+        set -euo pipefail
+        if command -v helm >/dev/null 2>&1 && helm version --template '{{.Version}}' 2>/dev/null | grep -q "v${HELM_VERSION}$"; then
+          exit 0
+        fi
+        arch=$(uname -m)
+        case "$arch" in
+          x86_64) arch=amd64 ;;
+          aarch64|arm64) arch=arm64 ;;
+          *) echo "Unsupported architecture: $arch" >&2; exit 1 ;;
+        esac
+        archive="helm-v${HELM_VERSION}-linux-${arch}.tar.gz"
+        curl --fail --silent --show-error --location \
+          "https://get.helm.sh/${archive}" --output "$RUNNER_TEMP/$archive"
+        tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP"
+        sudo install -m 0755 "$RUNNER_TEMP/linux-${arch}/helm" /usr/local/bin/helm
+        helm version
+
+    - name: Install shellcheck
+      shell: bash
+      env:
+        SHELLCHECK_VERSION: ${{ inputs.shellcheck-version }}
+      run: |
+        set -euo pipefail
+        if command -v shellcheck >/dev/null 2>&1; then
+          exit 0
+        fi
+        arch=$(uname -m)
+        case "$arch" in
+          x86_64) arch=x86_64 ;;
+          aarch64|arm64) arch=aarch64 ;;
+          *) echo "Unsupported architecture: $arch" >&2; exit 1 ;;
+        esac
+        archive="shellcheck-v${SHELLCHECK_VERSION}.linux.${arch}.tar.xz"
+        curl --fail --silent --show-error --location \
+          "https://github.com/koalaman/shellcheck/releases/download/v${SHELLCHECK_VERSION}/${archive}" \
+          --output "$RUNNER_TEMP/$archive"
+        tar -xJf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP"
+        sudo install -m 0755 "$RUNNER_TEMP/shellcheck-v${SHELLCHECK_VERSION}/shellcheck" /usr/local/bin/shellcheck
+        shellcheck --version | sed -n '1,2p'
+
+    - name: Install shfmt
+      shell: bash
+      env:
+        SHFMT_VERSION: ${{ inputs.shfmt-version }}
+      run: |
+        set -euo pipefail
+        if command -v shfmt >/dev/null 2>&1; then
+          exit 0
+        fi
+        arch=$(uname -m)
+        case "$arch" in
+          x86_64) arch=amd64 ;;
+          aarch64|arm64) arch=arm64 ;;
+          *) echo "Unsupported architecture: $arch" >&2; exit 1 ;;
+        esac
+        curl --fail --silent --show-error --location \
+          "https://github.com/mvdan/sh/releases/download/v${SHFMT_VERSION}/shfmt_v${SHFMT_VERSION}_linux_${arch}" \
+          --output "$RUNNER_TEMP/shfmt"
+        sudo install -m 0755 "$RUNNER_TEMP/shfmt" /usr/local/bin/shfmt
+        shfmt --version
+
+    - name: Report tool versions
+      shell: bash
+      run: |
+        set -euo pipefail
+        printf 'architecture=%s\n' "$(uname -m)"
+        printf 'helm='; helm version --template '{{.Version}}'; printf '\n'
+        printf 'shellcheck='; shellcheck --version | awk -F: '/version:/ {gsub(/ /, "", $2); print $2; exit}'
+        printf 'shfmt='; shfmt --version
+        printf 'jq='; jq --version
+        printf 'python='; python3 --version
