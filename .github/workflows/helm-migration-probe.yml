@@ -61,7 +61,9 @@ jobs:
             https://github.com \
             https://pypi.org; do
             printf '%s ' "$url" | tee -a network-reachability.txt
-            curl --fail --silent --show-error --location --max-time 15 \
+            # A reachable host may return 3xx/4xx at its root; record HTTP status
+            # without treating an application response as a network failure.
+            curl --silent --show-error --location --max-time 15 \
               -o /dev/null -w '%{http_code}\n' "$url" | tee -a network-reachability.txt
           done
 
