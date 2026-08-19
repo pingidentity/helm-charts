@@ -20,14 +20,24 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
+        echo 'setup-tools: checking base packages'
         missing=()
         for package in jq gettext-base libxml2-utils; do
-          command -v "${package%%-*}" >/dev/null 2>&1 || missing+=("$package")
+          case "$package" in
+            jq) command_name=jq ;;
+            gettext-base) command_name=envsubst ;;
+            libxml2-utils) command_name=xmllint ;;
+          esac
+          command -v "$command_name" >/dev/null 2>&1 || missing+=("$package")
         done
         if [ "${#missing[@]}" -gt 0 ]; then
-          sudo apt-get update
-          sudo apt-get install --no-install-recommends -y "${missing[@]}"
+          echo "setup-tools: installing base packages: ${missing[*]}"
+          timeout 180s sudo apt-get update -o Acquire::Retries=2
+          timeout 180s sudo apt-get install --no-install-recommends -y "${missing[@]}"
+        else
+          echo 'setup-tools: base packages already available'
         fi
+        echo 'setup-tools: base packages complete'
 
     - name: Install Helm
       shell: bash
@@ -35,7 +45,9 @@ runs:
         HELM_VERSION: ${{ inputs.helm-version }}
       run: |
         set -euo pipefail
+        echo "setup-tools: checking Helm ${HELM_VERSION}"
         if command -v helm >/dev/null 2>&1 && helm version --template '{{.Version}}' 2>/dev/null | grep -q "v${HELM_VERSION}$"; then
+          echo 'setup-tools: Helm already available'
           exit 0
         fi
         arch=$(uname -m)
@@ -45,11 +57,13 @@ runs:
           *) echo "Unsupported architecture: $arch" >&2; exit 1 ;;
         esac
         archive="helm-v${HELM_VERSION}-linux-${arch}.tar.gz"
-        curl --fail --silent --show-error --location \
+        echo "setup-tools: downloading ${archive}"
+        timeout 120s curl --fail --silent --show-error --location \
           "https://get.helm.sh/${archive}" --output "$RUNNER_TEMP/$archive"
         tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP"
         sudo install -m 0755 "$RUNNER_TEMP/linux-${arch}/helm" /usr/local/bin/helm
         helm version
+        echo 'setup-tools: Helm complete'
 
     - name: Install shellcheck
       shell: bash
@@ -57,7 +71,9 @@ runs:
         SHELLCHECK_VERSION: ${{ inputs.shellcheck-version }}
       run: |
         set -euo pipefail
+        echo "setup-tools: checking ShellCheck ${SHELLCHECK_VERSION}"
         if command -v shellcheck >/dev/null 2>&1; then
+          echo 'setup-tools: ShellCheck already available'
           exit 0
         fi
         arch=$(uname -m)
@@ -67,12 +83,14 @@ runs:
           *) echo "Unsupported architecture: $arch" >&2; exit 1 ;;
         esac
         archive="shellcheck-v${SHELLCHECK_VERSION}.linux.${arch}.tar.xz"
-        curl --fail --silent --show-error --location \
+        echo "setup-tools: downloading ${archive}"
+        timeout 120s curl --fail --silent --show-error --location \
           "https://github.com/koalaman/shellcheck/releases/download/v${SHELLCHECK_VERSION}/${archive}" \
           --output "$RUNNER_TEMP/$archive"
         tar -xJf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP"
         sudo install -m 0755 "$RUNNER_TEMP/shellcheck-v${SHELLCHECK_VERSION}/shellcheck" /usr/local/bin/shellcheck
         shellcheck --version | sed -n '1,2p'
+        echo 'setup-tools: ShellCheck complete'
 
     - name: Install shfmt
       shell: bash
@@ -80,7 +98,9 @@ runs:
         SHFMT_VERSION: ${{ inputs.shfmt-version }}
       run: |
         set -euo pipefail
+        echo "setup-tools: checking shfmt ${SHFMT_VERSION}"
         if command -v shfmt >/dev/null 2>&1; then
+          echo 'setup-tools: shfmt already available'
           exit 0
         fi
         arch=$(uname -m)
@@ -89,11 +109,13 @@ runs:
           aarch64|arm64) arch=arm64 ;;
           *) echo "Unsupported architecture: $arch" >&2; exit 1 ;;
         esac
-        curl --fail --silent --show-error --location \
+        echo "setup-tools: downloading shfmt for ${arch}"
+        timeout 120s curl --fail --silent --show-error --location \
           "https://github.com/mvdan/sh/releases/download/v${SHFMT_VERSION}/shfmt_v${SHFMT_VERSION}_linux_${arch}" \
           --output "$RUNNER_TEMP/shfmt"
         sudo install -m 0755 "$RUNNER_TEMP/shfmt" /usr/local/bin/shfmt
         shfmt --version
+        echo 'setup-tools: shfmt complete'
 
     - name: Report tool versions
       shell: bash
