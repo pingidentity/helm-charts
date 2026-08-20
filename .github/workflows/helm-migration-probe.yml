@@ -42,9 +42,13 @@ jobs:
         run: |
           set -euo pipefail
           # actions/checkout does not reliably pass its HTTPS extraheader into
-          # private submodule clones; configure it explicitly for this step.
-          auth=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
-          git config --global http.https://github.com/.extraheader "AUTHORIZATION: basic ${auth}"
+          # private submodule clones. Use a temporary URL rewrite and always
+          # remove it after the clone so the token is not retained in config.
+          cleanup() {
+            git config --global --unset-all url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
           git submodule sync --recursive
           git -c protocol.version=2 submodule update --init --force --depth=1 --recursive
 
