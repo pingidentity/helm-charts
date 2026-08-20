@@ -162,12 +162,12 @@ runs:
         fi
         arch=$(uname -m)
         case "$arch" in
-          x86_64) archive_arch=linux ;;
-          aarch64|arm64) archive_arch=aarch64 ;;
+          x86_64) client_path='' ;;
+          aarch64|arm64) client_path='aarch64/' ;;
           *) echo "Unsupported architecture: $arch" >&2; exit 1 ;;
         esac
-        archive="openshift-client-${archive_arch}.tar.gz"
-        base_url="https://mirror.openshift.com/pub/openshift-v4/${archive_arch}/clients/ocp/${OC_VERSION}"
+        archive='openshift-client-linux.tar.gz'
+        base_url="https://mirror.openshift.com/pub/openshift-v4/${client_path}clients/ocp/${OC_VERSION}"
         timeout 180s curl --fail --silent --show-error --location \
           "${base_url}/${archive}" --output "$RUNNER_TEMP/$archive"
         tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" oc
