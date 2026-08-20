@@ -13,6 +13,14 @@ inputs:
     description: shellcheck release version to install when shellcheck is unavailable
     required: false
     default: '0.11.0'
+  kubectl-version:
+    description: kubectl minor stream to install when kubectl is unavailable
+    required: false
+    default: '1.36.3'
+  oc-version:
+    description: OpenShift client version to install when oc is unavailable
+    required: false
+    default: '4.22.9'
 runs:
   using: composite
   steps:
@@ -117,6 +125,56 @@ runs:
         shfmt --version
         echo 'setup-tools: shfmt complete'
 
+    - name: Install kubectl
+      shell: bash
+      env:
+        KUBECTL_VERSION: ${{ inputs.kubectl-version }}
+      run: |
+        set -euo pipefail
+        echo "setup-tools: checking kubectl ${KUBECTL_VERSION}"
+        if command -v kubectl >/dev/null 2>&1 && kubectl version --client=true --output=json 2>/dev/null | jq -e --arg v "v${KUBECTL_VERSION}" '.clientVersion.gitVersion == $v' >/dev/null; then
+          echo 'setup-tools: kubectl already available'
+          exit 0
+        fi
+        arch=$(uname -m)
+        case "$arch" in
+          x86_64) arch=amd64 ;;
+          aarch64|arm64) arch=arm64 ;;
+          *) echo "Unsupported architecture: $arch" >&2; exit 1 ;;
+        esac
+        timeout 120s curl --fail --silent --show-error --location \
+          "https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/${arch}/kubectl" \
+          --output "$RUNNER_TEMP/kubectl"
+        sudo install -m 0755 "$RUNNER_TEMP/kubectl" /usr/local/bin/kubectl
+        kubectl version --client=true
+        echo 'setup-tools: kubectl complete'
+
+    - name: Install OpenShift client
+      shell: bash
+      env:
+        OC_VERSION: ${{ inputs.oc-version }}
+      run: |
+        set -euo pipefail
+        echo "setup-tools: checking oc ${OC_VERSION}"
+        if command -v oc >/dev/null 2>&1 && oc version --client=true 2>/dev/null | grep -q "Client Version: ${OC_VERSION}"; then
+          echo 'setup-tools: oc already available'
+          exit 0
+        fi
+        arch=$(uname -m)
+        case "$arch" in
+          x86_64) archive_arch=linux ;;
+          aarch64|arm64) archive_arch=aarch64 ;;
+          *) echo "Unsupported architecture: $arch" >&2; exit 1 ;;
+        esac
+        archive="openshift-client-${archive_arch}.tar.gz"
+        base_url="https://mirror.openshift.com/pub/openshift-v4/${archive_arch}/clients/ocp/${OC_VERSION}"
+        timeout 180s curl --fail --silent --show-error --location \
+          "${base_url}/${archive}" --output "$RUNNER_TEMP/$archive"
+        tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" oc
+        sudo install -m 0755 "$RUNNER_TEMP/oc" /usr/local/bin/oc
+        oc version --client=true
+        echo 'setup-tools: oc complete'
+
     - name: Report tool versions
       shell: bash
       run: |
@@ -127,3 +185,5 @@ runs:
         printf 'shfmt='; shfmt --version
         printf 'jq='; jq --version
         printf 'python='; python3 --version
+        printf 'kubectl='; kubectl version --client=true --output=json | jq -r '.clientVersion.gitVersion'
+        printf 'oc='; oc version --client=true | sed -n '1p'

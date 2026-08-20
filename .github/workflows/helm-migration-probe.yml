@@ -70,6 +70,12 @@ jobs:
       - name: Set up tools
         uses: ./.github/actions/setup-tools
 
+      - name: Verify Kubernetes clients without cluster access
+        run: |
+          set -euo pipefail
+          kubectl version --client=true
+          oc version --client=true
+
       - name: Run template tests
         if: ${{ inputs.run_template_tests }}
         run: |
