@@ -33,8 +33,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          submodules: false
+          submodules: recursive
           fetch-depth: 1
+
+      - name: Verify submodule checkout
+        run: |
+          set -euo pipefail
+          test -f shared-configs/README.md
+          git -C shared-configs rev-parse --verify HEAD
+          printf 'submodule_commit=%s\n' "$(git -C shared-configs rev-parse HEAD)"
 
       - name: Collect runner facts
         run: |
