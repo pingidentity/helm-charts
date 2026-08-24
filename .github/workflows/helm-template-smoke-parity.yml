@@ -1,0 +1,197 @@
+name: Helm template and smoke parity probe
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_template_tests:
+        description: Run the focused and complete template suites
+        type: boolean
+        required: true
+        default: true
+      run_smoke_x86:
+        description: Run PingDataConsole smoke on the private x86 runner
+        type: boolean
+        required: true
+        default: false
+      run_smoke_arm:
+        description: Run PingDataConsole smoke on the private ARM runner
+        type: boolean
+        required: true
+        default: false
+      retain_logs:
+        description: Retain diagnostics on successful jobs
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: helm-template-smoke-parity-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CI_COMMIT_REF_NAME: ${{ github.ref_name }}
+  # Keep the namespace prefix DNS-safe even when the branch contains '/'.
+  CI_COMMIT_REF_SLUG: helm-ci
+  CI_COMMIT_SHA: ${{ github.sha }}
+  CI_COMMIT_SHORT_SHA: ${{ github.sha }}
+  CI_PIPELINE_ID: ${{ github.run_id }}
+  CI_PROJECT_DIR: ${{ github.workspace }}
+  CI_JOB_ID: ${{ github.job }}
+
+jobs:
+  template:
+    name: Template tests
+    if: ${{ inputs.run_template_tests }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+          fetch-depth: 1
+
+      - name: Set up tools
+        uses: ./.github/actions/setup-tools
+
+      - name: Install template-test dependency
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/template-venv"
+          "$RUNNER_TEMP/template-venv/bin/python" -m pip install --disable-pip-version-check PyYAML==6.0.2
+          echo "$RUNNER_TEMP/template-venv/bin" >> "$GITHUB_PATH"
+
+      - name: Run focused template test
+        run: |
+          set -o pipefail
+          ./ci_scripts/test_helm_template.py test \
+            --test-file helm-tests/template-tests/gateway/gateway-http-route.yaml \
+            2>&1 | tee focused-template-test.log
+
+      - name: Run complete template suite
+        run: |
+          set -o pipefail
+          ./ci_scripts/run_helm_template_tests.sh 2>&1 | tee template-tests.log
+
+      - name: Upload template diagnostics
+        if: ${{ always() && (inputs.retain_logs || failure()) }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: helm-template-tests-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            focused-template-test.log
+            template-tests.log
+
+  smoke:
+    name: PingDataConsole smoke (${{ matrix.arch }})
+    if: ${{ (matrix.arch == 'x86_64' && inputs.run_smoke_x86) || (matrix.arch == 'aarch64' && inputs.run_smoke_arm) }}
+    runs-on: ${{ matrix.runner }}
+    environment: helm-smoke
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ping-internal-x86
+          - arch: aarch64
+            runner: ping-internal-arm
+    env:
+      EXPECTED_ARCH: ${{ matrix.arch }}
+      PING_IDENTITY_DEVOPS_USER: ${{ secrets.PING_IDENTITY_DEVOPS_USER }}
+      PING_IDENTITY_DEVOPS_KEY: ${{ secrets.PING_IDENTITY_DEVOPS_KEY }}
+      PIPELINE_BUILD_REGISTRY: ${{ vars.PIPELINE_BUILD_REGISTRY }}
+      PIPELINE_BUILD_REGISTRY_VENDOR: ${{ vars.PIPELINE_BUILD_REGISTRY_VENDOR }}
+      PIPELINE_BUILD_REPO: ${{ vars.PIPELINE_BUILD_REPO }}
+      PIPELINE_DEPS_REGISTRY: ${{ vars.PIPELINE_DEPS_REGISTRY }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+          fetch-depth: 1
+
+      - name: Create submodule GitHub App token
+        id: submodule-app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.SUBMODULE_APP_ID }}
+          private-key: ${{ secrets.SUBMODULE_APP_PRIVATE_KEY }}
+          owner: ping-internal
+          repositories: cdi-shared-configs
+          permission-contents: read
+
+      - name: Checkout private submodule
+        env:
+          GH_TOKEN: ${{ steps.submodule-app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          cleanup() {
+            git config --global --unset-all url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
+          git submodule sync --recursive
+          git -c protocol.version=2 submodule update --init --force --depth=1 --recursive
+
+      - name: Verify runner architecture
+        run: |
+          set -euo pipefail
+          actual_arch=$(uname -m)
+          case "${EXPECTED_ARCH}:${actual_arch}" in
+            x86_64:x86_64|aarch64:aarch64|aarch64:arm64) ;;
+            *) echo "Expected ${EXPECTED_ARCH}, got ${actual_arch}" >&2; exit 1 ;;
+          esac
+          printf 'runner=%s\narchitecture=%s\n' "$RUNNER_NAME" "$actual_arch"
+
+      - name: Set up tools
+        uses: ./.github/actions/setup-tools
+
+      - name: Verify smoke prerequisites
+        run: |
+          set -euo pipefail
+          test -n "${PING_IDENTITY_DEVOPS_USER}" || { echo 'Missing PING_IDENTITY_DEVOPS_USER'; exit 1; }
+          test -n "${PING_IDENTITY_DEVOPS_KEY}" || { echo 'Missing PING_IDENTITY_DEVOPS_KEY'; exit 1; }
+          test -n "${PIPELINE_BUILD_REGISTRY}" || { echo 'Missing PIPELINE_BUILD_REGISTRY'; exit 1; }
+          test -n "${PIPELINE_DEPS_REGISTRY}" || { echo 'Missing PIPELINE_DEPS_REGISTRY'; exit 1; }
+          kubectl cluster-info
+          kubectl get nodes -o custom-columns='NAME:.metadata.name,ARCH:.status.nodeInfo.architecture'
+
+      - name: Run PingDataConsole smoke
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            printf 'smoke_attempt=%s\n' "$attempt" | tee -a "smoke-${EXPECTED_ARCH}.log"
+            if ./ci_scripts/run_helm_smoke.sh --product pingdataconsole 2>&1 | tee -a "smoke-${EXPECTED_ARCH}.log"; then
+              exit 0
+            fi
+            test "$attempt" -lt 3 && sleep 10
+          done
+          exit 1
+
+      - name: Capture smoke diagnostics
+        if: ${{ always() }}
+        run: |
+          kubectl get namespaces -o name > namespaces-${EXPECTED_ARCH}.txt || true
+          kubectl get pods --all-namespaces -o wide > pods-${EXPECTED_ARCH}.txt || true
+
+      - name: Clean up smoke namespaces
+        if: ${{ always() }}
+        run: ./ci_scripts/cleanup_kubernetes.sh || true
+
+      - name: Upload smoke diagnostics
+        if: ${{ always() && (inputs.retain_logs || failure()) }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: helm-smoke-${{ matrix.arch }}-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            smoke-${{ matrix.arch }}.log
+            namespaces-${{ matrix.arch }}.txt
+            pods-${{ matrix.arch }}.txt

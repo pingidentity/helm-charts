@@ -453,6 +453,32 @@ if test -n "${PING_IDENTITY_SNAPSHOT}"; then
     GIT_REV_SHORT=$(date '+%H%M')
     GIT_REV_LONG=$(date '+%s')
     CI_TAG="$(date '+%Y%m%d')"
+elif test -n "${GITHUB_ACTIONS}"; then
+    # GitHub Actions supplies workspace/run metadata, but not the GitLab
+    # registry, Docker Trust, Vault, or JWT environment. Keep this adapter
+    # narrow and skip the obsolete Notary/Docker Trust path entirely.
+    CI_PROJECT_DIR="${CI_PROJECT_DIR:-${GITHUB_WORKSPACE:-$(pwd)}}"
+    FOUNDATION_REGISTRY=""
+    if test -n "${PIPELINE_BUILD_REGISTRY:-}" && test -n "${PIPELINE_BUILD_REPO:-}"; then
+        FOUNDATION_REGISTRY="${PIPELINE_BUILD_REGISTRY}/${PIPELINE_BUILD_REPO}"
+    fi
+    if test -n "${PIPELINE_DEPS_REGISTRY:-}"; then
+        DEPS_REGISTRY="${PIPELINE_DEPS_REGISTRY%/}/"
+    else
+        DEPS_REGISTRY=""
+    fi
+
+    banner "GitHub Actions CI using ${PIPELINE_BUILD_REGISTRY_VENDOR:-none} - ${FOUNDATION_REGISTRY:-none}"
+
+    if test "${PIPELINE_BUILD_REGISTRY_VENDOR:-}" = "aws" && test -n "${PIPELINE_BUILD_REGISTRY:-}"; then
+        # shellcheck source=./aws_tools.lib.sh
+        . "${CI_SCRIPTS_DIR}/aws_tools.lib.sh"
+    fi
+
+    GIT_REV_SHORT=$(git rev-parse --short=4 "${CI_COMMIT_SHA:-HEAD}")
+    GIT_REV_LONG=$(git rev-parse "${CI_COMMIT_SHA:-HEAD}")
+    CI_TAG="${CI_COMMIT_REF_NAME:-${GITHUB_REF_NAME:-local}}-${CI_COMMIT_SHORT_SHA:-${GIT_REV_SHORT}}"
+    gitBranch="${CI_COMMIT_REF_NAME:-${GITHUB_REF_NAME:-unknown}}"
 elif test -n "${CI_COMMIT_REF_NAME}"; then
     #we are in CI pipeline
     FOUNDATION_REGISTRY="${PIPELINE_BUILD_REGISTRY}/${PIPELINE_BUILD_REPO}"
