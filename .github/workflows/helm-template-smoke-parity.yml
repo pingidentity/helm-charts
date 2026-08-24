@@ -91,7 +91,7 @@ jobs:
     name: PingDataConsole smoke (${{ matrix.arch }})
     if: ${{ (matrix.arch == 'x86_64' && inputs.run_smoke_x86) || (matrix.arch == 'aarch64' && inputs.run_smoke_arm) }}
     runs-on: ${{ matrix.runner }}
-    environment: helm-smoke
+    environment: helm-test
     timeout-minutes: 45
     strategy:
       fail-fast: false
@@ -188,7 +188,7 @@ jobs:
         if: ${{ always() && (inputs.retain_logs || failure()) }}
         uses: actions/upload-artifact@v4
         with:
-          name: helm-smoke-${{ matrix.arch }}-${{ github.run_id }}
+          name: helm-test-${{ matrix.arch }}-${{ github.run_id }}
           if-no-files-found: warn
           retention-days: 14
           path: |
