@@ -36,6 +36,39 @@ jobs:
           submodules: false
           fetch-depth: 1
 
+      - name: Create submodule GitHub App token
+        id: submodule-app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.SUBMODULE_APP_ID }}
+          private-key: ${{ secrets.SUBMODULE_APP_PRIVATE_KEY }}
+          owner: ping-internal
+          repositories: cdi-shared-configs
+          permission-contents: read
+
+      - name: Checkout private submodule
+        env:
+          GH_TOKEN: ${{ steps.submodule-app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          # actions/checkout does not reliably pass its HTTPS extraheader into
+          # private submodule clones. Use a temporary URL rewrite and always
+          # remove it after the clone so the token is not retained in config.
+          cleanup() {
+            git config --global --unset-all url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
+          git submodule sync --recursive
+          git -c protocol.version=2 submodule update --init --force --depth=1 --recursive
+
+      - name: Verify submodule checkout
+        run: |
+          set -euo pipefail
+          test -f shared-configs/README.md
+          git -C shared-configs rev-parse --verify HEAD
+          printf 'submodule_commit=%s\n' "$(git -C shared-configs rev-parse HEAD)"
+
       - name: Collect runner facts
         run: |
           set -euo pipefail
