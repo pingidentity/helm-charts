@@ -36,9 +36,19 @@ jobs:
           submodules: false
           fetch-depth: 1
 
+      - name: Create submodule GitHub App token
+        id: submodule-app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.SUBMODULE_APP_ID }}
+          private-key: ${{ secrets.SUBMODULE_APP_PRIVATE_KEY }}
+          owner: ping-internal
+          repositories: cdi-shared-configs
+          permission-contents: read
+
       - name: Checkout private submodule
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.submodule-app-token.outputs.token }}
         run: |
           set -euo pipefail
           # actions/checkout does not reliably pass its HTTPS extraheader into
