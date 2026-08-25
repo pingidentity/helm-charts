@@ -94,6 +94,7 @@ jobs:
     with:
       expected_arch: x86_64
       runner: ping-internal-x86
+      job_id: x86
       retain_logs: ${{ inputs.retain_logs }}
     secrets: inherit
 
@@ -104,5 +105,6 @@ jobs:
     with:
       expected_arch: aarch64
       runner: ping-internal-arm
+      job_id: arm
       retain_logs: ${{ inputs.retain_logs }}
     secrets: inherit

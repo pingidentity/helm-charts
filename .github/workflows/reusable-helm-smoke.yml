@@ -12,6 +12,9 @@ on:
       retain_logs:
         required: true
         type: boolean
+      job_id:
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -24,6 +27,13 @@ jobs:
     timeout-minutes: 45
     env:
       EXPECTED_ARCH: ${{ inputs.expected_arch }}
+      CI_COMMIT_REF_NAME: ${{ github.ref_name }}
+      CI_COMMIT_REF_SLUG: helm-ci
+      CI_COMMIT_SHA: ${{ github.sha }}
+      CI_COMMIT_SHORT_SHA: ${{ github.sha }}
+      CI_PIPELINE_ID: ${{ github.run_id }}
+      CI_PROJECT_DIR: ${{ github.workspace }}
+      CI_JOB_ID: ${{ inputs.job_id }}
       PING_IDENTITY_DEVOPS_USER: ${{ vars.PING_IDENTITY_DEVOPS_USER }}
       PING_IDENTITY_DEVOPS_KEY: ${{ secrets.PING_IDENTITY_DEVOPS_KEY }}
       PIPELINE_BUILD_REGISTRY: ${{ vars.PIPELINE_BUILD_REGISTRY }}
@@ -101,8 +111,9 @@ jobs:
           test -n "${PIPELINE_DEPS_REGISTRY}" || { echo 'Missing PIPELINE_DEPS_REGISTRY'; exit 1; }
           test -s "${AWS_SHARED_CREDENTIALS_FILE}" || { echo 'AWS credentials file is empty'; exit 1; }
           test -s "${AWS_CONFIG_FILE}" || { echo 'AWS config file is empty'; exit 1; }
-          kubectl cluster-info
-          kubectl get nodes -o custom-columns='NAME:.metadata.name,ARCH:.status.nodeInfo.architecture'
+          test "$(kubectl auth can-i create namespaces)" = yes || {
+            echo 'Runner service account cannot create namespaces'; exit 1;
+          }
 
       - name: Run PingDataConsole smoke
         run: |
@@ -119,12 +130,14 @@ jobs:
       - name: Capture smoke diagnostics
         if: ${{ always() }}
         run: |
-          kubectl get namespaces -o name > "namespaces-${EXPECTED_ARCH}.txt" || true
-          kubectl get pods --all-namespaces -o wide > "pods-${EXPECTED_ARCH}.txt" || true
+          kubectl get pods -o wide > "pods-${EXPECTED_ARCH}.txt" || true
+          kubectl get events --sort-by=.lastTimestamp > "events-${EXPECTED_ARCH}.txt" || true
 
-      - name: Clean up smoke namespaces
+      - name: Clean up smoke namespace
         if: ${{ always() }}
-        run: ./ci_scripts/cleanup_kubernetes.sh || true
+        run: |
+          namespace="dbt-${CI_COMMIT_REF_SLUG}-${CI_PIPELINE_ID}-${CI_JOB_ID}-1"
+          kubectl delete namespace "${namespace}" --ignore-not-found=true --wait=false || true
 
       - name: Remove AWS compatibility files
         if: ${{ always() }}
@@ -141,3 +154,4 @@ jobs:
             smoke-${{ inputs.expected_arch }}.log
             namespaces-${{ inputs.expected_arch }}.txt
             pods-${{ inputs.expected_arch }}.txt
+            events-${{ inputs.expected_arch }}.txt
