@@ -109,6 +109,8 @@ jobs:
       PIPELINE_BUILD_REGISTRY_VENDOR: ${{ vars.PIPELINE_BUILD_REGISTRY_VENDOR }}
       PIPELINE_BUILD_REPO: ${{ vars.PIPELINE_BUILD_REPO }}
       PIPELINE_DEPS_REGISTRY: ${{ vars.PIPELINE_DEPS_REGISTRY }}
+      AWS_SHARED_CREDENTIALS_FILE: ${{ runner.temp }}/aws-credentials
+      AWS_CONFIG_FILE: ${{ runner.temp }}/aws-config
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -152,6 +154,19 @@ jobs:
       - name: Set up tools
         uses: ./.github/actions/setup-tools
 
+      - name: Materialize AWS compatibility files
+        env:
+          AWS_CREDENTIALS_CONTENT: ${{ secrets.AWS_SHARED_CREDENTIALS_FILE }}
+          AWS_CONFIG_CONTENT: ${{ secrets.AWS_CONFIG_FILE }}
+        run: |
+          set -euo pipefail
+          test -n "${AWS_CREDENTIALS_CONTENT}" || { echo 'Missing AWS_SHARED_CREDENTIALS_FILE'; exit 1; }
+          test -n "${AWS_CONFIG_CONTENT}" || { echo 'Missing AWS_CONFIG_FILE'; exit 1; }
+          umask 077
+          printf '%s\n' "${AWS_CREDENTIALS_CONTENT}" > "${AWS_SHARED_CREDENTIALS_FILE}"
+          printf '%s\n' "${AWS_CONFIG_CONTENT}" > "${AWS_CONFIG_FILE}"
+          unset AWS_CREDENTIALS_CONTENT AWS_CONFIG_CONTENT
+
       - name: Verify smoke prerequisites
         run: |
           set -euo pipefail
@@ -159,6 +174,8 @@ jobs:
           test -n "${PING_IDENTITY_DEVOPS_KEY}" || { echo 'Missing PING_IDENTITY_DEVOPS_KEY'; exit 1; }
           test -n "${PIPELINE_BUILD_REGISTRY}" || { echo 'Missing PIPELINE_BUILD_REGISTRY'; exit 1; }
           test -n "${PIPELINE_DEPS_REGISTRY}" || { echo 'Missing PIPELINE_DEPS_REGISTRY'; exit 1; }
+          test -s "${AWS_SHARED_CREDENTIALS_FILE}" || { echo 'AWS credentials file is empty'; exit 1; }
+          test -s "${AWS_CONFIG_FILE}" || { echo 'AWS config file is empty'; exit 1; }
           kubectl cluster-info
           kubectl get nodes -o custom-columns='NAME:.metadata.name,ARCH:.status.nodeInfo.architecture'
 
@@ -183,6 +200,10 @@ jobs:
       - name: Clean up smoke namespaces
         if: ${{ always() }}
         run: ./ci_scripts/cleanup_kubernetes.sh || true
+
+      - name: Remove AWS compatibility files
+        if: ${{ always() }}
+        run: rm -f "${AWS_SHARED_CREDENTIALS_FILE}" "${AWS_CONFIG_FILE}"
 
       - name: Upload smoke diagnostics
         if: ${{ always() && (inputs.retain_logs || failure()) }}
