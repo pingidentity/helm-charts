@@ -30,7 +30,7 @@ runs:
         set -euo pipefail
         echo 'setup-tools: checking base packages'
         missing=()
-        for package in jq gettext-base libxml2-utils; do
+        for package in jq gettext-base libxml2-utils xz-utils; do
           case "$package" in
             jq) command_name=jq ;;
             gettext-base) command_name=envsubst ;;
