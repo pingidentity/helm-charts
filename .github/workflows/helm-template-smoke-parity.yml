@@ -95,6 +95,7 @@ jobs:
       expected_arch: x86_64
       runner: ping-internal-x86
       job_id: x86
+      cluster_name: helm-charts-runner
       retain_logs: ${{ inputs.retain_logs }}
     secrets: inherit
 
@@ -106,5 +107,6 @@ jobs:
       expected_arch: aarch64
       runner: ping-internal-arm
       job_id: arm
+      cluster_name: helm-charts-runner-arm
       retain_logs: ${{ inputs.retain_logs }}
     secrets: inherit
