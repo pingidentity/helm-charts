@@ -45,7 +45,6 @@ jobs:
       PIPELINE_BUILD_REPO: ${{ vars.PIPELINE_BUILD_REPO }}
       PIPELINE_DEPS_REGISTRY: ${{ vars.PIPELINE_DEPS_REGISTRY }}
       AWS_REGION: ${{ vars.AWS_REGION }}
-      KUBECONFIG: ${{ runner.temp }}/kubeconfig
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -109,11 +108,14 @@ jobs:
           unset AWS_CREDENTIALS_CONTENT AWS_CONFIG_CONTENT
 
       - name: Configure test cluster access
+        env:
+          KUBECONFIG: ${{ runner.temp }}/kubeconfig
         run: |
           set -euo pipefail
           aws eks update-kubeconfig --name "${{ inputs.cluster_name }}" --region "${AWS_REGION}" --kubeconfig "${KUBECONFIG}"
           kubectl version
           kubectl config current-context
+          printf 'KUBECONFIG=%s\n' "${KUBECONFIG}" >> "${GITHUB_ENV}"
 
       - name: Verify smoke prerequisites
         run: |
@@ -154,6 +156,8 @@ jobs:
 
       - name: Remove AWS compatibility files
         if: ${{ always() }}
+        env:
+          KUBECONFIG: ${{ runner.temp }}/kubeconfig
         run: rm -f "${AWS_SHARED_CREDENTIALS_FILE}" "${AWS_CONFIG_FILE}" "${KUBECONFIG}"
 
       - name: Upload smoke diagnostics
