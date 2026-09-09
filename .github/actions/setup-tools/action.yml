@@ -94,7 +94,7 @@ runs:
           aarch64|arm64) arch=aarch64 ;;
           *) echo "Unsupported architecture: $arch" >&2; exit 1 ;;
         esac
-        archive="awscli-v2-${AWSCLI_VERSION}.zip"
+        archive="awscli-exe-linux-${arch}-${AWSCLI_VERSION}.zip"
         echo "setup-tools: downloading ${archive}"
         timeout 180s curl --fail --silent --show-error --location \
           "https://awscli.amazonaws.com/${archive}" --output "$RUNNER_TEMP/$archive"
