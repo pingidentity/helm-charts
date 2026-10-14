@@ -12,3 +12,7 @@ type: application
 home: https://helm.pingidentity.com/
 icon: https://helm.pingidentity.com/img/logos/ping.png
 appVersion: "2609"
+# Oldest supported Kubernetes version. Rolling latest-3 policy; bump is a
+# breaking change announced in release notes. The -0 suffix admits prerelease
+# kube versions (see 0.9.21).
+kubeVersion: ">=1.31.0-0"

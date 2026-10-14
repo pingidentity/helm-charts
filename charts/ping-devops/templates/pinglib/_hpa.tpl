@@ -1,11 +1,7 @@
 {{- define "pinglib.hpa.tpl" -}}
 {{- $top := index . 0 -}}
 {{- $v := index . 1 -}}
-{{- if $top.Capabilities.APIVersions.Has "autoscaling/v2" }}
 apiVersion: autoscaling/v2
-{{- else }}
-apiVersion: autoscaling/v2beta2
-{{- end }}
 kind: HorizontalPodAutoscaler
 metadata:
   {{ include "pinglib.metadata.labels" . | nindent 2  }}

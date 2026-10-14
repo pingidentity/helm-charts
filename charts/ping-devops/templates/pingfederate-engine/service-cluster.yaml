@@ -4,8 +4,7 @@
 
 {{- define "pingfederate-engine.service-cluster" -}}
 metadata:
-  annotations:
-    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+  annotations: {}
 spec:
   publishNotReadyAddresses: true
   selector:

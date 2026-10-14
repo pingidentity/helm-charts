@@ -22,7 +22,6 @@ metadata:
   annotations:
     external-dns.alpha.kubernetes.io/hostname: set1.west.ping-multi-cluster.com
     external-dns.alpha.kubernetes.io/myannotation: mycustomannotation
-    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
   name: annotation-pingdirectory-cluster
 ---
 apiVersion: v1
