@@ -292,9 +292,11 @@ if operation == Operation.test:
     releaseName = os.path.splitext(os.path.basename(testFile))[0]
     if 'releaseName' in params:
         releaseName = params['releaseName']
-    kubeVersionArg = ""
-    if 'kubeVersion' in params and params['kubeVersion']:
-        kubeVersionArg = " --kube-version " + str(params['kubeVersion'])
+    # Tests without an explicit pin run at the chart's declared support floor.
+    # Older helm builds default Capabilities.KubeVersion below the floor
+    # (e.g. v1.24.0 in helm 3.9), which the chart's kubeVersion constraint rejects.
+    kubeVersion = params.get('kubeVersion') or 'v1.31.0'
+    kubeVersionArg = " --kube-version " + str(kubeVersion)
     expectHelmTemplateFailure = bool(params.get('expectHelmTemplateFailure', False))
     expectedHelmTemplateError = params.get('expectedHelmTemplateError')
 

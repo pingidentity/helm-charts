@@ -1,10 +1,13 @@
 # This test covers version-gated unhealthyPodEvictionPolicy rendering.
+# On sub-1.31 clusters the chart-level kubeVersion floor (Chart.yaml)
+# rejects the install before the PDB gate is evaluated, so the expected
+# error is the chart constraint violation.
 ### SECTION:PARAMETERS ###
 releaseName: pdbversiongate
 skipTest: false
 kubeVersion: v1.30.0
 expectHelmTemplateFailure: true
-expectedHelmTemplateError: requires Kubernetes v1.31+
+expectedHelmTemplateError: 'chart requires kubeVersion: >=1.31.0-0 which is incompatible with Kubernetes v1.30.0'
 ### SECTION:VALUES ###
 global:
   envs:
