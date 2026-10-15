@@ -1,0 +1,28 @@
+# Verifies the chart renders at the current Kubernetes head (latest EKS
+# minor the CI fleets target). Pins the top of the supported matrix;
+# bump alongside each Chart.yaml kubeVersion floor raise.
+### SECTION:PARAMETERS ###
+releaseName: headv137
+skipTest: false
+kubeVersion: v1.37.0
+### SECTION:VALUES ###
+global:
+  envs:
+    PING_IDENTITY_ACCEPT_EULA: "YES"
+
+pingfederate-admin:
+  enabled: true
+  workload:
+    podDisruptionBudget:
+      enabled: true
+      minAvailable: 1
+      unhealthyPodEvictionPolicy: AlwaysAllow
+### SECTION:EXPECTED ###
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: headv137-pingfederate-admin
+spec:
+  unhealthyPodEvictionPolicy: AlwaysAllow
+---
+### SECTION:UNEXPECTED ###

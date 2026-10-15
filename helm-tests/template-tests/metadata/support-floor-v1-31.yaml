@@ -1,0 +1,29 @@
+# Verifies the chart renders at the declared support floor (Chart.yaml
+# kubeVersion ">=1.31.0-0"). The PDB unhealthyPodEvictionPolicy gate is
+# satisfied at the floor, so the policy must appear in the render.
+### SECTION:PARAMETERS ###
+releaseName: floorv131
+skipTest: false
+kubeVersion: v1.31.0
+### SECTION:VALUES ###
+global:
+  envs:
+    PING_IDENTITY_ACCEPT_EULA: "YES"
+
+pingfederate-admin:
+  enabled: true
+  workload:
+    podDisruptionBudget:
+      enabled: true
+      minAvailable: 1
+      unhealthyPodEvictionPolicy: AlwaysAllow
+### SECTION:EXPECTED ###
+# unhealthyPodEvictionPolicy must render unconditionally at the floor
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: floorv131-pingfederate-admin
+spec:
+  unhealthyPodEvictionPolicy: AlwaysAllow
+---
+### SECTION:UNEXPECTED ###

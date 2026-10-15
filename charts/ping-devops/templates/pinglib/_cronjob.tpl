@@ -14,11 +14,7 @@
 {{- end -}}
 {{- $args := list "-c" $shellCmd -}}
 
-{{- if $top.Capabilities.APIVersions.Has "batch/v1" }}
 apiVersion: batch/v1
-{{- else }}
-apiVersion: batch/v1beta1
-{{- end }}
 kind: CronJob
 metadata:
   {{ include "pinglib.metadata.labels" . | nindent 2 }}
