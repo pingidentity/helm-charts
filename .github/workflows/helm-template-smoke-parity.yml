@@ -1,0 +1,115 @@
+name: Helm template and smoke parity probe
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_template_tests:
+        description: Run the focused and complete template suites
+        type: boolean
+        required: true
+        default: true
+      run_smoke_x86:
+        description: Run PingDataConsole smoke on the private x86 runner
+        type: boolean
+        required: true
+        default: false
+      run_smoke_arm:
+        description: Run PingDataConsole smoke on the private ARM runner
+        type: boolean
+        required: true
+        default: false
+      retain_logs:
+        description: Retain diagnostics on successful jobs
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: helm-template-smoke-parity-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CI_COMMIT_REF_NAME: ${{ github.ref_name }}
+  # Keep the namespace prefix DNS-safe even when the branch contains '/'.
+  CI_COMMIT_REF_SLUG: helm-ci
+  CI_COMMIT_SHA: ${{ github.sha }}
+  CI_COMMIT_SHORT_SHA: ${{ github.sha }}
+  CI_PIPELINE_ID: ${{ github.run_id }}
+  CI_PROJECT_DIR: ${{ github.workspace }}
+  CI_JOB_ID: ${{ github.job }}
+
+jobs:
+  template:
+    name: Template tests
+    if: ${{ inputs.run_template_tests }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+          fetch-depth: 1
+
+      - name: Set up tools
+        uses: ./.github/actions/setup-tools
+
+      - name: Install template-test dependency
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/template-venv"
+          "$RUNNER_TEMP/template-venv/bin/python" -m pip install --disable-pip-version-check PyYAML==6.0.2
+          echo "$RUNNER_TEMP/template-venv/bin" >> "$GITHUB_PATH"
+
+      - name: Run focused template test
+        run: |
+          set -o pipefail
+          ./ci_scripts/test_helm_template.py test \
+            --test-file helm-tests/template-tests/gateway/gateway-http-route.yaml \
+            2>&1 | tee focused-template-test.log
+
+      - name: Run complete template suite
+        run: |
+          set -o pipefail
+          ./ci_scripts/run_helm_template_tests.sh 2>&1 | tee template-tests.log
+
+      - name: Upload template diagnostics
+        if: ${{ always() && (inputs.retain_logs || failure()) }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: helm-template-tests-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            focused-template-test.log
+            template-tests.log
+
+  smoke_x86:
+    name: PingDataConsole smoke (x86_64)
+    if: ${{ inputs.run_smoke_x86 }}
+    uses: ./.github/workflows/reusable-helm-smoke.yml
+    with:
+      expected_arch: x86_64
+      runner: ping-internal-x86
+      job_id: x86
+      cluster_name: helm-charts-runner
+      cluster_server: https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com
+      retain_logs: ${{ inputs.retain_logs }}
+    secrets: inherit
+
+  smoke_arm:
+    name: PingDataConsole smoke (aarch64)
+    if: ${{ inputs.run_smoke_arm }}
+    uses: ./.github/workflows/reusable-helm-smoke.yml
+    with:
+      expected_arch: aarch64
+      runner: ping-internal-arm
+      job_id: arm
+      cluster_name: helm-charts-runner-arm
+      cluster_server: https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com
+      retain_logs: ${{ inputs.retain_logs }}
+    secrets: inherit

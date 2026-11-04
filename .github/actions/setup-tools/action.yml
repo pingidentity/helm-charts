@@ -17,6 +17,10 @@ inputs:
     description: kubectl minor stream to install when kubectl is unavailable
     required: false
     default: '1.36.3'
+  awscli-version:
+    description: AWS CLI version to install when AWS CLI is unavailable or mismatched
+    required: false
+    default: '2.36.41'
   oc-version:
     description: OpenShift client version to install when oc is unavailable
     required: false
@@ -30,7 +34,7 @@ runs:
         set -euo pipefail
         echo 'setup-tools: checking base packages'
         missing=()
-        for package in jq gettext-base libxml2-utils; do
+        for package in jq gettext-base libxml2-utils xz-utils; do
           case "$package" in
             jq) command_name=jq ;;
             gettext-base) command_name=envsubst ;;
@@ -72,6 +76,32 @@ runs:
         sudo install -m 0755 "$RUNNER_TEMP/linux-${arch}/helm" /usr/local/bin/helm
         helm version
         echo 'setup-tools: Helm complete'
+
+    - name: Install AWS CLI
+      shell: bash
+      env:
+        AWSCLI_VERSION: ${{ inputs.awscli-version }}
+      run: |
+        set -euo pipefail
+        echo "setup-tools: checking AWS CLI ${AWSCLI_VERSION}"
+        if command -v aws >/dev/null 2>&1 && aws --version 2>/dev/null | grep -q "aws-cli/${AWSCLI_VERSION//./\\.}"; then
+          echo 'setup-tools: AWS CLI already available'
+          exit 0
+        fi
+        arch=$(uname -m)
+        case "$arch" in
+          x86_64) arch=x86_64 ;;
+          aarch64|arm64) arch=aarch64 ;;
+          *) echo "Unsupported architecture: $arch" >&2; exit 1 ;;
+        esac
+        archive="awscli-exe-linux-${arch}-${AWSCLI_VERSION}.zip"
+        echo "setup-tools: downloading ${archive}"
+        timeout 180s curl --fail --silent --show-error --location \
+          "https://awscli.amazonaws.com/${archive}" --output "$RUNNER_TEMP/$archive"
+        unzip -q -o "$RUNNER_TEMP/$archive" -d "$RUNNER_TEMP/awscli"
+        sudo "$RUNNER_TEMP/awscli/aws/install" --update
+        aws --version
+        echo 'setup-tools: AWS CLI complete'
 
     - name: Install shellcheck
       shell: bash
@@ -185,5 +215,6 @@ runs:
         printf 'shfmt='; shfmt --version
         printf 'jq='; jq --version
         printf 'python='; python3 --version
+        printf 'aws='; aws --version
         printf 'kubectl='; kubectl version --client=true --output=json | jq -r '.clientVersion.gitVersion'
         printf 'oc='; oc version --client=true | sed -n '1p'
