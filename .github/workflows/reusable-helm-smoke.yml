@@ -23,10 +23,6 @@ on:
         description: EKS cluster API endpoint
         required: true
         type: string
-      cluster_ca:
-        description: Base64 cluster CA bundle (public key material)
-        required: true
-        type: string
 
 permissions:
   contents: read
@@ -108,10 +104,18 @@ jobs:
           KUBECONFIG: ${{ runner.temp }}/kubeconfig
           EKS_CLUSTER: ${{ inputs.cluster_name }}
           EKS_SERVER: ${{ inputs.cluster_server }}
-          EKS_CA: ${{ inputs.cluster_ca }}
+          # Resolve the CA here, inside the job that declares environment:
+          # helm-test — environment variables are invisible to the caller.
+          EKS_CA_X86: ${{ vars.EKS_X86_CA }}
+          EKS_CA_ARM: ${{ vars.EKS_ARM_CA }}
         run: |
           set -euo pipefail
-          test -n "${EKS_CA}" || { echo 'Missing cluster CA variable'; exit 1; }
+          case "${EXPECTED_ARCH}" in
+            x86_64) EKS_CA="${EKS_CA_X86}" ;;
+            aarch64) EKS_CA="${EKS_CA_ARM}" ;;
+            *) echo "Unknown arch ${EXPECTED_ARCH}"; exit 1 ;;
+          esac
+          test -n "${EKS_CA}" || { echo "Missing cluster CA variable for ${EXPECTED_ARCH}"; exit 1; }
           cat > "${KUBECONFIG}" <<EOF
           apiVersion: v1
           kind: Config
@@ -176,13 +180,13 @@ jobs:
           exit 1
 
       - name: Capture smoke diagnostics
-        if: ${{ always() }}
+        if: ${{ always() && env.HELM_CI_NAMESPACE != '' }}
         run: |
           kubectl get pods -o wide -n "${HELM_CI_NAMESPACE}" > "pods-${EXPECTED_ARCH}.txt" || true
           kubectl get events --sort-by=.lastTimestamp -n "${HELM_CI_NAMESPACE}" > "events-${EXPECTED_ARCH}.txt" || true
 
       - name: Clean up smoke artifacts and release pool claim
-        if: ${{ always() }}
+        if: ${{ always() && env.HELM_CI_NAMESPACE != '' }}
         run: |
           kubectl delete pvc,configmap,secret -n "${HELM_CI_NAMESPACE}" --all \
             --ignore-not-found=true || true

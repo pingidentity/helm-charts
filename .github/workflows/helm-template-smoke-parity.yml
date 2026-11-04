@@ -98,7 +98,6 @@ jobs:
       job_id: x86
       cluster_name: helm-charts-runner
       cluster_server: https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com
-      cluster_ca: ${{ vars.EKS_X86_CA }}
       retain_logs: ${{ inputs.retain_logs }}
     secrets: inherit
 
@@ -112,6 +111,5 @@ jobs:
       job_id: arm
       cluster_name: helm-charts-runner-arm
       cluster_server: https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com
-      cluster_ca: ${{ vars.EKS_ARM_CA }}
       retain_logs: ${{ inputs.retain_logs }}
     secrets: inherit
