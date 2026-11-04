@@ -24,6 +24,10 @@ Usage: ${0} {options}
         Override the image-tags with this single tag.  Good for testing against a released
         version (i.e. sprint of 2105)
 
+    --namespace {namespace-name}
+        Run all smoke tests inside this existing namespace.
+        The namespace must already exist and will not be created or deleted.
+
     --help
         Display general usage information
 END_USAGE
@@ -63,6 +67,11 @@ while test -n "${1}"; do
             test -z "${2}" && usage "You must specify an image-tag-override ${1} option (i.e. 2105)"
             shift
             _image_tag_override="${1}"
+            ;;
+        --namespace)
+            test -z "${2}" && usage "You must provide a namespace with the ${1} option"
+            shift
+            NS_OPT="--namespace ${1}"
             ;;
         --help)
             usage
