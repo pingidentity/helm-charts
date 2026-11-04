@@ -26,6 +26,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 concurrency:
   group: helm-template-smoke-parity-${{ github.ref }}
