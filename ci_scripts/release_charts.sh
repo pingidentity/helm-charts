@@ -26,7 +26,10 @@ git clone "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-
 cd helm-charts || exit
 
 function check_for_draft_release() {
-    sem_version=$(grep "version" charts/ping-devops/Chart.yaml | awk '{print $2}')
+    # Anchor to the exact "version:" key. A bare "version" grep also matches
+    # kubeVersion and comment lines mentioning "version", and awk then builds
+    # the tag from the last match (broke 0.17.0: "0.17.0\nOldest\nkube").
+    sem_version=$(grep '^version:' charts/ping-devops/Chart.yaml | awk '{print $2}')
     expected_tag="ping-devops-${sem_version}"
 
     if test "${CI_COMMIT_TAG}" != "${expected_tag}"; then
