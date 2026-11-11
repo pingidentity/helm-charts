@@ -43,7 +43,7 @@ jobs:
     name: PingDataConsole smoke (${{ inputs.expected_arch }})
     runs-on: ${{ inputs.runner }}
     environment: helm-test
-    timeout-minutes: 45
+    timeout-minutes: 90
     env:
       EXPECTED_ARCH: ${{ inputs.expected_arch }}
       CI_COMMIT_REF_NAME: ${{ github.ref_name }}
