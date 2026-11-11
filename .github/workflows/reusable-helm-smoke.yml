@@ -23,6 +23,11 @@ on:
         description: EKS cluster API endpoint
         required: true
         type: string
+      smoke_product:
+        description: Smoke product to run (helm-tests/smoke-tests/<product>)
+        required: false
+        type: string
+        default: pingdataconsole
 
 permissions:
   contents: read
@@ -168,11 +173,27 @@ jobs:
           }
 
       - name: Run PingDataConsole smoke
+        if: ${{ inputs.smoke_product == 'pingdataconsole' }}
         run: |
           set -euo pipefail
           for attempt in 1 2 3; do
             printf 'smoke_attempt=%s\n' "$attempt" | tee -a "smoke-${EXPECTED_ARCH}.log"
             if ./ci_scripts/run_helm_smoke.sh --product pingdataconsole --namespace "${HELM_CI_NAMESPACE}" 2>&1 | tee -a "smoke-${EXPECTED_ARCH}.log"; then
+              exit 0
+            fi
+            test "$attempt" -lt 3 && sleep 10
+          done
+          exit 1
+
+      - name: Run PingDirectory smoke (Bruno)
+        if: ${{ inputs.smoke_product == 'pingdirectory' }}
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            printf 'smoke_attempt=%s\n' "$attempt" | tee -a "smoke-${EXPECTED_ARCH}.log"
+            # Target the bruno yaml explicitly (single file) so the parallel-run
+            # newman yaml in the same directory is not also executed.
+            if ./ci_scripts/run_helm_smoke.sh --product pingdirectory --namespace "${HELM_CI_NAMESPACE}" --helm-test helm-tests/smoke-tests/pingdirectory/pd-bruno-smoke.yaml 2>&1 | tee -a "smoke-${EXPECTED_ARCH}.log"; then
               exit 0
             fi
             test "$attempt" -lt 3 && sleep 10

@@ -28,6 +28,12 @@ Usage: ${0} {options}
         Run all smoke tests inside this existing namespace.
         The namespace must already exist and will not be created or deleted.
 
+    --helm-test {test-path}
+        Override the smoke test file/dir passed to run_helm_tests.sh.
+        Defaults to helm-tests/smoke-tests/<product>. Useful for parallel-run
+        suites (e.g. helm-tests/smoke-tests/<product>/<product>-bruno-smoke.yaml)
+        where the directory contains both the newman and bruno yaml variants.
+
     --help
         Display general usage information
 END_USAGE
@@ -72,6 +78,11 @@ while test -n "${1}"; do
             test -z "${2}" && usage "You must provide a namespace with the ${1} option"
             shift
             NS_OPT="--namespace ${1}"
+            ;;
+        --helm-test)
+            test -z "${2}" && usage "You must provide a test path with the ${1} option"
+            shift
+            _helm_test_override="${1}"
             ;;
         --help)
             usage
@@ -210,7 +221,7 @@ _pids=()
 #
 # Calculating test to be run
 #
-_test="${CI_PROJECT_DIR}/helm-tests/smoke-tests/${product}"
+_test="${_helm_test_override:-${CI_PROJECT_DIR}/helm-tests/smoke-tests/${product}}"
 banner "Running smoke test found at: ${_test}"
 
 #If this is a snapshot pipeline, override the image tag to snapshot image tags

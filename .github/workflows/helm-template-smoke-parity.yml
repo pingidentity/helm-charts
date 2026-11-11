@@ -18,6 +18,16 @@ on:
         type: boolean
         required: true
         default: false
+      run_smoke_bruno_x86:
+        description: Run PingDirectory smoke (Bruno) on the private x86 runner
+        type: boolean
+        required: true
+        default: false
+      run_smoke_bruno_arm:
+        description: Run PingDirectory smoke (Bruno) on the private ARM runner
+        type: boolean
+        required: true
+        default: false
       run_integration_x86:
         description: Run representative integration test on the private x86 runner
         type: boolean
@@ -131,6 +141,34 @@ jobs:
       job_id: arm
       cluster_name: helm-charts-runner-arm
       cluster_server: https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com
+      retain_logs: ${{ inputs.retain_logs }}
+    secrets: inherit
+
+  smoke_bruno_x86:
+    name: PingDirectory smoke — Bruno (x86_64)
+    if: ${{ inputs.run_smoke_bruno_x86 }}
+    uses: ./.github/workflows/reusable-helm-smoke.yml
+    with:
+      expected_arch: x86_64
+      runner: ping-internal-x86
+      job_id: x86
+      cluster_name: helm-charts-runner
+      cluster_server: https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com
+      smoke_product: pingdirectory
+      retain_logs: ${{ inputs.retain_logs }}
+    secrets: inherit
+
+  smoke_bruno_arm:
+    name: PingDirectory smoke — Bruno (aarch64)
+    if: ${{ inputs.run_smoke_bruno_arm }}
+    uses: ./.github/workflows/reusable-helm-smoke.yml
+    with:
+      expected_arch: aarch64
+      runner: ping-internal-arm
+      job_id: arm
+      cluster_name: helm-charts-runner-arm
+      cluster_server: https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com
+      smoke_product: pingdirectory
       retain_logs: ${{ inputs.retain_logs }}
     secrets: inherit
 
