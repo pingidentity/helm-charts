@@ -198,30 +198,13 @@ jobs:
             pingdirectoryproxy) bruno_yaml=pdp-bruno-smoke.yaml ;;
             pingfederate)       bruno_yaml=pf-bruno-smoke.yaml ;;
             pingaccess)         bruno_yaml=pa-bruno-smoke.yaml ;;
+            pingdataconsole)    bruno_yaml=pdc-bruno-smoke.yaml ;;
             *) echo "Unknown bruno smoke product '${SMOKE_PRODUCT}'"; exit 1 ;;
           esac
           for attempt in 1 2 3; do
             printf 'smoke_attempt=%s\n' "$attempt" | tee -a "smoke-${EXPECTED_ARCH}.log"
             if ./ci_scripts/run_helm_smoke.sh --product "${SMOKE_PRODUCT}" --namespace "${HELM_CI_NAMESPACE}" \
                 --helm-test "helm-tests/smoke-tests/${SMOKE_PRODUCT}/${bruno_yaml}" 2>&1 | tee -a "smoke-${EXPECTED_ARCH}.log"; then
-              exit 0
-            fi
-            test "$attempt" -lt 3 && sleep 10
-          done
-          exit 1
-
-      - name: Run PingDataConsole smoke (Bruno)
-        if: ${{ inputs.smoke_product == 'pingdataconsole-bruno' }}
-        run: |
-          set -euo pipefail
-          # pingdataconsole's own directory holds both the newman and the bruno
-          # yaml; target the bruno yaml explicitly. Running both in one namespace
-          # collides (the newman pdc suite failed 'could not load environment'
-          # against the shared -env-vars CMs while the bruno suite passed).
-          for attempt in 1 2 3; do
-            printf 'smoke_attempt=%s\n' "$attempt" | tee -a "smoke-${EXPECTED_ARCH}.log"
-            if ./ci_scripts/run_helm_smoke.sh --product pingdataconsole --namespace "${HELM_CI_NAMESPACE}" \
-                --helm-test helm-tests/smoke-tests/pingdataconsole/pdc-bruno-smoke.yaml 2>&1 | tee -a "smoke-${EXPECTED_ARCH}.log"; then
               exit 0
             fi
             test "$attempt" -lt 3 && sleep 10
