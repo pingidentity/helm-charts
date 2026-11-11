@@ -185,15 +185,25 @@ jobs:
           done
           exit 1
 
-      - name: Run PingDirectory smoke (Bruno)
-        if: ${{ inputs.smoke_product == 'pingdirectory' }}
+      - name: Run smoke (Bruno)
+        if: ${{ inputs.smoke_product != 'pingdataconsole' }}
+        env:
+          SMOKE_PRODUCT: ${{ inputs.smoke_product }}
         run: |
           set -euo pipefail
+          # Resolve the suite's bruno yaml explicitly (single file) so the
+          # parallel-run newman yaml in the same directory is not also executed.
+          case "${SMOKE_PRODUCT}" in
+            pingdirectory)      bruno_yaml=pd-bruno-smoke.yaml ;;
+            pingdirectoryproxy) bruno_yaml=pdp-bruno-smoke.yaml ;;
+            pingfederate)       bruno_yaml=pf-bruno-smoke.yaml ;;
+            pingaccess)         bruno_yaml=pa-bruno-smoke.yaml ;;
+            *) echo "Unknown bruno smoke product '${SMOKE_PRODUCT}'"; exit 1 ;;
+          esac
           for attempt in 1 2 3; do
             printf 'smoke_attempt=%s\n' "$attempt" | tee -a "smoke-${EXPECTED_ARCH}.log"
-            # Target the bruno yaml explicitly (single file) so the parallel-run
-            # newman yaml in the same directory is not also executed.
-            if ./ci_scripts/run_helm_smoke.sh --product pingdirectory --namespace "${HELM_CI_NAMESPACE}" --helm-test helm-tests/smoke-tests/pingdirectory/pd-bruno-smoke.yaml 2>&1 | tee -a "smoke-${EXPECTED_ARCH}.log"; then
+            if ./ci_scripts/run_helm_smoke.sh --product "${SMOKE_PRODUCT}" --namespace "${HELM_CI_NAMESPACE}" \
+                --helm-test "helm-tests/smoke-tests/${SMOKE_PRODUCT}/${bruno_yaml}" 2>&1 | tee -a "smoke-${EXPECTED_ARCH}.log"; then
               exit 0
             fi
             test "$attempt" -lt 3 && sleep 10

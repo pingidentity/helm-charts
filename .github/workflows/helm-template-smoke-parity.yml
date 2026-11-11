@@ -19,15 +19,20 @@ on:
         required: true
         default: false
       run_smoke_bruno_x86:
-        description: Run PingDirectory smoke (Bruno) on the private x86 runner
+        description: Run Bruno smoke (smoke_product) on the private x86 runner
         type: boolean
         required: true
         default: false
       run_smoke_bruno_arm:
-        description: Run PingDirectory smoke (Bruno) on the private ARM runner
+        description: Run Bruno smoke (smoke_product) on the private ARM runner
         type: boolean
         required: true
         default: false
+      smoke_product:
+        description: Bruno smoke product (pingdirectory|pingdirectoryproxy|pingfederate|pingaccess)
+        type: string
+        required: false
+        default: pingdirectory
       run_integration_x86:
         description: Run representative integration test on the private x86 runner
         type: boolean
@@ -145,7 +150,7 @@ jobs:
     secrets: inherit
 
   smoke_bruno_x86:
-    name: PingDirectory smoke — Bruno (x86_64)
+    name: Smoke — Bruno ${{ inputs.smoke_product }} (x86_64)
     if: ${{ inputs.run_smoke_bruno_x86 }}
     uses: ./.github/workflows/reusable-helm-smoke.yml
     with:
@@ -154,12 +159,12 @@ jobs:
       job_id: x86
       cluster_name: helm-charts-runner
       cluster_server: https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com
-      smoke_product: pingdirectory
+      smoke_product: ${{ inputs.smoke_product }}
       retain_logs: ${{ inputs.retain_logs }}
     secrets: inherit
 
   smoke_bruno_arm:
-    name: PingDirectory smoke — Bruno (aarch64)
+    name: Smoke — Bruno ${{ inputs.smoke_product }} (aarch64)
     if: ${{ inputs.run_smoke_bruno_arm }}
     uses: ./.github/workflows/reusable-helm-smoke.yml
     with:
@@ -168,7 +173,7 @@ jobs:
       job_id: arm
       cluster_name: helm-charts-runner-arm
       cluster_server: https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com
-      smoke_product: pingdirectory
+      smoke_product: ${{ inputs.smoke_product }}
       retain_logs: ${{ inputs.retain_logs }}
     secrets: inherit
 
