@@ -1,0 +1,271 @@
+name: Reusable Helm integration test
+
+on:
+  workflow_call:
+    inputs:
+      expected_arch:
+        required: true
+        type: string
+      runner:
+        required: true
+        type: string
+      retain_logs:
+        required: true
+        type: boolean
+      job_id:
+        required: true
+        type: string
+      cluster_name:
+        description: EKS cluster the integration tests deploy into
+        required: true
+        type: string
+      cluster_server:
+        description: EKS cluster API endpoint
+        required: true
+        type: string
+      integration_test:
+        description: Test name under helm-tests/<test_directory>
+        required: true
+        type: string
+      helm_chart:
+        description: Chart directory passed to run_helm_integration.sh
+        required: true
+        type: string
+      test_directory:
+        description: Subdirectory of helm-tests to resolve integration_test in
+        required: false
+        type: string
+        default: integration-tests
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  integration:
+    name: ${{ inputs.test_directory }}/${{ inputs.integration_test }} (${{ inputs.expected_arch }})
+    runs-on: ${{ inputs.runner }}
+    environment: helm-test
+    timeout-minutes: 45
+    env:
+      EXPECTED_ARCH: ${{ inputs.expected_arch }}
+      CI_COMMIT_REF_NAME: ${{ github.ref_name }}
+      CI_COMMIT_REF_SLUG: helm-ci
+      CI_COMMIT_SHA: ${{ github.sha }}
+      CI_COMMIT_SHORT_SHA: ${{ github.sha }}
+      CI_PIPELINE_ID: ${{ github.run_id }}
+      CI_PROJECT_DIR: ${{ github.workspace }}
+      CI_JOB_ID: ${{ inputs.job_id }}
+      PING_IDENTITY_DEVOPS_USER: ${{ vars.PING_IDENTITY_DEVOPS_USER }}
+      PING_IDENTITY_DEVOPS_KEY: ${{ secrets.PING_IDENTITY_DEVOPS_KEY }}
+      PIPELINE_BUILD_REGISTRY: ${{ vars.PIPELINE_BUILD_REGISTRY }}
+      PIPELINE_BUILD_REGISTRY_VENDOR: ${{ vars.PIPELINE_BUILD_REGISTRY_VENDOR }}
+      PIPELINE_BUILD_REPO: ${{ vars.PIPELINE_BUILD_REPO }}
+      PIPELINE_DEPS_REGISTRY: ${{ vars.PIPELINE_DEPS_REGISTRY }}
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      # httpcan post-renderer (auto-detected by run_helm_integration.sh) pulls
+      # its image from here; verified present at httpcan:0.5.3.
+      ARTIFACTORY_REGISTRY: ${{ vars.ARTIFACTORY_REGISTRY || 'docker.corp.pingidentity.com:5300' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+          fetch-depth: 1
+
+      - name: Create submodule GitHub App token
+        id: submodule-app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.SUBMODULE_APP_ID }}
+          private-key: ${{ secrets.SUBMODULE_APP_PRIVATE_KEY }}
+          owner: ping-internal
+          repositories: cdi-shared-configs
+          permission-contents: read
+
+      - name: Checkout private submodule
+        env:
+          GH_TOKEN: ${{ steps.submodule-app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          cleanup() {
+            git config --global --unset-all url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
+          git submodule sync --recursive
+          git -c protocol.version=2 submodule update --init --force --depth=1 --recursive
+
+      - name: Verify runner architecture
+        run: |
+          set -euo pipefail
+          actual_arch=$(uname -m)
+          case "${EXPECTED_ARCH}:${actual_arch}" in
+            x86_64:x86_64|aarch64:aarch64|aarch64:arm64) ;;
+            *) echo "Expected ${EXPECTED_ARCH}, got ${actual_arch}" >&2; exit 1 ;;
+          esac
+          printf 'runner=%s\narchitecture=%s\n' "$RUNNER_NAME" "$actual_arch"
+
+      - name: Set up tools
+        uses: ./.github/actions/setup-tools
+
+      - name: Assume CI role via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::574076504146:role/helm-charts-ci
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Configure test cluster access
+        env:
+          KUBECONFIG: ${{ runner.temp }}/kubeconfig
+          EKS_CLUSTER: ${{ inputs.cluster_name }}
+          EKS_SERVER: ${{ inputs.cluster_server }}
+          # Resolve the CA here, inside the job that declares environment:
+          # helm-test — environment variables are invisible to the caller.
+          EKS_CA_X86: ${{ vars.EKS_X86_CA }}
+          EKS_CA_ARM: ${{ vars.EKS_ARM_CA }}
+        run: |
+          set -euo pipefail
+          case "${EXPECTED_ARCH}" in
+            x86_64) EKS_CA="${EKS_CA_X86}" ;;
+            aarch64) EKS_CA="${EKS_CA_ARM}" ;;
+            *) echo "Unknown arch ${EXPECTED_ARCH}"; exit 1 ;;
+          esac
+          test -n "${EKS_CA}" || { echo "Missing cluster CA variable for ${EXPECTED_ARCH}"; exit 1; }
+          cat > "${KUBECONFIG}" <<EOF
+          apiVersion: v1
+          kind: Config
+          clusters:
+          - name: ${EKS_CLUSTER}
+            cluster:
+              server: ${EKS_SERVER}
+              certificate-authority-data: ${EKS_CA}
+          users:
+          - name: helm-charts-ci
+            user:
+              exec:
+                apiVersion: client.authentication.k8s.io/v1beta1
+                command: aws
+                args: ["eks", "get-token", "--cluster-name", "${EKS_CLUSTER}", "--region", "${AWS_REGION}"]
+                interactiveMode: Never
+          contexts:
+          - name: ${EKS_CLUSTER}
+            context: {cluster: ${EKS_CLUSTER}, user: helm-charts-ci}
+          current-context: ${EKS_CLUSTER}
+          EOF
+          printf 'KUBECONFIG=%s\n' "${KUBECONFIG}" >> "${GITHUB_ENV}"
+          kubectl version --client=false
+          kubectl config current-context
+
+      - name: Claim pool namespace
+        run: |
+          set -euo pipefail
+          pool=$(( GITHUB_RUN_ID % 5 ))
+          ns="ppds-ci-pool-${pool}"
+          kubectl get ns "${ns}" > /dev/null || { echo "Pool namespace ${ns} missing"; exit 1; }
+          {
+            printf 'HELM_CI_NAMESPACE=%s\n' "${ns}"
+            printf 'HELM_CI_POOL=%s\n' "${pool}"
+          } >> "${GITHUB_ENV}"
+          printf 'Claimed %s\n' "${ns}"
+
+      - name: Assemble examples-test values from getting-started
+        if: ${{ inputs.test_directory == 'examples-test' }}
+        run: |
+          set -euo pipefail
+          # GitLab before_script equivalent: clone pingidentity-devops-getting-started
+          # and concat the example yaml with the teststeps file into
+          # helm-tests/examples-test/<test>/<test>.yaml (mirror the .gitlab-ci.yml
+          # mapping for the known examples).
+          example_yaml=""
+          teststeps="helm-tests/examples-test/${{ inputs.integration_test }}/teststeps/${{ inputs.integration_test }}.yaml"
+          case "${{ inputs.integration_test }}" in
+            everything)
+              example_yaml="30-helm/everything.yaml"
+              teststeps="helm-tests/examples-test/everything/teststeps/everythingteststeps.yaml"
+              ;;
+            pd-backup-sidecar)
+              example_yaml="30-helm/pingdirectory-backup/pingdirectory-periodic-backup.yaml"
+              ;;
+            pingaccess-pingfederate-integration)
+              example_yaml="30-helm/pingaccess-pingfederate-integration.yaml"
+              ;;
+            *)
+              echo "No getting-started mapping for ${{ inputs.integration_test }}; add one to this step"; exit 1 ;;
+          esac
+          test -f "${teststeps}" || { echo "Missing ${teststeps}"; exit 1; }
+          git clone --depth 1 https://github.com/pingidentity/pingidentity-devops-getting-started.git
+          test -f "pingidentity-devops-getting-started/${example_yaml}" || { echo "Missing ${example_yaml} in getting-started"; exit 1; }
+          out="helm-tests/examples-test/${{ inputs.integration_test }}/${{ inputs.integration_test }}.yaml"
+          cat "pingidentity-devops-getting-started/${example_yaml}" "${teststeps}" > "${out}"
+          if test "${{ inputs.integration_test }}" = "pingaccess-pingfederate-integration"; then
+            # Same sed the GitLab job applies.
+            perl -i -p -e 's/"insert domain name here"/ping-devops.com/g' "${out}"
+          fi
+          echo "Assembled ${out}"
+
+      - name: Verify integration prerequisites
+        run: |
+          set -euo pipefail
+          test -n "${PING_IDENTITY_DEVOPS_USER}" || { echo 'Missing PING_IDENTITY_DEVOPS_USER'; exit 1; }
+          test -n "${PING_IDENTITY_DEVOPS_KEY}" || { echo 'Missing PING_IDENTITY_DEVOPS_KEY'; exit 1; }
+          test -n "${PIPELINE_DEPS_REGISTRY}" || { echo 'Missing PIPELINE_DEPS_REGISTRY'; exit 1; }
+          test -n "${ARTIFACTORY_REGISTRY}" || { echo 'Missing ARTIFACTORY_REGISTRY (httpcan post-renderer)'; exit 1; }
+          test "$(kubectl auth can-i create namespaces)" = no || {
+            echo 'ERROR: cluster-scoped rights should NOT exist'; exit 1;
+          }
+          test "$(kubectl auth can-i create deployments -n "${HELM_CI_NAMESPACE}")" = yes || {
+            echo "ERROR: no rights inside ${HELM_CI_NAMESPACE}"; exit 1;
+          }
+          test -d "helm-tests/${{ inputs.test_directory }}/${{ inputs.integration_test }}" || {
+            echo "Unknown test ${{ inputs.test_directory }}/${{ inputs.integration_test }}"; exit 1;
+          }
+
+      - name: Run integration test
+        run: |
+          set -euo pipefail
+          # GitLab CI ran integration jobs with retry: 2 — same tolerance here.
+          for attempt in 1 2 3; do
+            printf 'integration_attempt=%s\n' "$attempt" | tee -a "integration-${EXPECTED_ARCH}.log"
+            if ./ci_scripts/run_helm_integration.sh \
+                --test-directory "${{ inputs.test_directory }}" \
+                --integration-test "${{ inputs.integration_test }}" \
+                --helm-chart "${{ inputs.helm_chart }}" \
+                --namespace "${HELM_CI_NAMESPACE}" \
+                2>&1 | tee -a "integration-${EXPECTED_ARCH}.log"; then
+              exit 0
+            fi
+            test "$attempt" -lt 3 && sleep 10
+          done
+          exit 1
+
+      - name: Capture integration diagnostics
+        if: ${{ always() && env.HELM_CI_NAMESPACE != '' }}
+        run: |
+          kubectl get pods -o wide -n "${HELM_CI_NAMESPACE}" > "pods-${EXPECTED_ARCH}.txt" || true
+          kubectl get events --sort-by=.lastTimestamp -n "${HELM_CI_NAMESPACE}" > "events-${EXPECTED_ARCH}.txt" || true
+
+      - name: Clean up integration artifacts and release pool claim
+        if: ${{ always() && env.HELM_CI_NAMESPACE != '' }}
+        run: |
+          kubectl delete pvc,configmap,secret -n "${HELM_CI_NAMESPACE}" --all \
+            --ignore-not-found=true || true
+          kubectl get all,pvc,configmap,secret -n "${HELM_CI_NAMESPACE}" || true
+
+      - name: Remove kubeconfig
+        if: ${{ always() }}
+        env:
+          KUBECONFIG: ${{ runner.temp }}/kubeconfig
+        run: rm -f "${KUBECONFIG}"
+
+      - name: Upload integration diagnostics
+        if: ${{ always() && (inputs.retain_logs || failure()) }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: helm-integration-${{ inputs.test_directory }}-${{ inputs.integration_test }}-${{ inputs.expected_arch }}-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            integration-${{ inputs.expected_arch }}.log
+            pods-${{ inputs.expected_arch }}.txt
+            events-${{ inputs.expected_arch }}.txt
