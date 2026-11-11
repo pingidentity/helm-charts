@@ -169,6 +169,41 @@ jobs:
           } >> "${GITHUB_ENV}"
           printf 'Claimed %s\n' "${ns}"
 
+      - name: Assemble examples-test values from getting-started
+        if: ${{ inputs.test_directory == 'examples-test' }}
+        run: |
+          set -euo pipefail
+          # GitLab before_script equivalent: clone pingidentity-devops-getting-started
+          # and concat the example yaml with the teststeps file into
+          # helm-tests/examples-test/<test>/<test>.yaml (mirror the .gitlab-ci.yml
+          # mapping for the known examples).
+          example_yaml=""
+          teststeps="helm-tests/examples-test/${{ inputs.integration_test }}/teststeps/${{ inputs.integration_test }}.yaml"
+          case "${{ inputs.integration_test }}" in
+            everything)
+              example_yaml="30-helm/everything.yaml"
+              teststeps="helm-tests/examples-test/everything/teststeps/everythingteststeps.yaml"
+              ;;
+            pd-backup-sidecar)
+              example_yaml="30-helm/pingdirectory-backup/pingdirectory-periodic-backup.yaml"
+              ;;
+            pingaccess-pingfederate-integration)
+              example_yaml="30-helm/pingaccess-pingfederate-integration.yaml"
+              ;;
+            *)
+              echo "No getting-started mapping for ${{ inputs.integration_test }}; add one to this step"; exit 1 ;;
+          esac
+          test -f "${teststeps}" || { echo "Missing ${teststeps}"; exit 1; }
+          git clone --depth 1 https://github.com/pingidentity/pingidentity-devops-getting-started.git
+          test -f "pingidentity-devops-getting-started/${example_yaml}" || { echo "Missing ${example_yaml} in getting-started"; exit 1; }
+          out="helm-tests/examples-test/${{ inputs.integration_test }}/${{ inputs.integration_test }}.yaml"
+          cat "pingidentity-devops-getting-started/${example_yaml}" "${teststeps}" > "${out}"
+          if test "${{ inputs.integration_test }}" = "pingaccess-pingfederate-integration"; then
+            # Same sed the GitLab job applies.
+            perl -i -p -e 's/"insert domain name here"/ping-devops.com/g' "${out}"
+          fi
+          echo "Assembled ${out}"
+
       - name: Verify integration prerequisites
         run: |
           set -euo pipefail
