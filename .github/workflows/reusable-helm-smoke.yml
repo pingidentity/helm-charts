@@ -28,6 +28,11 @@ on:
         required: false
         type: string
         default: pingdataconsole
+      smoke_variant:
+        description: postman (dir default) or bruno (explicit -bruno yaml)
+        required: false
+        type: string
+        default: postman
 
 permissions:
   contents: read
@@ -173,7 +178,7 @@ jobs:
           }
 
       - name: Run PingDataConsole smoke
-        if: ${{ inputs.smoke_product == 'pingdataconsole' }}
+        if: ${{ inputs.smoke_product == 'pingdataconsole' && inputs.smoke_variant == 'postman' }}
         run: |
           set -euo pipefail
           for attempt in 1 2 3; do
@@ -186,7 +191,7 @@ jobs:
           exit 1
 
       - name: Run smoke (Bruno)
-        if: ${{ inputs.smoke_product != 'pingdataconsole' }}
+        if: ${{ inputs.smoke_variant == 'bruno' }}
         env:
           SMOKE_PRODUCT: ${{ inputs.smoke_product }}
         run: |
