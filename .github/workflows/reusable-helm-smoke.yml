@@ -145,7 +145,7 @@ jobs:
         run: |
           set -euo pipefail
           pool=$(( GITHUB_RUN_ID % 5 ))
-          ns="helm-ci-pool-${pool}"
+          ns="ppds-ci-pool-${pool}"
           kubectl get ns "${ns}" > /dev/null || { echo "Pool namespace ${ns} missing"; exit 1; }
           {
             printf 'HELM_CI_NAMESPACE=%s\n' "${ns}"
