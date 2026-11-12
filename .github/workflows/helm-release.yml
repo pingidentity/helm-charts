@@ -159,13 +159,24 @@ jobs:
       - name: Regenerate docs/index.yaml
         run: |
           set -euo pipefail
-          # index.yaml must be the last artifact touched. Merge the packaged
-          # chart into the existing index with the public download URL.
-          helm repo index ./ \
-            --url "https://github.com/${PUBLIC_REPO}/releases/download/${{ steps.version.outputs.tag_name }}" \
-            --merge docs/index.yaml
-          mv ./index.yaml docs/index.yaml
-          grep -c "version: ${{ steps.version.outputs.chart_version }}" docs/index.yaml
+          # index.yaml must be the last artifact touched.
+          # Release mode: merge the packaged chart into the existing index with
+          # the public download URL (--merge preserves prior versions).
+          # Dry-run mode: the current chart version may already exist in the
+          # index (it shipped in a prior release) and --merge keeps the OLD
+          # entry on version collision, so build a standalone index instead —
+          # the probe draft is self-consistent and nothing is written back.
+          index_args=""
+          if [ '${{ steps.version.outputs.mode }}' = 'dry-run' ]; then
+            index_args="--url https://github.com/${PUBLIC_REPO}/releases/download/${{ steps.version.outputs.tag_name }}"
+          else
+            index_args="--url https://github.com/${PUBLIC_REPO}/releases/download/${{ steps.version.outputs.tag_name }} --merge docs/index.yaml"
+          fi
+          helm repo index ./ $index_args
+          if [ '${{ steps.version.outputs.mode }}' != 'dry-run' ]; then
+            mv ./index.yaml docs/index.yaml
+            grep -c "version: ${{ steps.version.outputs.chart_version }}" docs/index.yaml
+          fi
 
       - name: Verify index digest matches packaged chart
         id: digest
@@ -173,12 +184,18 @@ jobs:
           set -euo pipefail
           # Byte-identical invariant: the index digest must equal the sha256 of
           # the packaged .tgz. helm repo index computes it from the same file,
-          # but verify rather than trust.
+          # but verify rather than trust. In dry-run mode the freshly built
+          # standalone index.yaml (repo root) is checked; in release mode the
+          # merged docs/index.yaml is.
           version='${{ steps.version.outputs.chart_version }}'
-          index_digest="$(awk '/ping-devops:/{f=1} f && /^    version: '"${version}"'/{match_line=1} match_line && /digest:/{print $2; exit}' docs/index.yaml)"
+          index_file="docs/index.yaml"
+          if [ '${{ steps.version.outputs.mode }}' = 'dry-run' ]; then
+            index_file="index.yaml"
+          fi
+          index_digest="$(awk '/ping-devops:/{f=1} f && /^    version: '"${version}"'/{match_line=1} match_line && /digest:/{print $2; exit}' "${index_file}")"
           actual_digest="$(sha256sum "ping-devops-${version}.tgz" | awk '{print $1}')"
           if [ "$index_digest" != "$actual_digest" ]; then
-            echo "::error::digest mismatch: docs/index.yaml=${index_digest} packaged=${actual_digest}"
+            echo "::error::digest mismatch: ${index_file}=${index_digest} packaged=${actual_digest}"
             exit 1
           fi
           echo "digest=${actual_digest}" >> "$GITHUB_OUTPUT"
