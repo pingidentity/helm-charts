@@ -5,17 +5,12 @@ on:
   # check "Template tests" on every pull request (it previously required a
   # manual admin bypass per PR). Only the template job runs on PRs — smoke
   # and integration jobs stay dispatch-only (private EKS runners, dispatch
-  # inputs default them off anyway). Paths are scoped so docs-only PRs skip.
+  # inputs default them off anyway). No paths filter: a required check must
+  # report on every PR, including workflow- or docs-only ones (a skipped
+  # check leaves the PR blocked).
   pull_request:
     branches:
       - master
-    paths:
-      - 'charts/**'
-      - 'ci_scripts/**'
-      - 'helm-tests/template-tests/**'
-      - 'helm-tests/_global/**'
-      - '.github/actions/setup-tools/**'
-      - '.github/workflows/helm-template-smoke-parity.yml'
   workflow_dispatch:
     inputs:
       run_template_tests:
