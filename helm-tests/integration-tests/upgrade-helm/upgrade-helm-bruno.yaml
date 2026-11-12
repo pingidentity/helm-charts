@@ -29,21 +29,22 @@ testFramework:
       - wait-for-url.sh
 
   testSteps:
+    # alpine/k8s:1.20.7 is amd64-only; 1.31.3 is multi-arch (aarch64 CI needs it).
     - name: 00a-kubectl-version
-      image: ${DEPS_REGISTRY}alpine/k8s:1.20.7
+      image: ${DEPS_REGISTRY}alpine/k8s:1.31.3
       command:
         - kubectl
         - version
 
     - name: 00b-kubectl-get-pvcs
-      image: ${DEPS_REGISTRY}alpine/k8s:1.20.7
+      image: ${DEPS_REGISTRY}alpine/k8s:1.31.3
       command:
         - kubectl
         - get
         - pvc
 
     - name: 00c-add-repo
-      image: ${DEPS_REGISTRY}alpine/k8s:1.20.7
+      image: ${DEPS_REGISTRY}alpine/k8s:1.31.3
       command:
         - helm
         - repo
@@ -56,7 +57,7 @@ testFramework:
         - "/var/run/shared/.cache/helm/repository/pingidentity-index.yaml"
 
     - name: 00d-search-repo
-      image: ${DEPS_REGISTRY}alpine/k8s:1.20.7
+      image: ${DEPS_REGISTRY}alpine/k8s:1.31.3
       command:
         - helm
         - search
@@ -67,11 +68,14 @@ testFramework:
         - "/var/run/shared/.config/helm/repositories.yaml"
 
     - name: 01-update-value-file
-      image: ${DEPS_REGISTRY}alpine/k8s:1.20.7
+      image: ${DEPS_REGISTRY}alpine/k8s:1.31.3
       command:
         - helm
         - upgrade
-        - dbt-upgrade-helm
+        # Self-upgrade of THIS release (newman variant uses dbt-upgrade-helm,
+        # but the bruno release name carries the -bruno suffix). This enables
+        # the pingfederate-admin/engine workloads defined in newfile.yaml.
+        - dbt-upgrade-helm-bruno
         - pingidentity/ping-devops
         - -f
         - /var/run/newfile.yaml
@@ -81,7 +85,7 @@ testFramework:
         - "/var/run/shared/.config/helm/repositories.yaml"
 
     - name: 02a-wait-for-pingdfederate-admin
-      image: pingidentity/pingtoolkit:2106 #${DEPS_REGISTRY}pingidentity/pingtoolkit:2106
+      image: ${DEPS_REGISTRY}pingidentity/pingtoolkit:2106
       command:
         - /bin/sh
         - /var/run/wait-for-url.sh
@@ -89,7 +93,7 @@ testFramework:
         - "900"
 
     - name: 02b-wait-for-pingdfederate-engine
-      image: pingidentity/pingtoolkit:2106 #${DEPS_REGISTRY}pingidentity/pingtoolkit:2106
+      image: ${DEPS_REGISTRY}pingidentity/pingtoolkit:2106
       command:
         - /bin/sh
         - /var/run/wait-for-url.sh
