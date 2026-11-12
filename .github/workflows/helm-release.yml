@@ -76,7 +76,8 @@ jobs:
       chart_version: ${{ steps.version.outputs.chart_version }}
       tag_name: ${{ steps.version.outputs.tag_name }}
       draft_url: ${{ steps.draft.outputs.draft_url }}
-      mode: ${{ steps.mode.outputs.mode }}
+      mode: ${{ steps.version.outputs.mode }}
+      digest: ${{ steps.digest.outputs.digest }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
