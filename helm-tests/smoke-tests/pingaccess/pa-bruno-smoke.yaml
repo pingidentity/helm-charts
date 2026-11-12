@@ -72,7 +72,7 @@ testFramework:
         - "900"
 
     - name: 02-check-pa-helm-bruno
-      image: node:22-alpine
+      image: ${DEPS_REGISTRY}node:22-alpine
       env:
         # npm needs a writable HOME for its cache; the chart runs this container
         # as runAsUser 9031 and /var/run is the writable mount.
