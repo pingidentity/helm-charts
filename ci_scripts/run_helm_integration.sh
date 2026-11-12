@@ -82,9 +82,8 @@ while test -n "${1}"; do
             test -z "${_integration_to_run}" && test -d "${_integration_helm_tests_dir}"/"${1}" && _integration_to_run="${_integration_helm_tests_dir}"/"${1}"
             # Try absolute path
             test -z "${_integration_to_run}" && test -d "${1}" && _integration_to_run="${1}"
-            # Single-file variant (e.g. a -bruno yaml in a parallel-run dir):
-            # passing a file bypasses dir enumeration so the newman sibling is
-            # not also installed into the same namespace.
+            # Single-file variant: passing a file bypasses dir enumeration so
+            # only that suite's yaml is installed into the namespace.
             test -z "${_integration_to_run}" && test -f "$(pwd)"/"${1}" && _integration_to_run="$(pwd)"/"${1}"
             test -z "${_integration_to_run}" && test -f "${1}" && _integration_to_run="${1}"
 

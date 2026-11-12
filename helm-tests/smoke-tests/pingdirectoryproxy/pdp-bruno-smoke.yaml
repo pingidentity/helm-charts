@@ -2,7 +2,7 @@
 # Ping Identity Test - PingDirectoryProxy Smoke Test (BRUNO)
 #
 #
-# Bruno variant of the postman/newman yaml in this directory (parallel run).
+# Sole suite yaml (Postman/newman suites deleted at PDI-2452 cutover).
 # Runs the converted Bruno collection helm-tests/bruno/smoke/pingdirectoryproxy;
 # slug = test dir name, resolved by createBrunoCollectionConfigMap.
 #

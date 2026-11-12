@@ -237,56 +237,6 @@ _final() {
 trap _final EXIT
 
 ################################################################################
-# Build Postman Environment Variables from exiting config maps ending in argument
-# passed
-#
-# Example:
-#   getPostmanEnvJson "-env-vars"
-################################################################################
-getPostmanEnvJson() {
-    _search="${1}"
-
-    #
-    # Get the list of candidate ConfigMap Names based on the search
-    #
-    _candidateCMs=$(kubectl get configmap "${NS_OPT[@]}" -o json | jq -r ".items[] | select(.metadata.name | test(\"$_search\")) | .metadata.name")
-
-    #
-    # Start the json with basic info
-    #
-    echo "{
-        \"id\": \"9b464ada-d685-4415-8f5a-8ed2c3970d6a\",
-        \"name\": \"helm-testing\",
-        \"_postman_variable_scope\": \"environment\",
-        \"_postman_exported_at\": \"$(date '+%Y-%m-%dT%H:%M:%S')\",
-        \"_postman_exported_using\": \"helm-testing\",
-        \"values\": ["
-
-    #
-    # For each candidate ConfigMap
-    # Get the Name/Value pairs in the data element and create a
-    # postman environment key/value/enabled json
-    for _candidateCM in ${_candidateCMs}; do
-        _nvPairs=$(kubectl get configmap "${_candidateCM}" "${NS_OPT[@]}" -o json | jq -r '.data')
-
-        for _key in $(jq -r 'keys | .[]' <<< "${_nvPairs}"); do
-            echo "${_comma}"
-            jq -n '{key:$key,value:$value,enabled:$enabled}' \
-                --arg key "${_key}" \
-                --arg value "$(jq -r ".$_key" <<< "${_nvPairs}")" \
-                --arg enabled "true"
-
-            _comma=","
-        done
-    done
-
-    #
-    # End the Json
-    #
-    echo "]}"
-}
-
-################################################################################
 # Build Bruno Environment Variables from existing config maps ending in argument
 # passed
 #
@@ -631,29 +581,13 @@ for _helmTest in ${_helmTests}; do
 
     if test ${_returnCode} -eq 0; then
         #
-        # Allow a bit of time to allow for configmaps to be created so we can generate
-        # the postman environment variables in next step
+        # Allow a bit of time to allow for configmaps to be created so we can
+        # generate the environment variables in the next step
         #
         sleep 5
         #
-        # Generate Postman Environment ConfigMaps
-        #
-        banner "Generating Postman Environment ConfigMap"
-
-        #
-        # Generate a postman style environments json file
-        #
-        _postmanEnvConfigMap="${_helmRelease}-generated.postman-environment.json"
-        _postmanEnvFile="${_tmpDir}/${_postmanEnvConfigMap}"
-
-        getPostmanEnvJson ".*-env-vars$" > "${_postmanEnvFile}"
-
-        kubectl delete configmap "${_postmanEnvConfigMap}" "${NS_OPT[@]}" 2> /dev/null > /dev/null
-        kubectl create configmap "${_postmanEnvConfigMap}" "${NS_OPT[@]}" --from-file="file=${_postmanEnvFile}"
-
-        #
-        # Generate Bruno Environment ConfigMap (parallel-run with Postman; see
-        # helm-tests/bruno/). Bruno suites reference generated.bruno-environment.json
+        # Generate Bruno Environment ConfigMap. Suites reference
+        # generated.bruno-environment.json
         # and <release>-bruno-collection.tar.gz in their testConfigMaps.files.
         #
         _brunoEnvConfigMap="${_helmRelease}-generated.bruno-environment.json"

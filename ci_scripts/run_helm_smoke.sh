@@ -30,9 +30,7 @@ Usage: ${0} {options}
 
     --helm-test {test-path}
         Override the smoke test file/dir passed to run_helm_tests.sh.
-        Defaults to helm-tests/smoke-tests/<product>. Useful for parallel-run
-        suites (e.g. helm-tests/smoke-tests/<product>/<product>-bruno-smoke.yaml)
-        where the directory contains both the newman and bruno yaml variants.
+        Defaults to helm-tests/smoke-tests/<product>.
 
     --help
         Display general usage information

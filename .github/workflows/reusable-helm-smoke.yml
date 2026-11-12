@@ -28,11 +28,6 @@ on:
         required: false
         type: string
         default: pingdataconsole
-      smoke_variant:
-        description: postman (dir default) or bruno (explicit -bruno yaml)
-        required: false
-        type: string
-        default: postman
 
 permissions:
   contents: read
@@ -40,7 +35,7 @@ permissions:
 
 jobs:
   smoke:
-    name: PingDataConsole smoke (${{ inputs.expected_arch }})
+    name: Smoke ${{ inputs.smoke_product }} (${{ inputs.expected_arch }})
     runs-on: ${{ inputs.runner }}
     environment: helm-test
     timeout-minutes: 90
@@ -177,39 +172,16 @@ jobs:
             echo "ERROR: no rights inside ${HELM_CI_NAMESPACE}"; exit 1;
           }
 
-      - name: Run PingDataConsole smoke
-        if: ${{ inputs.smoke_product == 'pingdataconsole' && inputs.smoke_variant == 'postman' }}
-        run: |
-          set -euo pipefail
-          for attempt in 1 2 3; do
-            printf 'smoke_attempt=%s\n' "$attempt" | tee -a "smoke-${EXPECTED_ARCH}.log"
-            if ./ci_scripts/run_helm_smoke.sh --product pingdataconsole --namespace "${HELM_CI_NAMESPACE}" 2>&1 | tee -a "smoke-${EXPECTED_ARCH}.log"; then
-              exit 0
-            fi
-            test "$attempt" -lt 3 && sleep 10
-          done
-          exit 1
-
-      - name: Run smoke (Bruno)
-        if: ${{ inputs.smoke_variant == 'bruno' }}
+      - name: Run smoke
         env:
           SMOKE_PRODUCT: ${{ inputs.smoke_product }}
         run: |
           set -euo pipefail
-          # Resolve the suite's bruno yaml explicitly (single file) so the
-          # parallel-run newman yaml in the same directory is not also executed.
-          case "${SMOKE_PRODUCT}" in
-            pingdirectory)      bruno_yaml=pd-bruno-smoke.yaml ;;
-            pingdirectoryproxy) bruno_yaml=pdp-bruno-smoke.yaml ;;
-            pingfederate)       bruno_yaml=pf-bruno-smoke.yaml ;;
-            pingaccess)         bruno_yaml=pa-bruno-smoke.yaml ;;
-            pingdataconsole)    bruno_yaml=pdc-bruno-smoke.yaml ;;
-            *) echo "Unknown bruno smoke product '${SMOKE_PRODUCT}'"; exit 1 ;;
-          esac
+          # Suite directories now hold only the Bruno yaml (newman suites
+          # deleted, PDI-2452), so dir enumeration resolves unambiguously.
           for attempt in 1 2 3; do
             printf 'smoke_attempt=%s\n' "$attempt" | tee -a "smoke-${EXPECTED_ARCH}.log"
-            if ./ci_scripts/run_helm_smoke.sh --product "${SMOKE_PRODUCT}" --namespace "${HELM_CI_NAMESPACE}" \
-                --helm-test "helm-tests/smoke-tests/${SMOKE_PRODUCT}/${bruno_yaml}" 2>&1 | tee -a "smoke-${EXPECTED_ARCH}.log"; then
+            if ./ci_scripts/run_helm_smoke.sh --product "${SMOKE_PRODUCT}" --namespace "${HELM_CI_NAMESPACE}" 2>&1 | tee -a "smoke-${EXPECTED_ARCH}.log"; then
               exit 0
             fi
             test "$attempt" -lt 3 && sleep 10

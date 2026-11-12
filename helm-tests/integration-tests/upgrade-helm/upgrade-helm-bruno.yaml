@@ -1,8 +1,8 @@
 ###############################################################################
-# Ping Identity Test - PingFederate Helm Upgrade Integration Test (BRUNO) (BRUNO)
+# Ping Identity Test - PingFederate Helm Upgrade Integration Test (BRUNO)
 #
 #
-# Bruno variant of the postman/newman yaml in this directory (parallel run).
+# Sole suite yaml (Postman/newman suites deleted at PDI-2452 cutover).
 # Runs the converted Bruno collection helm-tests/bruno/integration/upgrade-helm;
 # slug = test dir name, resolved by createBrunoCollectionConfigMap.
 #

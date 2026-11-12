@@ -2,7 +2,7 @@
 # Ping Identity Test - PingDirectory Proxy/PingDirectory Integration Test (BRUNO)
 #
 #
-# Bruno variant of the postman/newman yaml in this directory (parallel run).
+# Sole suite yaml (Postman/newman suites deleted at PDI-2452 cutover).
 # Runs the converted Bruno collection helm-tests/bruno/integration/pdp-pd;
 # slug = test dir name, resolved by createBrunoCollectionConfigMap.
 #
