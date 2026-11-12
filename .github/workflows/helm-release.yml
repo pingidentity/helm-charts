@@ -108,7 +108,11 @@ jobs:
           echo "tag_name=${tag}" >> "$GITHUB_OUTPUT"
           echo "mode=${mode}" >> "$GITHUB_OUTPUT"
           echo "chart_version=${chart_version}" >> "$GITHUB_OUTPUT"
-          if [ "$mode" = 'dry-run' ] && [ "$tag" = "$expected_tag" ]; then
+          # A real release tag push legitimately "matches" the chart version;
+          # that is the required condition. Only a DISPATCHED dry-run probing
+          # with the real version tag is an error (it would collide with a
+          # live release draft on the public repo).
+          if [ '${{ github.event_name }}' = 'workflow_dispatch' ] && [ "$mode" = 'dry-run' ] && [ "$tag" = "$expected_tag" ]; then
             echo "::error::dry-run tag ${tag} matches the chart version ${chart_version}; use a probe tag (e.g. ping-devops-0.0.0-probe) to avoid colliding with a real release draft"
             exit 1
           fi
