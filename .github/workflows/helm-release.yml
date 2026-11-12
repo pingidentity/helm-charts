@@ -192,7 +192,14 @@ jobs:
           if [ '${{ steps.version.outputs.mode }}' = 'dry-run' ]; then
             index_file="index.yaml"
           fi
-          index_digest="$(awk '/ping-devops:/{f=1} f && /^    version: '"${version}"'/{match_line=1} match_line && /digest:/{print $2; exit}' "${index_file}")"
+          # helm index entries are alphabetized: digest precedes version within
+          # an entry. Track the current entry block and match its version.
+          index_digest="$(awk '
+            /^  - apiVersion/ {in_entry=1; ver=""; dig=""}
+            in_entry && /^    version: / {ver=$2}
+            in_entry && /^    digest: / {dig=$2}
+            in_entry && ver=="'"${version}"'" && dig!="" {print dig; exit}
+          ' "${index_file}")"
           actual_digest="$(sha256sum "ping-devops-${version}.tgz" | awk '{print $1}')"
           if [ "$index_digest" != "$actual_digest" ]; then
             echo "::error::digest mismatch: ${index_file}=${index_digest} packaged=${actual_digest}"
