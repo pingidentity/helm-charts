@@ -177,7 +177,7 @@ _run_helm_test() {
         # endpoints (no authentication), so any strong value satisfies the
         # image's 83-change-password hook — generate one when unset.
         if test -z "${PA_DEFAULT_PASSWORD:-}"; then
-            PA_DEFAULT_PASSWORD="$(openssl rand -base64 24 2>/dev/null || head -c 24 /dev/urandom | base64)"
+            PA_DEFAULT_PASSWORD="$(openssl rand -hex 16 2>/dev/null || head -c 16 /dev/urandom | xxd -p -c 32)"
         fi
         _cmd="${_cmd} --helm-set-values global.envs.PING_IDENTITY_PASSWORD=${PA_DEFAULT_PASSWORD}"
     fi
