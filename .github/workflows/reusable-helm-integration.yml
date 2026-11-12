@@ -36,6 +36,11 @@ on:
         required: false
         type: string
         default: integration-tests
+      should_run:
+        description: When false, the job skips immediately (caller-side matrix/event filtering; reusable-call jobs cannot use matrix in job-level if)
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -44,6 +49,7 @@ permissions:
 jobs:
   integration:
     name: ${{ inputs.test_directory }}/${{ inputs.integration_test }} (${{ inputs.expected_arch }})
+    if: ${{ inputs.should_run }}
     runs-on: ${{ inputs.runner }}
     environment: helm-test
     timeout-minutes: 90
