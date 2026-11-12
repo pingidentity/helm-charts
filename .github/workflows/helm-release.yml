@@ -335,7 +335,12 @@ jobs:
 
       - name: Push master and tag to public repo
         env:
+          # App token: contents:write on pingidentity/helm-charts ONLY (it is
+          # not installed on ping-internal repos). Use it for the public
+          # clone/push. Fetching this repo's master uses the workflow's own
+          # GITHUB_TOKEN, which is scoped to ping-internal/ppds-helm-charts.
           GH_TOKEN: ${{ steps.release-bot-token.outputs.token }}
+          EMU_TOKEN: ${{ github.token }}
           TAG: ${{ needs.package.outputs.tag_name }}
         run: |
           set -euo pipefail
@@ -344,7 +349,7 @@ jobs:
           # Fast-forward public master to the EMU master release commit. This
           # must be a fast-forward; if it is not, the public repo has moved and
           # needs manual reconciliation.
-          git fetch "https://x-access-token:${GH_TOKEN}@github.com/ping-internal/ppds-helm-charts.git" master
+          git fetch "https://x-access-token:${EMU_TOKEN}@github.com/ping-internal/ppds-helm-charts.git" master
           git merge --ff-only FETCH_HEAD
           git push origin master
           git tag "${TAG}" FETCH_HEAD
