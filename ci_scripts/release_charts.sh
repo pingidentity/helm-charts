@@ -22,8 +22,11 @@ set -x
 
 curl_output=/tmp/curlout
 github_api_base="https://api.github.com/repos/${GITHUB_OWNER}/helm-charts"
-git clone "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
-cd helm-charts || exit
+# Since the GitHub EMU cutover (PDI-2542) this script runs from the already
+# checked-out repository root (the workflow checks out the release ref); it no
+# longer clones the internal GitLab repo. The repo root is the directory that
+# contains charts/ping-devops and docs/index.yaml.
+cd "${CI_PROJECT_DIR:-$(cd "$(dirname "${0}")/.." && pwd)}" || exit
 
 function check_for_draft_release() {
     # Anchor to the exact "version:" key. A bare "version" grep also matches
@@ -33,7 +36,7 @@ function check_for_draft_release() {
     expected_tag="ping-devops-${sem_version}"
 
     if test "${CI_COMMIT_TAG}" != "${expected_tag}"; then
-        echo "Gitlab tag \"${CI_COMMIT_TAG}\" does not match expected tag \"${expected_tag}\" for release"
+        echo "Tag \"${CI_COMMIT_TAG}\" does not match expected tag \"${expected_tag}\" for release"
         exit 1
     fi
 
