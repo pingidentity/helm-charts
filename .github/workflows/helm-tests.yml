@@ -1,19 +1,41 @@
 name: Helm tests
 
+# Test pipeline for the ping-devops chart, mirroring the GitLab CI stages
+# (initialization/test.template/test.smoke/test.integration) with GitHub
+# Actions needs-gating:
+#
+#   template -> smoke (parallel, both arches) -> integration (parallel, both arches)
+#
+# Stage gate: a stage runs only if every job of the previous stage succeeded
+# (needs:). A smoke failure skips integration, exactly like the GitLab stage
+# ordering.
+#
+# Triggers:
+#  - pull_request -> Template tests only (the org ruleset's required check).
+#  - push to master -> FULL parity with the GitLab master pipeline:
+#    template -> 11 smoke products x2 arch -> 5 integration suites x2 arch.
+#  - schedule (07:00 America/Chicago Mon/Wed/Fri) -> canary: template ->
+#    pingdataconsole smoke x2 arch. Catches runner/registry/credential rot
+#    between merges; not a coverage run.
+#  - workflow_dispatch -> per-toggle inputs (template, smoke per arch,
+#    integration per arch) for targeted runs.
+#
+# Not ported from GitLab: chartlinter (separate lint chunk), the NIGHTLY-only
+# jobs (pa-pf-pd-fips integration + examples-test suites — the GitLab schedule
+# that set NIGHTLY=true was inactive since 2026-01, so these were already
+# dead in practice). The FIPS suite remains dispatch-runnable via the
+# integration_test input (integration_test=pa-pf-pd-fips).
+
 on:
-  # PR trigger satisfies the org branch ruleset's required status check
-  # "Template tests" on every pull request (it previously required a manual
-  # admin bypass per PR). Only the template job runs on PRs — smoke and
-  # integration jobs stay dispatch-only (private EKS runners, dispatch inputs
-  # default them off anyway). No paths filter: a required check must report
-  # on every PR, including workflow- or docs-only ones (a skipped check
-  # leaves the PR blocked).
   pull_request:
     branches:
       - master
   push:
     branches:
       - master
+  schedule:
+    # 07:00 America/Chicago Mon/Wed/Fri (13:00 UTC during CDT).
+    - cron: '0 13 * * 1,3,5'
   workflow_dispatch:
     inputs:
       run_template_tests:
@@ -32,30 +54,25 @@ on:
         required: true
         default: false
       smoke_product:
-        description: Smoke product (pingdirectory|pingdirectoryproxy|pingdataconsole|pingfederate|pingaccess)
+        description: Smoke product (any helm-tests/smoke-tests/<product>)
         type: string
         required: false
         default: pingdataconsole
       run_integration_x86:
-        description: Run representative integration test on the private x86 runner
+        description: Run integration test on the private x86 runner
         type: boolean
         required: true
         default: false
       run_integration_arm:
-        description: Run representative integration test on the private ARM runner
+        description: Run integration test on the private ARM runner
         type: boolean
         required: true
         default: false
       integration_test:
-        description: Integration test family (helm-tests/<dir>/<name>)
+        description: Integration test family (helm-tests/integration-tests/<name>)
         type: string
         required: false
         default: pa-pf-pd
-      test_directory:
-        description: helm-tests subdirectory (integration-tests or examples-test)
-        type: string
-        required: false
-        default: integration-tests
       retain_logs:
         description: Retain diagnostics on successful jobs
         type: boolean
@@ -84,9 +101,9 @@ jobs:
   template:
     name: Template tests
     # Always run on PRs (required check must report) and master pushes (the
-    # GitLab-era release gate: master must be green before a release tag is
-    # cut). Dispatch mode honors the input.
-    if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' || inputs.run_template_tests }}
+    # release gate: master must be green before a release tag is cut). On
+    # schedule: template gates the canary smoke. Dispatch honors the input.
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.run_template_tests }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -129,63 +146,90 @@ jobs:
             focused-template-test.log
             template-tests.log
 
-  smoke_x86:
-    name: Smoke ${{ inputs.smoke_product }} (x86_64)
-    if: ${{ inputs.run_smoke_x86 }}
+  # --------------------------------------------------------------------
+  # Smoke stage: product x arch matrix, parallel, needs-gated on template.
+  # push (merge parity): all 11 products, both arches — the GitLab master
+  # pipeline's test.smoke stage. schedule (MWF canary): pingdataconsole only.
+  # workflow_dispatch: the toggled arch(es) for the chosen product.
+  # --------------------------------------------------------------------
+  smoke:
+    name: Smoke ${{ matrix.product }} (${{ matrix.arch_name }})
+    needs: template
+    if: ${{ always() && needs.template.result == 'success' && ((github.event_name == 'push') || (github.event_name == 'schedule' && matrix.on_schedule) || (github.event_name == 'workflow_dispatch' && matrix.product == inputs.smoke_product && ((matrix.arch == 'x86_64' && inputs.run_smoke_x86) || (matrix.arch == 'aarch64' && inputs.run_smoke_arm)))) }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # ---- schedule canary: pingdataconsole, both arches
+          - { product: pingdataconsole, arch: x86_64, arch_name: x86_64, runner: ping-internal-x86, cluster: helm-charts-runner, server: 'https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com', on_schedule: true }
+          - { product: pingdataconsole, arch: aarch64, arch_name: aarch64, runner: ping-internal-arm, cluster: helm-charts-runner-arm, server: 'https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com', on_schedule: true }
+          # ---- push parity: remaining 10 products, both arches
+          - { product: pingaccess, arch: x86_64, arch_name: x86_64, runner: ping-internal-x86, cluster: helm-charts-runner, server: 'https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com', on_schedule: false }
+          - { product: pingaccess, arch: aarch64, arch_name: aarch64, runner: ping-internal-arm, cluster: helm-charts-runner-arm, server: 'https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com', on_schedule: false }
+          - { product: pingauthorize, arch: x86_64, arch_name: x86_64, runner: ping-internal-x86, cluster: helm-charts-runner, server: 'https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com', on_schedule: false }
+          - { product: pingauthorize, arch: aarch64, arch_name: aarch64, runner: ping-internal-arm, cluster: helm-charts-runner-arm, server: 'https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com', on_schedule: false }
+          - { product: pingauthorizepap, arch: x86_64, arch_name: x86_64, runner: ping-internal-x86, cluster: helm-charts-runner, server: 'https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com', on_schedule: false }
+          - { product: pingauthorizepap, arch: aarch64, arch_name: aarch64, runner: ping-internal-arm, cluster: helm-charts-runner-arm, server: 'https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com', on_schedule: false }
+          - { product: pingcentral, arch: x86_64, arch_name: x86_64, runner: ping-internal-x86, cluster: helm-charts-runner, server: 'https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com', on_schedule: false }
+          - { product: pingcentral, arch: aarch64, arch_name: aarch64, runner: ping-internal-arm, cluster: helm-charts-runner-arm, server: 'https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com', on_schedule: false }
+          - { product: pingdatasync, arch: x86_64, arch_name: x86_64, runner: ping-internal-x86, cluster: helm-charts-runner, server: 'https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com', on_schedule: false }
+          - { product: pingdatasync, arch: aarch64, arch_name: aarch64, runner: ping-internal-arm, cluster: helm-charts-runner-arm, server: 'https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com', on_schedule: false }
+          - { product: pingdelegator, arch: x86_64, arch_name: x86_64, runner: ping-internal-x86, cluster: helm-charts-runner, server: 'https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com', on_schedule: false }
+          - { product: pingdelegator, arch: aarch64, arch_name: aarch64, runner: ping-internal-arm, cluster: helm-charts-runner-arm, server: 'https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com', on_schedule: false }
+          - { product: pingdirectory, arch: x86_64, arch_name: x86_64, runner: ping-internal-x86, cluster: helm-charts-runner, server: 'https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com', on_schedule: false }
+          - { product: pingdirectory, arch: aarch64, arch_name: aarch64, runner: ping-internal-arm, cluster: helm-charts-runner-arm, server: 'https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com', on_schedule: false }
+          - { product: pingdirectoryproxy, arch: x86_64, arch_name: x86_64, runner: ping-internal-x86, cluster: helm-charts-runner, server: 'https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com', on_schedule: false }
+          - { product: pingdirectoryproxy, arch: aarch64, arch_name: aarch64, runner: ping-internal-arm, cluster: helm-charts-runner-arm, server: 'https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com', on_schedule: false }
+          - { product: pingfederate, arch: x86_64, arch_name: x86_64, runner: ping-internal-x86, cluster: helm-charts-runner, server: 'https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com', on_schedule: false }
+          - { product: pingfederate, arch: aarch64, arch_name: aarch64, runner: ping-internal-arm, cluster: helm-charts-runner-arm, server: 'https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com', on_schedule: false }
+          - { product: ldap-sdk-tools, arch: x86_64, arch_name: x86_64, runner: ping-internal-x86, cluster: helm-charts-runner, server: 'https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com', on_schedule: false }
+          - { product: ldap-sdk-tools, arch: aarch64, arch_name: aarch64, runner: ping-internal-arm, cluster: helm-charts-runner-arm, server: 'https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com', on_schedule: false }
+          - { product: pingtoolkit, arch: x86_64, arch_name: x86_64, runner: ping-internal-x86, cluster: helm-charts-runner, server: 'https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com', on_schedule: false }
+          - { product: pingtoolkit, arch: aarch64, arch_name: aarch64, runner: ping-internal-arm, cluster: helm-charts-runner-arm, server: 'https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com', on_schedule: false }
     uses: ./.github/workflows/reusable-helm-smoke.yml
     with:
-      expected_arch: x86_64
-      runner: ping-internal-x86
-      job_id: x86
-      cluster_name: helm-charts-runner
-      cluster_server: https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com
-      smoke_product: ${{ inputs.smoke_product }}
-      retain_logs: ${{ inputs.retain_logs }}
+      expected_arch: ${{ matrix.arch }}
+      runner: ${{ matrix.runner }}
+      job_id: ${{ matrix.arch == 'x86_64' && 'x86' || 'arm' }}
+      cluster_name: ${{ matrix.cluster }}
+      cluster_server: ${{ matrix.server }}
+      smoke_product: ${{ matrix.product }}
+      retain_logs: ${{ inputs.retain_logs || false }}
     secrets: inherit
 
-  smoke_arm:
-    name: Smoke ${{ inputs.smoke_product }} (aarch64)
-    if: ${{ inputs.run_smoke_arm }}
-    uses: ./.github/workflows/reusable-helm-smoke.yml
-    with:
-      expected_arch: aarch64
-      runner: ping-internal-arm
-      job_id: arm
-      cluster_name: helm-charts-runner-arm
-      cluster_server: https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com
-      smoke_product: ${{ inputs.smoke_product }}
-      retain_logs: ${{ inputs.retain_logs }}
-    secrets: inherit
-
-
-  integration_x86:
-    name: Integration ${{ inputs.test_directory }}/${{ inputs.integration_test }} (x86_64)
-    if: ${{ inputs.run_integration_x86 }}
+  # --------------------------------------------------------------------
+  # Integration stage: 5 suites x 2 arch, parallel, needs-gated on the WHOLE
+  # smoke stage (stage gate: any smoke failure skips integration, matching
+  # the GitLab stage ordering). The dispatch single-suite case also passes
+  # through here; its if picks the requested suite+arch.
+  # --------------------------------------------------------------------
+  integration:
+    name: Integration ${{ matrix.suite }} (${{ matrix.arch_name }})
+    needs: smoke
+    if: ${{ always() && needs.smoke.result == 'success' && ((github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && matrix.suite == inputs.integration_test && ((matrix.arch == 'x86_64' && inputs.run_integration_x86) || (matrix.arch == 'aarch64' && inputs.run_integration_arm)))) }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { suite: pa-pf-pd, arch: x86_64, arch_name: x86_64, runner: ping-internal-x86, cluster: helm-charts-runner, server: 'https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com' }
+          - { suite: pa-pf-pd, arch: aarch64, arch_name: aarch64, runner: ping-internal-arm, cluster: helm-charts-runner-arm, server: 'https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com' }
+          - { suite: paz-pd, arch: x86_64, arch_name: x86_64, runner: ping-internal-x86, cluster: helm-charts-runner, server: 'https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com' }
+          - { suite: paz-pd, arch: aarch64, arch_name: aarch64, runner: ping-internal-arm, cluster: helm-charts-runner-arm, server: 'https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com' }
+          - { suite: pd-replicated, arch: x86_64, arch_name: x86_64, runner: ping-internal-x86, cluster: helm-charts-runner, server: 'https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com' }
+          - { suite: pd-replicated, arch: aarch64, arch_name: aarch64, runner: ping-internal-arm, cluster: helm-charts-runner-arm, server: 'https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com' }
+          - { suite: pdp-pd, arch: x86_64, arch_name: x86_64, runner: ping-internal-x86, cluster: helm-charts-runner, server: 'https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com' }
+          - { suite: pdp-pd, arch: aarch64, arch_name: aarch64, runner: ping-internal-arm, cluster: helm-charts-runner-arm, server: 'https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com' }
+          - { suite: pds-pd, arch: x86_64, arch_name: x86_64, runner: ping-internal-x86, cluster: helm-charts-runner, server: 'https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com' }
+          - { suite: pds-pd, arch: aarch64, arch_name: aarch64, runner: ping-internal-arm, cluster: helm-charts-runner-arm, server: 'https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com' }
     uses: ./.github/workflows/reusable-helm-integration.yml
     with:
-      expected_arch: x86_64
-      runner: ping-internal-x86
-      job_id: x86
-      cluster_name: helm-charts-runner
-      cluster_server: https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com
-      integration_test: ${{ inputs.integration_test }}
-      test_directory: ${{ inputs.test_directory }}
+      expected_arch: ${{ matrix.arch }}
+      runner: ${{ matrix.runner }}
+      job_id: ${{ matrix.arch == 'x86_64' && 'x86' || 'arm' }}
+      cluster_name: ${{ matrix.cluster }}
+      cluster_server: ${{ matrix.server }}
+      integration_test: ${{ matrix.suite }}
+      test_directory: integration-tests
       helm_chart: charts/ping-devops/
-      retain_logs: ${{ inputs.retain_logs }}
-    secrets: inherit
-
-  integration_arm:
-    name: Integration ${{ inputs.test_directory }}/${{ inputs.integration_test }} (aarch64)
-    if: ${{ inputs.run_integration_arm }}
-    uses: ./.github/workflows/reusable-helm-integration.yml
-    with:
-      expected_arch: aarch64
-      runner: ping-internal-arm
-      job_id: arm
-      cluster_name: helm-charts-runner-arm
-      cluster_server: https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com
-      integration_test: ${{ inputs.integration_test }}
-      test_directory: ${{ inputs.test_directory }}
-      helm_chart: charts/ping-devops/
-      retain_logs: ${{ inputs.retain_logs }}
+      retain_logs: ${{ inputs.retain_logs || false }}
     secrets: inherit
