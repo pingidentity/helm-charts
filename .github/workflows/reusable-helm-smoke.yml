@@ -225,6 +225,12 @@ jobs:
       - name: Clean up smoke artifacts and release pool claim
         if: ${{ always() && env.HELM_CI_NAMESPACE != '' }}
         run: |
+          # Pods/statefulsets/deployments too: a cancelled job's cleanup never
+          # runs, leaving product pods (e.g. a failed PA StatefulSet) squatting
+          # on the pool node and blocking later suites. Pools are exclusively
+          # ours; these deletes stay inside the claimed namespace.
+          kubectl delete pod,sts,deploy,replicaset,statefulset,pvc,configmap,secret -n "${HELM_CI_NAMESPACE}" --all \
+            --ignore-not-found=true --wait=false || true
           kubectl delete pvc,configmap,secret -n "${HELM_CI_NAMESPACE}" --all \
             --ignore-not-found=true || true
           kubectl get all,pvc,configmap,secret -n "${HELM_CI_NAMESPACE}" || true

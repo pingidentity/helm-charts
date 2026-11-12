@@ -531,6 +531,18 @@ test -n "${VERBOSE}" && kubectl describe nodes
 # Create the devops-secret ConfigMap
 #
 _devopsSecretName="devops-secret"
+
+#
+# Sweep leftover workloads in the target namespace before installing. A
+# cancelled/failed earlier run skips its cleanup step, leaving product pods
+# (e.g. a crashed PA StatefulSet) that consume node CPU/memory and block
+# later suites in the shared pool. Namespace-scoped; pools are exclusively
+# ours. Runs once per script invocation, before any helm install.
+#
+banner "Pre-install sweep of leftover workloads in ${NS}"
+kubectl delete pod,sts,deploy,replicaset,statefulset -l 'app.kubernetes.io/managed-by=Helm' "${NS_OPT[@]}" --ignore-not-found=true --wait=false 2> /dev/null > /dev/null || true
+kubectl delete pvc,pod "${NS_OPT[@]}" --all --ignore-not-found=true --wait=false 2> /dev/null > /dev/null || true
+
 banner "Generating Secret ${_devopsSecretName}"
 kubectl delete secret "${_devopsSecretName}" "${NS_OPT[@]}" 2> /dev/null > /dev/null
 kubectl create secret generic "${_devopsSecretName}" "${NS_OPT[@]}" \
