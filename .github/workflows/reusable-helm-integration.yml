@@ -217,9 +217,17 @@ jobs:
           test "$(kubectl auth can-i create deployments -n "${HELM_CI_NAMESPACE}")" = yes || {
             echo "ERROR: no rights inside ${HELM_CI_NAMESPACE}"; exit 1;
           }
-          test -d "helm-tests/${{ inputs.test_directory }}/${{ inputs.integration_test }}" || {
+          # integration_test may be a bare name (joined with test_directory)
+          # or a repo-relative file path (parallel-run bruno yaml).
+          if test -d "helm-tests/${{ inputs.test_directory }}/${{ inputs.integration_test }}"; then
+            :
+          elif test -f "${{ inputs.integration_test }}"; then
+            :
+          elif test -f "helm-tests/${{ inputs.test_directory }}/${{ inputs.integration_test }}"; then
+            :
+          else
             echo "Unknown test ${{ inputs.test_directory }}/${{ inputs.integration_test }}"; exit 1;
-          }
+          fi
 
       - name: Run integration test
         run: |
@@ -262,7 +270,7 @@ jobs:
         if: ${{ always() && (inputs.retain_logs || failure()) }}
         uses: actions/upload-artifact@v4
         with:
-          name: helm-integration-${{ inputs.test_directory }}-${{ inputs.integration_test }}-${{ inputs.expected_arch }}-${{ github.run_id }}
+          name: helm-integration-${{ inputs.test_directory }}-${{ inputs.expected_arch }}-${{ github.run_id }}
           if-no-files-found: warn
           retention-days: 14
           path: |
