@@ -104,7 +104,7 @@ jobs:
           fi
           chart_version="$(grep '^version:' ${CHART_DIR}/Chart.yaml | awk '{print $2}')"
           expected_tag="ping-devops-${chart_version}"
-          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "tag_name=${tag}" >> "$GITHUB_OUTPUT"
           echo "mode=${mode}" >> "$GITHUB_OUTPUT"
           echo "chart_version=${chart_version}" >> "$GITHUB_OUTPUT"
           if [ "$mode" = 'dry-run' ] && [ "$tag" = "$expected_tag" ]; then
