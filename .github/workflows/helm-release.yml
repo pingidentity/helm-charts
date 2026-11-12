@@ -282,10 +282,11 @@ jobs:
               --jq .id)"
             echo "created draft release ${release_id} for ${TAG}"
           fi
-          gh api -X POST "repos/${PUBLIC_REPO}/releases/${release_id}/assets" \
-            -H "Content-Type: application/gzip" \
-            --input "ping-devops-${VERSION}.tgz" \
-            -f name="ping-devops-${VERSION}.tgz" --jq .name
+          # Asset upload must hit uploads.github.com; plain gh api against
+          # api.github.com/.../assets 404s. gh release upload resolves the
+          # draft release by tag and uses the correct upload endpoint.
+          gh release upload "${TAG}" "ping-devops-${VERSION}.tgz" \
+            --repo "${PUBLIC_REPO}" --clobber
           echo "release_id=${release_id}" >> "$GITHUB_OUTPUT"
           echo "draft_url=https://github.com/${PUBLIC_REPO}/releases/tag/${TAG}" >> "$GITHUB_OUTPUT"
 
