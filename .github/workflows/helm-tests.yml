@@ -155,7 +155,7 @@ jobs:
   smoke:
     name: Smoke ${{ matrix.product }} (${{ matrix.arch_name }})
     needs: template
-    if: ${{ always() && needs.template.result == 'success' && ((github.event_name == 'push') || (github.event_name == 'schedule' && matrix.on_schedule) || (github.event_name == 'workflow_dispatch' && matrix.product == inputs.smoke_product && ((matrix.arch == 'x86_64' && inputs.run_smoke_x86) || (matrix.arch == 'aarch64' && inputs.run_smoke_arm)))) }}
+    if: ${{ always() && needs.template.result == 'success' }}
     strategy:
       fail-fast: false
       matrix:
@@ -195,6 +195,11 @@ jobs:
       cluster_server: ${{ matrix.server }}
       smoke_product: ${{ matrix.product }}
       retain_logs: ${{ inputs.retain_logs || false }}
+      # Reusable-call job-level `if` cannot reference matrix, so per-entry
+      # event filtering happens here and the reusable job skips when false.
+      should_run: ${{ (github.event_name == 'push')
+        || (github.event_name == 'schedule' && matrix.on_schedule)
+        || (github.event_name == 'workflow_dispatch' && matrix.product == inputs.smoke_product && ((matrix.arch == 'x86_64' && inputs.run_smoke_x86) || (matrix.arch == 'aarch64' && inputs.run_smoke_arm))) }}
     secrets: inherit
 
   # --------------------------------------------------------------------
@@ -206,7 +211,7 @@ jobs:
   integration:
     name: Integration ${{ matrix.suite }} (${{ matrix.arch_name }})
     needs: smoke
-    if: ${{ always() && needs.smoke.result == 'success' && ((github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && matrix.suite == inputs.integration_test && ((matrix.arch == 'x86_64' && inputs.run_integration_x86) || (matrix.arch == 'aarch64' && inputs.run_integration_arm)))) }}
+    if: ${{ always() && needs.smoke.result == 'success' }}
     strategy:
       fail-fast: false
       matrix:
@@ -232,4 +237,8 @@ jobs:
       test_directory: integration-tests
       helm_chart: charts/ping-devops/
       retain_logs: ${{ inputs.retain_logs || false }}
+      # Same pattern as smoke: per-entry event filtering via should_run
+      # (matrix is unavailable in the reusable-call job-level if).
+      should_run: ${{ (github.event_name == 'push')
+        || (github.event_name == 'workflow_dispatch' && matrix.suite == inputs.integration_test && ((matrix.arch == 'x86_64' && inputs.run_integration_x86) || (matrix.arch == 'aarch64' && inputs.run_integration_arm))) }}
     secrets: inherit
