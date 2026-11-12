@@ -1,4 +1,4 @@
-name: Helm release draft cleanup
+name: Helm release drafts
 
 # Admin tooling for draft releases on the public pingidentity/helm-charts
 # repository. Drafts are invisible to user tokens without push access there —
