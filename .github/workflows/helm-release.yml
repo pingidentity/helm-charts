@@ -76,7 +76,8 @@ jobs:
       chart_version: ${{ steps.version.outputs.chart_version }}
       tag_name: ${{ steps.version.outputs.tag_name }}
       draft_url: ${{ steps.draft.outputs.draft_url }}
-      mode: ${{ steps.mode.outputs.mode }}
+      mode: ${{ steps.version.outputs.mode }}
+      digest: ${{ steps.digest.outputs.digest }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -104,7 +105,7 @@ jobs:
           fi
           chart_version="$(grep '^version:' ${CHART_DIR}/Chart.yaml | awk '{print $2}')"
           expected_tag="ping-devops-${chart_version}"
-          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "tag_name=${tag}" >> "$GITHUB_OUTPUT"
           echo "mode=${mode}" >> "$GITHUB_OUTPUT"
           echo "chart_version=${chart_version}" >> "$GITHUB_OUTPUT"
           if [ "$mode" = 'dry-run' ] && [ "$tag" = "$expected_tag" ]; then
@@ -159,13 +160,24 @@ jobs:
       - name: Regenerate docs/index.yaml
         run: |
           set -euo pipefail
-          # index.yaml must be the last artifact touched. Merge the packaged
-          # chart into the existing index with the public download URL.
-          helm repo index ./ \
-            --url "https://github.com/${PUBLIC_REPO}/releases/download/${{ steps.version.outputs.tag_name }}" \
-            --merge docs/index.yaml
-          mv ./index.yaml docs/index.yaml
-          grep -c "version: ${{ steps.version.outputs.chart_version }}" docs/index.yaml
+          # index.yaml must be the last artifact touched.
+          # Release mode: merge the packaged chart into the existing index with
+          # the public download URL (--merge preserves prior versions).
+          # Dry-run mode: the current chart version may already exist in the
+          # index (it shipped in a prior release) and --merge keeps the OLD
+          # entry on version collision, so build a standalone index instead —
+          # the probe draft is self-consistent and nothing is written back.
+          index_args=""
+          if [ '${{ steps.version.outputs.mode }}' = 'dry-run' ]; then
+            index_args="--url https://github.com/${PUBLIC_REPO}/releases/download/${{ steps.version.outputs.tag_name }}"
+          else
+            index_args="--url https://github.com/${PUBLIC_REPO}/releases/download/${{ steps.version.outputs.tag_name }} --merge docs/index.yaml"
+          fi
+          helm repo index ./ $index_args
+          if [ '${{ steps.version.outputs.mode }}' != 'dry-run' ]; then
+            mv ./index.yaml docs/index.yaml
+            grep -c "version: ${{ steps.version.outputs.chart_version }}" docs/index.yaml
+          fi
 
       - name: Verify index digest matches packaged chart
         id: digest
@@ -173,12 +185,25 @@ jobs:
           set -euo pipefail
           # Byte-identical invariant: the index digest must equal the sha256 of
           # the packaged .tgz. helm repo index computes it from the same file,
-          # but verify rather than trust.
+          # but verify rather than trust. In dry-run mode the freshly built
+          # standalone index.yaml (repo root) is checked; in release mode the
+          # merged docs/index.yaml is.
           version='${{ steps.version.outputs.chart_version }}'
-          index_digest="$(awk '/ping-devops:/{f=1} f && /^    version: '"${version}"'/{match_line=1} match_line && /digest:/{print $2; exit}' docs/index.yaml)"
+          index_file="docs/index.yaml"
+          if [ '${{ steps.version.outputs.mode }}' = 'dry-run' ]; then
+            index_file="index.yaml"
+          fi
+          # helm index entries are alphabetized: digest precedes version within
+          # an entry. Track the current entry block and match its version.
+          index_digest="$(awk '
+            /^  - apiVersion/ {in_entry=1; ver=""; dig=""}
+            in_entry && /^    version: / {ver=$2}
+            in_entry && /^    digest: / {dig=$2}
+            in_entry && ver=="'"${version}"'" && dig!="" {print dig; exit}
+          ' "${index_file}")"
           actual_digest="$(sha256sum "ping-devops-${version}.tgz" | awk '{print $1}')"
           if [ "$index_digest" != "$actual_digest" ]; then
-            echo "::error::digest mismatch: docs/index.yaml=${index_digest} packaged=${actual_digest}"
+            echo "::error::digest mismatch: ${index_file}=${index_digest} packaged=${actual_digest}"
             exit 1
           fi
           echo "digest=${actual_digest}" >> "$GITHUB_OUTPUT"
@@ -230,6 +255,13 @@ jobs:
           VERSION: ${{ needs.package.outputs.chart_version }}
         run: |
           set -euo pipefail
+          # Hygiene: delete orphaned drafts from earlier failed runs (e.g. the
+          # tagless draft created when the tag output key was empty). Drafts
+          # are invisible to customers but would otherwise linger forever.
+          orphan_ids="$(gh api "repos/${PUBLIC_REPO}/releases" --jq '.[] | select(.draft==true and ((.tag_name // "") == "")) | .id' || true)"
+          for oid in $orphan_ids; do
+            gh api -X DELETE "repos/${PUBLIC_REPO}/releases/${oid}" && echo "deleted orphaned draft ${oid}"
+          done
           # Idempotency: if a draft for this tag already exists (retry after a
           # failed run), reuse it rather than stacking duplicates.
           release_id="$(gh api "repos/${PUBLIC_REPO}/releases" --jq ".[] | select(.tag_name==\"${TAG}\" and .draft==true) | .id" | head -1 || true)"
@@ -242,18 +274,20 @@ jobs:
               echo "deleted stale asset from prior attempt"
             fi
           else
+            # -F (not -f) sends typed values: draft must be a JSON boolean.
             release_id="$(gh api -X POST "repos/${PUBLIC_REPO}/releases" \
               -f tag_name="${TAG}" \
               -f name="${TAG}" \
-              -f draft=true \
+              -F draft=true \
               -f body="Ping Identity helm charts release ${VERSION}." \
               --jq .id)"
             echo "created draft release ${release_id} for ${TAG}"
           fi
-          gh api -X POST "repos/${PUBLIC_REPO}/releases/${release_id}/assets" \
-            -H "Content-Type: application/gzip" \
-            --input "ping-devops-${VERSION}.tgz" \
-            -f name="ping-devops-${VERSION}.tgz" --jq .name
+          # Asset upload must hit uploads.github.com; plain gh api against
+          # api.github.com/.../assets 404s. gh release upload resolves the
+          # draft release by tag and uses the correct upload endpoint.
+          gh release upload "${TAG}" "ping-devops-${VERSION}.tgz" \
+            --repo "${PUBLIC_REPO}" --clobber
           echo "release_id=${release_id}" >> "$GITHUB_OUTPUT"
           echo "draft_url=https://github.com/${PUBLIC_REPO}/releases/tag/${TAG}" >> "$GITHUB_OUTPUT"
 

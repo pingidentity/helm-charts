@@ -1,0 +1,130 @@
+name: Helm release draft cleanup
+
+# Admin tooling for draft releases on the public pingidentity/helm-charts
+# repository. Drafts are invisible to user tokens without push access there —
+# only the ppds-helm-charts-release-bot App (helm-release environment secrets)
+# can list or delete them, so this workflow is the only human-operable window
+# into draft state.
+#
+# Modes:
+#   list        — show all draft releases (id, tag, title). Safe; default.
+#   delete-tag  — delete the draft release for the given tag. Requires the
+#                 confirm input to equal the tag.
+#   delete-all  — delete every draft release. Requires confirm=DELETE.
+#
+# Guards:
+#   - Only DRAFT releases are ever touched; published releases are filtered
+#     out of every operation by the draft==true jq predicate.
+#   - Deleting the in-flight release draft between a tag push and the publish
+#     dispatch is recoverable: re-dispatching publish mode recreates the draft
+#     (idempotent create-or-reuse). Still, avoid delete-all during a release.
+#
+# Uses: post-dry-run probe-draft deletion (runbook Phase 2), stray-draft
+# cleanup after failed runs, and draft-state visibility before publish.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: list = show drafts; delete-tag = delete one draft by tag; delete-all = delete every draft
+        required: true
+        type: choice
+        default: list
+        options:
+          - list
+          - delete-tag
+          - delete-all
+      tag:
+        description: Tag of the draft to delete (delete-tag mode), e.g. ping-devops-0.0.0-probe
+        required: false
+        type: string
+      confirm:
+        description: Type the tag name (delete-tag) or DELETE (delete-all) to confirm
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: helm-release-cleanup
+  cancel-in-progress: false
+
+env:
+  PUBLIC_REPO: pingidentity/helm-charts
+
+jobs:
+  cleanup:
+    name: Draft releases on public repo
+    runs-on: ubuntu-24.04
+    environment: helm-release
+    timeout-minutes: 5
+    steps:
+      - name: Create release-bot App token
+        id: token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_APP_PRIVATE_KEY }}
+          owner: pingidentity
+          repositories: helm-charts
+          permission-contents: write
+
+      - name: List or delete draft releases
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+          MODE: ${{ inputs.mode }}
+          TAG: ${{ inputs.tag }}
+          CONFIRM: ${{ inputs.confirm }}
+        run: |
+          set -euo pipefail
+
+          list_drafts() {
+            gh api "repos/${PUBLIC_REPO}/releases" \
+              --jq '.[] | select(.draft==true) | "\(.id)\t\(.tag_name // "(no tag)")\t\(.name)"'
+          }
+
+          case "$MODE" in
+            list)
+              echo "Draft releases on ${PUBLIC_REPO}:"
+              list_drafts || true
+              count="$(gh api "repos/${PUBLIC_REPO}/releases" --jq '[.[] | select(.draft==true)] | length')"
+              echo "---"
+              echo "total drafts: ${count}"
+              ;;
+            delete-tag)
+              if [ -z "${TAG}" ]; then
+                echo "::error::delete-tag requires the tag input"
+                exit 1
+              fi
+              if [ "${CONFIRM}" != "${TAG}" ]; then
+                echo "::error::confirm input must equal the tag to delete (got: '${CONFIRM}')"
+                exit 1
+              fi
+              ids="$(gh api "repos/${PUBLIC_REPO}/releases" --jq ".[] | select(.draft==true and .tag_name==\"${TAG}\") | .id")"
+              if [ -z "${ids}" ]; then
+                echo "no draft found for tag ${TAG}; nothing to do"
+                exit 0
+              fi
+              for id in ${ids}; do
+                gh api -X DELETE "repos/${PUBLIC_REPO}/releases/${id}"
+                echo "deleted draft ${id} (tag ${TAG})"
+              done
+              ;;
+            delete-all)
+              if [ "${CONFIRM}" != "DELETE" ]; then
+                echo "::error::delete-all requires confirm=DELETE (got: '${CONFIRM}')"
+                exit 1
+              fi
+              ids="$(gh api "repos/${PUBLIC_REPO}/releases" --jq '.[] | select(.draft==true) | .id')"
+              if [ -z "${ids}" ]; then
+                echo "no drafts found; nothing to do"
+                exit 0
+              fi
+              for id in ${ids}; do
+                gh api -X DELETE "repos/${PUBLIC_REPO}/releases/${id}"
+                echo "deleted draft ${id}"
+              done
+              echo "remaining drafts: $(gh api "repos/${PUBLIC_REPO}/releases" --jq '[.[] | select(.draft==true)] | length')"
+              ;;
+          esac
