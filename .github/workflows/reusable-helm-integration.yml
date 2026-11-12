@@ -46,7 +46,7 @@ jobs:
     name: ${{ inputs.test_directory }}/${{ inputs.integration_test }} (${{ inputs.expected_arch }})
     runs-on: ${{ inputs.runner }}
     environment: helm-test
-    timeout-minutes: 45
+    timeout-minutes: 90
     env:
       EXPECTED_ARCH: ${{ inputs.expected_arch }}
       CI_COMMIT_REF_NAME: ${{ github.ref_name }}
@@ -217,9 +217,17 @@ jobs:
           test "$(kubectl auth can-i create deployments -n "${HELM_CI_NAMESPACE}")" = yes || {
             echo "ERROR: no rights inside ${HELM_CI_NAMESPACE}"; exit 1;
           }
-          test -d "helm-tests/${{ inputs.test_directory }}/${{ inputs.integration_test }}" || {
+          # integration_test may be a bare name (joined with test_directory)
+          # or a repo-relative file path (parallel-run bruno yaml).
+          if test -d "helm-tests/${{ inputs.test_directory }}/${{ inputs.integration_test }}"; then
+            :
+          elif test -f "${{ inputs.integration_test }}"; then
+            :
+          elif test -f "helm-tests/${{ inputs.test_directory }}/${{ inputs.integration_test }}"; then
+            :
+          else
             echo "Unknown test ${{ inputs.test_directory }}/${{ inputs.integration_test }}"; exit 1;
-          }
+          fi
 
       - name: Run integration test
         run: |
@@ -248,6 +256,12 @@ jobs:
       - name: Clean up integration artifacts and release pool claim
         if: ${{ always() && env.HELM_CI_NAMESPACE != '' }}
         run: |
+          # Pods/statefulsets/deployments too: a cancelled job's cleanup never
+          # runs, leaving product pods (e.g. a failed PA StatefulSet) squatting
+          # on the pool node and blocking later suites. Pools are exclusively
+          # ours; these deletes stay inside the claimed namespace.
+          kubectl delete pod,sts,deploy,replicaset,statefulset,pvc,configmap,secret -n "${HELM_CI_NAMESPACE}" --all \
+            --ignore-not-found=true --wait=false || true
           kubectl delete pvc,configmap,secret -n "${HELM_CI_NAMESPACE}" --all \
             --ignore-not-found=true || true
           kubectl get all,pvc,configmap,secret -n "${HELM_CI_NAMESPACE}" || true
@@ -262,7 +276,7 @@ jobs:
         if: ${{ always() && (inputs.retain_logs || failure()) }}
         uses: actions/upload-artifact@v4
         with:
-          name: helm-integration-${{ inputs.test_directory }}-${{ inputs.integration_test }}-${{ inputs.expected_arch }}-${{ github.run_id }}
+          name: helm-integration-${{ inputs.test_directory }}-${{ inputs.expected_arch }}-${{ github.run_id }}
           if-no-files-found: warn
           retention-days: 14
           path: |

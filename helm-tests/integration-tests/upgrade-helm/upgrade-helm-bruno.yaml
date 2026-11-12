@@ -1,0 +1,121 @@
+###############################################################################
+# Ping Identity Test - PingFederate Helm Upgrade Integration Test (BRUNO)
+#
+#
+# Sole suite yaml (Postman/newman suites deleted at PDI-2452 cutover).
+# Runs the converted Bruno collection helm-tests/bruno/integration/upgrade-helm;
+# slug = test dir name, resolved by createBrunoCollectionConfigMap.
+#
+# ConfigMap assets (uploaded by run_helm_tests.sh):
+#   <release>-bruno-collection.tar.gz          tarball of the converted collection
+#   <release>-generated.bruno-environment.json env vars scraped from *-env-vars CMs
+#
+###############################################################################
+
+###############################################################################
+# Test Steps
+###############################################################################
+testFramework:
+  enabled: true
+  testConfigMaps:
+    # DEFAULTS (found in helm chart values.yaml)
+    # prefix: ping-devops-test-
+    # volumeMountPath: /var/run/
+    files:
+      - global-init-test.sh
+      - newfile.yaml
+      - bruno-collection.tar.gz
+      - generated.bruno-environment.json
+      - wait-for-url.sh
+
+  testSteps:
+    # alpine/k8s:1.20.7 is amd64-only; 1.31.3 is multi-arch (aarch64 CI needs it).
+    - name: 00a-kubectl-version
+      image: ${DEPS_REGISTRY}alpine/k8s:1.31.3
+      command:
+        - kubectl
+        - version
+
+    - name: 00b-kubectl-get-pvcs
+      image: ${DEPS_REGISTRY}alpine/k8s:1.31.3
+      command:
+        - kubectl
+        - get
+        - pvc
+
+    - name: 00c-add-repo
+      image: ${DEPS_REGISTRY}alpine/k8s:1.31.3
+      command:
+        - helm
+        - repo
+        - add
+        - pingidentity
+        - https://helm.pingidentity.com/
+        - --repository-config
+        - "/var/run/shared/.config/helm/repositories.yaml"
+        - --repository-cache
+        - "/var/run/shared/.cache/helm/repository/pingidentity-index.yaml"
+
+    - name: 00d-search-repo
+      image: ${DEPS_REGISTRY}alpine/k8s:1.31.3
+      command:
+        - helm
+        - search
+        - repo
+        - --repository-cache
+        - "/var/run/shared/.cache/helm/repository/pingidentity-index.yaml"
+        - --repository-config
+        - "/var/run/shared/.config/helm/repositories.yaml"
+
+    - name: 01-update-value-file
+      image: ${DEPS_REGISTRY}alpine/k8s:1.31.3
+      command:
+        - helm
+        - upgrade
+        # Self-upgrade of THIS release (newman variant uses dbt-upgrade-helm,
+        # but the bruno release name carries the -bruno suffix). This enables
+        # the pingfederate-admin/engine workloads defined in newfile.yaml.
+        - dbt-upgrade-helm-bruno
+        - pingidentity/ping-devops
+        - -f
+        - /var/run/newfile.yaml
+        - --repository-cache
+        - "/var/run/shared/.cache/helm/repository/pingidentity-index.yaml"
+        - --repository-config
+        - "/var/run/shared/.config/helm/repositories.yaml"
+
+    # :2106 has no arm64 manifest; other bruno suites use :latest (multi-arch).
+    - name: 02a-wait-for-pingdfederate-admin
+      image: ${DEPS_REGISTRY}pingidentity/pingtoolkit:latest
+      command:
+        - /bin/sh
+        - /var/run/wait-for-url.sh
+        - https://${PF_ADMIN_PRIVATE_HOSTNAME}:9999/pingfederate/app
+        - "900"
+
+    - name: 02b-wait-for-pingdfederate-engine
+      image: ${DEPS_REGISTRY}pingidentity/pingtoolkit:latest
+      command:
+        - /bin/sh
+        - /var/run/wait-for-url.sh
+        - https://${PF_ENGINE_PRIVATE_HOSTNAME}:9031/pf/heartbeat.ping
+        - "900"
+
+    - name: 03-check-pf-helm-bruno
+      image: ${DEPS_REGISTRY}node:22-alpine
+      env:
+        # npm needs a writable HOME for its cache; the chart runs this container
+        # as runAsUser 9031 and /var/run is the writable mount.
+        - name: HOME
+          value: /var/run/shared
+      command:
+        - /bin/sh
+        - -c
+        - |
+          set -e
+          cd /var/run/shared
+          mkdir -p bruno-collection
+          tar -xzf /var/run/bruno-collection.tar.gz -C bruno-collection
+          npm install @usebruno/cli@4.3.0 --silent --no-audit --no-fund --no-save
+          cd bruno-collection
+          ../node_modules/.bin/bru run . --env-file /var/run/generated.bruno-environment.json --insecure --output ../bru-results.json

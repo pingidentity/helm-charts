@@ -237,14 +237,15 @@ _final() {
 trap _final EXIT
 
 ################################################################################
-# Build Postman Environment Variables from exiting config maps ending in argument
+# Build Bruno Environment Variables from existing config maps ending in argument
 # passed
 #
 # Example:
-#   getPostmanEnvJson "-env-vars"
+#   getBrunoEnvJson "-env-vars"
 ################################################################################
-getPostmanEnvJson() {
+getBrunoEnvJson() {
     _search="${1}"
+    _comma=""
 
     #
     # Get the list of candidate ConfigMap Names based on the search
@@ -255,26 +256,23 @@ getPostmanEnvJson() {
     # Start the json with basic info
     #
     echo "{
-        \"id\": \"9b464ada-d685-4415-8f5a-8ed2c3970d6a\",
         \"name\": \"helm-testing\",
-        \"_postman_variable_scope\": \"environment\",
-        \"_postman_exported_at\": \"$(date '+%Y-%m-%dT%H:%M:%S')\",
-        \"_postman_exported_using\": \"helm-testing\",
-        \"values\": ["
+        \"variables\": ["
 
     #
     # For each candidate ConfigMap
     # Get the Name/Value pairs in the data element and create a
-    # postman environment key/value/enabled json
+    # bruno environment key/value/enabled json
     for _candidateCM in ${_candidateCMs}; do
         _nvPairs=$(kubectl get configmap "${_candidateCM}" "${NS_OPT[@]}" -o json | jq -r '.data')
 
         for _key in $(jq -r 'keys | .[]' <<< "${_nvPairs}"); do
             echo "${_comma}"
-            jq -n '{key:$key,value:$value,enabled:$enabled}' \
-                --arg key "${_key}" \
+            jq -n '{name:$name,value:$value,enabled:$enabled,type:$type}' \
+                --arg name "${_key}" \
                 --arg value "$(jq -r ".$_key" <<< "${_nvPairs}")" \
-                --arg enabled "true"
+                --arg enabled "true" \
+                --arg type "text"
 
             _comma=","
         done
@@ -284,6 +282,41 @@ getPostmanEnvJson() {
     # End the Json
     #
     echo "]}"
+}
+
+################################################################################
+# Create a tarball of a bruno collection directory and upload it as a single
+# ConfigMap asset (ConfigMaps are single-file; the bruno collection is a dir).
+# Collections live in helm-tests/bruno/{smoke,integration}/<test-dir-name>/ (the
+# slug matches the test directory name). Graceful no-op when the slug dir
+# doesn't exist (toolkit/curl-only suites).
+#
+# Example:
+#   createBrunoCollectionConfigMap <helmRelease> <testDirName>
+################################################################################
+createBrunoCollectionConfigMap() {
+    _helmRelease="${1}"
+    _testDirName="${2}"
+
+    for _brunoSlugDir in "${_helm_tests_dir}/bruno/${_testDirName}" \
+                         "${_helm_tests_dir}/bruno/smoke/${_testDirName}" \
+                         "${_helm_tests_dir}/bruno/integration/${_testDirName}"; do
+        if test -d "${_brunoSlugDir}"; then
+            break
+        fi
+    done
+
+    test -d "${_brunoSlugDir}" || return 0
+
+    _brunoTarName="${_helmRelease}-bruno-collection.tar.gz"
+    _brunoTarFile="${_tmpDir}/bruno-collection.tar.gz"
+
+    # COPYFILE_DISABLE: macOS tar otherwise embeds AppleDouble ._* resource-fork
+    # files for xattr'd files, which the bruno CLI tries to parse as requests.
+    COPYFILE_DISABLE=1 tar --exclude='./.claude' --exclude='./.git' --exclude='./node_modules' --no-xattrs -czf "${_brunoTarFile}" -C "${_brunoSlugDir}" . 2> /dev/null
+
+    kubectl delete configmap "${_brunoTarName}" "${NS_OPT[@]}" 2> /dev/null > /dev/null
+    kubectl create configmap "${_brunoTarName}" "${NS_OPT[@]}" --from-file="file=${_brunoTarFile}"
 }
 
 ################################################################################
@@ -448,6 +481,18 @@ test -n "${VERBOSE}" && kubectl describe nodes
 # Create the devops-secret ConfigMap
 #
 _devopsSecretName="devops-secret"
+
+#
+# Sweep leftover workloads in the target namespace before installing. A
+# cancelled/failed earlier run skips its cleanup step, leaving product pods
+# (e.g. a crashed PA StatefulSet) that consume node CPU/memory and block
+# later suites in the shared pool. Namespace-scoped; pools are exclusively
+# ours. Runs once per script invocation, before any helm install.
+#
+banner "Pre-install sweep of leftover workloads in ${NS}"
+kubectl delete pod,sts,deploy,replicaset,statefulset -l 'app.kubernetes.io/managed-by=Helm' "${NS_OPT[@]}" --ignore-not-found=true --wait=false 2> /dev/null > /dev/null || true
+kubectl delete pvc,pod "${NS_OPT[@]}" --all --ignore-not-found=true --wait=false 2> /dev/null > /dev/null || true
+
 banner "Generating Secret ${_devopsSecretName}"
 kubectl delete secret "${_devopsSecretName}" "${NS_OPT[@]}" 2> /dev/null > /dev/null
 kubectl create secret generic "${_devopsSecretName}" "${NS_OPT[@]}" \
@@ -536,25 +581,41 @@ for _helmTest in ${_helmTests}; do
 
     if test ${_returnCode} -eq 0; then
         #
-        # Allow a bit of time to allow for configmaps to be created so we can generate
-        # the postman environment variables in next step
+        # Allow a bit of time to allow for configmaps to be created so we can
+        # generate the environment variables in the next step
         #
         sleep 5
         #
-        # Generate Postman Environment ConfigMaps
+        # Generate Bruno Environment ConfigMap. Suites reference
+        # generated.bruno-environment.json
+        # and <release>-bruno-collection.tar.gz in their testConfigMaps.files.
         #
-        banner "Generating Postman Environment ConfigMap"
+        _brunoEnvConfigMap="${_helmRelease}-generated.bruno-environment.json"
+        _brunoEnvFile="${_tmpDir}/${_brunoEnvConfigMap}"
+
+        # Scope the scrape to THIS release's *-env-vars CMs: pool namespaces
+        # can hold two concurrent suites (e.g. a smoke + an integration job of
+        # the same dispatch), and a namespace-wide scrape would cross-
+        # contaminate same-named variables (e.g. PD_CONSOLE_PRIVATE_HOSTNAME)
+        # between releases.
+        getBrunoEnvJson "^${_helmRelease}-.*-env-vars$" > "${_brunoEnvFile}"
+
+        kubectl delete configmap "${_brunoEnvConfigMap}" "${NS_OPT[@]}" 2> /dev/null > /dev/null
+        kubectl create configmap "${_brunoEnvConfigMap}" "${NS_OPT[@]}" --from-file="file=${_brunoEnvFile}"
+
+        # The chart's pinglib.addreleasename helper truncates ConfigMap names to 63
+        # chars, which can drop the ".json" suffix on long release names and break
+        # the volume mount. Create the truncated name too; it's cheap insurance.
+        _brunoEnvConfigMapTrunc="$(echo "${_brunoEnvConfigMap}" | cut -c1-63)"
+
+        kubectl delete configmap "${_brunoEnvConfigMapTrunc}" "${NS_OPT[@]}" 2> /dev/null > /dev/null
+        kubectl create configmap "${_brunoEnvConfigMapTrunc}" "${NS_OPT[@]}" --from-file="file=${_brunoEnvFile}"
 
         #
-        # Generate a postman style environments json file
+        # Upload bruno collection tarball as a single ConfigMap asset (no-op when
+        # the test dir has no matching helm-tests/bruno slug)
         #
-        _postmanEnvConfigMap="${_helmRelease}-generated.postman-environment.json"
-        _postmanEnvFile="${_tmpDir}/${_postmanEnvConfigMap}"
-
-        getPostmanEnvJson ".*-env-vars$" > "${_postmanEnvFile}"
-
-        kubectl delete configmap "${_postmanEnvConfigMap}" "${NS_OPT[@]}" 2> /dev/null > /dev/null
-        kubectl create configmap "${_postmanEnvConfigMap}" "${NS_OPT[@]}" --from-file="file=${_postmanEnvFile}"
+        createBrunoCollectionConfigMap "${_helmRelease}" "$(basename "${_helmTestDir}")"
 
         #
         # Generate ConfigMaps for all test and global

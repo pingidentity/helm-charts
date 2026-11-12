@@ -28,6 +28,10 @@ Usage: ${0} {options}
         Run all smoke tests inside this existing namespace.
         The namespace must already exist and will not be created or deleted.
 
+    --helm-test {test-path}
+        Override the smoke test file/dir passed to run_helm_tests.sh.
+        Defaults to helm-tests/smoke-tests/<product>.
+
     --help
         Display general usage information
 END_USAGE
@@ -72,6 +76,11 @@ while test -n "${1}"; do
             test -z "${2}" && usage "You must provide a namespace with the ${1} option"
             shift
             NS_OPT="--namespace ${1}"
+            ;;
+        --helm-test)
+            test -z "${2}" && usage "You must provide a test path with the ${1} option"
+            shift
+            _helm_test_override="${1}"
             ;;
         --help)
             usage
@@ -161,6 +170,20 @@ _run_helm_test() {
         ${NS_OPT}"
 
     if [ "${product}" == "pingaccess" ]; then
+        # GitLab provided PA_DEFAULT_PASSWORD as a pipeline variable; GitHub CI
+        # has no equivalent secret. The PA smoke suite only probes heartbeat
+        # endpoints (no authentication), so any strong value satisfies the
+        # image's 83-change-password hook — generate one when unset.
+        if test -z "${PA_DEFAULT_PASSWORD:-}"; then
+            # PA admin-password policy: 8-64 chars, >=1 upper, >=1 lower, >=1 digit.
+        # Take 24 alphanumerics from a random pool, then force one char of each
+        # required class at fixed positions (deterministic policy satisfaction).
+        _pa_pw_pool="$(openssl rand -base64 64 2>/dev/null | tr -dc "A-Za-z0-9")"
+        _pa_pw_a="$(printf '%s' "${_pa_pw_pool}" | cut -c1-8)"
+        _pa_pw_b="$(printf '%s' "${_pa_pw_pool}" | cut -c9-16)"
+        _pa_pw_c="$(printf '%s' "${_pa_pw_pool}" | cut -c17-24)"
+        PA_DEFAULT_PASSWORD="${_pa_pw_a}Aa9${_pa_pw_b}7zX${_pa_pw_c}"
+        fi
         _cmd="${_cmd} --helm-set-values global.envs.PING_IDENTITY_PASSWORD=${PA_DEFAULT_PASSWORD}"
     fi
 
@@ -210,7 +233,7 @@ _pids=()
 #
 # Calculating test to be run
 #
-_test="${CI_PROJECT_DIR}/helm-tests/smoke-tests/${product}"
+_test="${_helm_test_override:-${CI_PROJECT_DIR}/helm-tests/smoke-tests/${product}}"
 banner "Running smoke test found at: ${_test}"
 
 #If this is a snapshot pipeline, override the image tag to snapshot image tags

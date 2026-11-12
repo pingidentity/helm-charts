@@ -20,7 +20,7 @@ This tool is used as a Helm post-renderer in the CI pipeline. See [post-renderer
 
 ### Integration
 
-If any integration tests require httpcan, ensure that the Helm chart values for the test include the following to enable the post-renderer.  You can see `helm-tests/integration-tests/pa-pf-pd-fips/pa-pf-pd-fips.yaml` for an example.  All existing tests using httpcan already have this configured.
+If any integration tests require httpcan, ensure that the Helm chart values for the test include the following to enable the post-renderer.  You can see `helm-tests/integration-tests/pa-pf-pd-fips/pa-pf-pd-fips-bruno.yaml` for an example.  All existing tests using httpcan already have this configured.
 
 ```yaml
 httpcan:

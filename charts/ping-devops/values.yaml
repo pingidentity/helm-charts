@@ -2103,8 +2103,8 @@ testFramework:
     #########################################################
     # files:
     #   - init-test.sh
-    #   - check-pingfederate.postman-collection.json
-    #   - generated.postman-environment.json
+    #   - bruno-collection.tar.gz
+    #   - generated.bruno-environment.json
 
   testSteps: []
     #########################################################
@@ -2128,16 +2128,24 @@ testFramework:
     #     - /bin/sh
     #     - /var/run/init-test.sh
 
-    # - name: 03-check-pingfederate
-    #   image: postman/newman:5-alpine
+    # - name: 03-check-pingfederate-bruno
+    #   image: node:22-alpine
+    #   env:
+    #     # npm needs a writable HOME for its cache; the chart runs this
+    #     # container as runAsUser 9031 and /var/run is the writable mount.
+    #     - name: HOME
+    #       value: /var/run/shared
     #   command:
-    #     - newman
-    #     - run
-    #     - /var/run/check-pingfederate.postman-collection.json
-    #     - --environment
-    #     - /var/run/generated.postman-environment.json
-    #     - --insecure
-    #     - --ignore-redirects
+    #     - /bin/sh
+    #     - -c
+    #     - |
+    #       set -e
+    #       cd /var/run/shared
+    #       mkdir -p bruno-collection
+    #       tar -xzf /var/run/bruno-collection.tar.gz -C bruno-collection
+    #       npm install @usebruno/cli@4.3.0 --silent --no-audit --no-fund --no-save
+    #       cd bruno-collection
+    #       ../node_modules/.bin/bru run . --env-file /var/run/generated.bruno-environment.json --insecure --output ../bru-results.json
 
   finalStep:
     name: 99-completion

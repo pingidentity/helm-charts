@@ -23,6 +23,11 @@ on:
         description: EKS cluster API endpoint
         required: true
         type: string
+      smoke_product:
+        description: Smoke product to run (helm-tests/smoke-tests/<product>)
+        required: false
+        type: string
+        default: pingdataconsole
 
 permissions:
   contents: read
@@ -30,10 +35,10 @@ permissions:
 
 jobs:
   smoke:
-    name: PingDataConsole smoke (${{ inputs.expected_arch }})
+    name: Smoke ${{ inputs.smoke_product }} (${{ inputs.expected_arch }})
     runs-on: ${{ inputs.runner }}
     environment: helm-test
-    timeout-minutes: 45
+    timeout-minutes: 90
     env:
       EXPECTED_ARCH: ${{ inputs.expected_arch }}
       CI_COMMIT_REF_NAME: ${{ github.ref_name }}
@@ -167,12 +172,16 @@ jobs:
             echo "ERROR: no rights inside ${HELM_CI_NAMESPACE}"; exit 1;
           }
 
-      - name: Run PingDataConsole smoke
+      - name: Run smoke
+        env:
+          SMOKE_PRODUCT: ${{ inputs.smoke_product }}
         run: |
           set -euo pipefail
+          # Suite directories now hold only the Bruno yaml (newman suites
+          # deleted, PDI-2452), so dir enumeration resolves unambiguously.
           for attempt in 1 2 3; do
             printf 'smoke_attempt=%s\n' "$attempt" | tee -a "smoke-${EXPECTED_ARCH}.log"
-            if ./ci_scripts/run_helm_smoke.sh --product pingdataconsole --namespace "${HELM_CI_NAMESPACE}" 2>&1 | tee -a "smoke-${EXPECTED_ARCH}.log"; then
+            if ./ci_scripts/run_helm_smoke.sh --product "${SMOKE_PRODUCT}" --namespace "${HELM_CI_NAMESPACE}" 2>&1 | tee -a "smoke-${EXPECTED_ARCH}.log"; then
               exit 0
             fi
             test "$attempt" -lt 3 && sleep 10
@@ -188,6 +197,12 @@ jobs:
       - name: Clean up smoke artifacts and release pool claim
         if: ${{ always() && env.HELM_CI_NAMESPACE != '' }}
         run: |
+          # Pods/statefulsets/deployments too: a cancelled job's cleanup never
+          # runs, leaving product pods (e.g. a failed PA StatefulSet) squatting
+          # on the pool node and blocking later suites. Pools are exclusively
+          # ours; these deletes stay inside the claimed namespace.
+          kubectl delete pod,sts,deploy,replicaset,statefulset,pvc,configmap,secret -n "${HELM_CI_NAMESPACE}" --all \
+            --ignore-not-found=true --wait=false || true
           kubectl delete pvc,configmap,secret -n "${HELM_CI_NAMESPACE}" --all \
             --ignore-not-found=true || true
           kubectl get all,pvc,configmap,secret -n "${HELM_CI_NAMESPACE}" || true
