@@ -1,6 +1,21 @@
 name: Helm template and smoke parity probe
 
 on:
+  # PR trigger exists to satisfy the org branch ruleset's required status
+  # check "Template tests" on every pull request (it previously required a
+  # manual admin bypass per PR). Only the template job runs on PRs — smoke
+  # and integration jobs stay dispatch-only (private EKS runners, dispatch
+  # inputs default them off anyway). Paths are scoped so docs-only PRs skip.
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'charts/**'
+      - 'ci_scripts/**'
+      - 'helm-tests/template-tests/**'
+      - 'helm-tests/_global/**'
+      - '.github/actions/setup-tools/**'
+      - '.github/workflows/helm-template-smoke-parity.yml'
   workflow_dispatch:
     inputs:
       run_template_tests:
@@ -70,7 +85,9 @@ env:
 jobs:
   template:
     name: Template tests
-    if: ${{ inputs.run_template_tests }}
+    # Dispatch mode: honor the input. PR mode: always run (the required
+    # status check must report on every matched pull request).
+    if: ${{ github.event_name == 'pull_request' || inputs.run_template_tests }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
