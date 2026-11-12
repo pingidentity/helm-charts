@@ -172,6 +172,13 @@ _run_helm_test() {
         ${NS_OPT}"
 
     if [ "${product}" == "pingaccess" ]; then
+        # GitLab provided PA_DEFAULT_PASSWORD as a pipeline variable; GitHub CI
+        # has no equivalent secret. The PA smoke suite only probes heartbeat
+        # endpoints (no authentication), so any strong value satisfies the
+        # image's 83-change-password hook — generate one when unset.
+        if test -z "${PA_DEFAULT_PASSWORD:-}"; then
+            PA_DEFAULT_PASSWORD="$(openssl rand -base64 24 2>/dev/null || head -c 24 /dev/urandom | base64)"
+        fi
         _cmd="${_cmd} --helm-set-values global.envs.PING_IDENTITY_PASSWORD=${PA_DEFAULT_PASSWORD}"
     fi
 
