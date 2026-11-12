@@ -6,6 +6,11 @@
 #
 # Push docker build changes to github
 #
+# GITLAB-ONLY: used by the .gitlab-ci.yml p.github job while GitLab CI remains
+# live during the EMU migration (PDI-2542). The GitHub Actions release workflow
+# (.github/workflows/helm-release.yml) replaces this script's mirror push with
+# an App-authenticated push. Delete this file at GitLab archival.
+#
 test "${VERBOSE}" = "true" && set -x
 
 if test -z "${CI_COMMIT_REF_NAME}"; then

@@ -1,0 +1,357 @@
+name: Helm chart release
+
+# Produces and publishes the monthly ping-devops chart release to the public
+# pingidentity/helm-charts repository.
+#
+# Trigger paths:
+#  - Push to master: runs the package job only (validation + packaging smoke).
+#    The public master mirror is updated as part of the release publish, so a
+#    plain master push here does not touch the public repo.
+#  - Push of a ping-devops-* tag: the workflow validates the tag against
+#    Chart.yaml, packages the chart, regenerates docs/index.yaml, creates a
+#    DRAFT release on the public repo with the exact packaged .tgz, and stops.
+#  - workflow_dispatch dry-run: identical pipeline, never publishes. Use this
+#    to rehearse a release (probe_tag input controls the draft tag name; must
+#    NOT match the chart version).
+#  - workflow_dispatch publish: completes the release by verifying the draft
+#    (tag, .tgz asset, index digest pairing), pushing master + tag to the
+#    public repo, publishing the draft, and notifying Slack.
+#
+# Byte-identical invariant: the .tgz referenced by docs/index.yaml MUST be the
+# exact file attached to the public release. Repackaging changes tarball
+# timestamps and therefore digests; the workflow packages exactly once and
+# reuses that archive everywhere.
+#
+# Credentials: RELEASE_BOT_APP_ID / RELEASE_BOT_APP_PRIVATE_KEY are helm-release
+# environment secrets on this repo (GitHub App ppds-helm-charts-release-bot,
+# Contents write on pingidentity/helm-charts only — DEVHELP-48200). The
+# helm-release environment should be configured with required reviewers so the
+# publish is a human-authorized step.
+
+on:
+  push:
+    tags:
+      - 'ping-devops-*'
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: dry-run = draft only; publish = verify + publish existing draft
+        required: true
+        type: choice
+        default: dry-run
+        options:
+          - dry-run
+          - publish
+      ref:
+        description: Branch/SHA to release from (dry-run only; tag pushes use the tag)
+        required: false
+        type: string
+        default: master
+      probe_tag:
+        description: Tag name for the draft in dry-run mode (use ping-devops-0.0.0-probe)
+        required: false
+        type: string
+        default: ping-devops-0.0.0-probe
+
+permissions:
+  contents: read
+
+concurrency:
+  group: helm-release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PUBLIC_REPO: pingidentity/helm-charts
+  CHART_DIR: charts/ping-devops
+
+jobs:
+  package:
+    name: Validate and package
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    if: ${{ github.event_name == 'push' && github.ref_type != 'tag' || github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/ping-devops-') }}
+    outputs:
+      chart_version: ${{ steps.version.outputs.chart_version }}
+      tag_name: ${{ steps.version.outputs.tag_name }}
+      draft_url: ${{ steps.draft.outputs.draft_url }}
+      mode: ${{ steps.mode.outputs.mode }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.ref }}
+
+      - name: Resolve release parameters
+        id: version
+        run: |
+          set -euo pipefail
+          if [ '${{ github.event_name }}' = 'workflow_dispatch' ]; then
+            mode='${{ inputs.mode }}'
+            if [ "$mode" = 'dry-run' ]; then
+              tag='${{ inputs.probe_tag }}'
+            else
+              # Publish mode acts on an existing draft for a real version tag.
+              chart_version="$(grep '^version:' ${CHART_DIR}/Chart.yaml | awk '{print $2}')"
+              tag="ping-devops-${chart_version}"
+            fi
+          else
+            mode=dry-run
+            tag='${{ github.ref_name }}'
+          fi
+          chart_version="$(grep '^version:' ${CHART_DIR}/Chart.yaml | awk '{print $2}')"
+          expected_tag="ping-devops-${chart_version}"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "mode=${mode}" >> "$GITHUB_OUTPUT"
+          echo "chart_version=${chart_version}" >> "$GITHUB_OUTPUT"
+          if [ "$mode" = 'dry-run' ] && [ "$tag" = "$expected_tag" ]; then
+            echo "::error::dry-run tag ${tag} matches the chart version ${chart_version}; use a probe tag (e.g. ping-devops-0.0.0-probe) to avoid colliding with a real release draft"
+            exit 1
+          fi
+          echo "mode=${mode} tag=${tag} chart_version=${chart_version}"
+
+      - name: Validate tag against chart version (tag-push mode)
+        if: ${{ github.event_name == 'push' && github.ref_type == 'tag' }}
+        run: |
+          set -euo pipefail
+          chart_version='${{ steps.version.outputs.chart_version }}'
+          tag='${{ github.ref_name }}'
+          if [ "$tag" != "ping-devops-${chart_version}" ]; then
+            echo "::error::tag ${tag} does not match chart version ${chart_version} (expected ping-devops-${chart_version})"
+            exit 1
+          fi
+          echo "tag ${tag} matches chart version ${chart_version}"
+
+      - name: Validate tag points at a merged commit
+        if: ${{ github.event_name == 'push' && github.ref_type == 'tag' }}
+        run: |
+          set -euo pipefail
+          tag='${{ github.ref_name }}'
+          # The tag must be reachable from master history: releases are cut
+          # from master, never from a side branch or a fresh orphan commit.
+          git merge-base --is-ancestor "${tag}^{commit}" origin/master || {
+            echo "::error::tag ${tag} is not on master; release tags must be cut from merged master"
+            exit 1
+          }
+          echo "tag ${tag} resolves to merged master commit $(git rev-parse --short "${tag}^{commit}")"
+
+      - name: Install Helm
+        run: |
+          set -euo pipefail
+          helm_version='4.2.4'
+          if ! command -v helm >/dev/null 2>&1 || ! helm version --short | grep -q "v${helm_version}"; then
+            curl -sSL "https://get.helm.sh/helm-v${helm_version}-linux-amd64.tar.gz" | tar -xz -C "$RUNNER_TEMP"
+            sudo install "$RUNNER_TEMP/linux-amd64/helm" /usr/local/bin/helm
+          fi
+          helm version --short
+
+      - name: Package chart
+        run: |
+          set -euo pipefail
+          rm -f ping-devops-*.tgz
+          helm package ${CHART_DIR} --destination ./
+          test -f "ping-devops-${{ steps.version.outputs.chart_version }}.tgz"
+          sha256sum "ping-devops-${{ steps.version.outputs.chart_version }}.tgz"
+
+      - name: Regenerate docs/index.yaml
+        run: |
+          set -euo pipefail
+          # index.yaml must be the last artifact touched. Merge the packaged
+          # chart into the existing index with the public download URL.
+          helm repo index ./ \
+            --url "https://github.com/${PUBLIC_REPO}/releases/download/${{ steps.version.outputs.tag_name }}" \
+            --merge docs/index.yaml
+          mv ./index.yaml docs/index.yaml
+          grep -c "version: ${{ steps.version.outputs.chart_version }}" docs/index.yaml
+
+      - name: Verify index digest matches packaged chart
+        id: digest
+        run: |
+          set -euo pipefail
+          # Byte-identical invariant: the index digest must equal the sha256 of
+          # the packaged .tgz. helm repo index computes it from the same file,
+          # but verify rather than trust.
+          version='${{ steps.version.outputs.chart_version }}'
+          index_digest="$(awk '/ping-devops:/{f=1} f && /^    version: '"${version}"'/{match_line=1} match_line && /digest:/{print $2; exit}' docs/index.yaml)"
+          actual_digest="$(sha256sum "ping-devops-${version}.tgz" | awk '{print $1}')"
+          if [ "$index_digest" != "$actual_digest" ]; then
+            echo "::error::digest mismatch: docs/index.yaml=${index_digest} packaged=${actual_digest}"
+            exit 1
+          fi
+          echo "digest=${actual_digest}" >> "$GITHUB_OUTPUT"
+          echo "digest verified: ${actual_digest}"
+
+      - name: Upload packaged chart and index
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-package-${{ steps.version.outputs.chart_version }}
+          retention-days: 7
+          path: |
+            ping-devops-*.tgz
+            docs/index.yaml
+
+  draft:
+    name: Create draft release on public repo
+    needs: package
+    if: ${{ github.event_name == 'push' && github.ref_type == 'tag' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-24.04
+    environment: helm-release
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+          fetch-depth: 1
+
+      - name: Create release-bot App token
+        id: release-bot-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_APP_PRIVATE_KEY }}
+          owner: pingidentity
+          repositories: helm-charts
+          permission-contents: write
+
+      - name: Download packaged chart and index
+        uses: actions/download-artifact@v4
+        with:
+          name: release-package-${{ needs.package.outputs.chart_version }}
+
+      - name: Create or reuse draft release
+        id: draft
+        env:
+          GH_TOKEN: ${{ steps.release-bot-token.outputs.token }}
+          TAG: ${{ needs.package.outputs.tag_name }}
+          VERSION: ${{ needs.package.outputs.chart_version }}
+        run: |
+          set -euo pipefail
+          # Idempotency: if a draft for this tag already exists (retry after a
+          # failed run), reuse it rather than stacking duplicates.
+          release_id="$(gh api "repos/${PUBLIC_REPO}/releases" --jq ".[] | select(.tag_name==\"${TAG}\" and .draft==true) | .id" | head -1 || true)"
+          if [ -n "$release_id" ]; then
+            echo "reusing existing draft release ${release_id} for ${TAG}"
+            # Replace any stale asset from the earlier attempt.
+            old_asset="$(gh api "repos/${PUBLIC_REPO}/releases/${release_id}" --jq ".assets[] | select(.name==\"ping-devops-${VERSION}.tgz\") | .id" || true)"
+            if [ -n "$old_asset" ]; then
+              gh api -X DELETE "repos/${PUBLIC_REPO}/releases/assets/${old_asset}"
+              echo "deleted stale asset from prior attempt"
+            fi
+          else
+            release_id="$(gh api -X POST "repos/${PUBLIC_REPO}/releases" \
+              -f tag_name="${TAG}" \
+              -f name="${TAG}" \
+              -f draft=true \
+              -f body="Ping Identity helm charts release ${VERSION}." \
+              --jq .id)"
+            echo "created draft release ${release_id} for ${TAG}"
+          fi
+          gh api -X POST "repos/${PUBLIC_REPO}/releases/${release_id}/assets" \
+            -H "Content-Type: application/gzip" \
+            --input "ping-devops-${VERSION}.tgz" \
+            -f name="ping-devops-${VERSION}.tgz" --jq .name
+          echo "release_id=${release_id}" >> "$GITHUB_OUTPUT"
+          echo "draft_url=https://github.com/${PUBLIC_REPO}/releases/tag/${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify draft asset digest
+        env:
+          GH_TOKEN: ${{ steps.release-bot-token.outputs.token }}
+          TAG: ${{ needs.package.outputs.tag_name }}
+          VERSION: ${{ needs.package.outputs.chart_version }}
+          EXPECTED_DIGEST: ${{ needs.package.outputs.digest }}
+        run: |
+          set -euo pipefail
+          # Download the draft asset back from the public repo and hash it. The
+          # uploaded bytes must equal the packaged bytes the index references.
+          gh api "repos/${PUBLIC_REPO}/releases" --jq ".[] | select(.tag_name==\"${TAG}\" and .draft==true)" >/dev/null
+          asset_url="$(gh api "repos/${PUBLIC_REPO}/releases" --jq ".[] | select(.tag_name==\"${TAG}\" and .draft==true) | .assets[] | select(.name==\"ping-devops-${VERSION}.tgz\") | .url")"
+          gh api "$asset_url" -H "Accept: application/octet-stream" > "$RUNNER_TEMP/downloaded.tgz"
+          actual="$(sha256sum "$RUNNER_TEMP/downloaded.tgz" | awk '{print $1}')"
+          if [ "$actual" != "$EXPECTED_DIGEST" ]; then
+            echo "::error::draft asset digest ${actual} != index digest ${EXPECTED_DIGEST}"
+            exit 1
+          fi
+          echo "draft asset digest matches index: ${actual}"
+
+  publish:
+    name: Publish release
+    needs: [package, draft]
+    if: ${{ !cancelled() && needs.package.outputs.mode == 'publish' && needs.draft.result == 'success' }}
+    runs-on: ubuntu-24.04
+    environment: helm-release
+    timeout-minutes: 10
+    steps:
+      - name: Create release-bot App token
+        id: release-bot-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_APP_PRIVATE_KEY }}
+          owner: pingidentity
+          repositories: helm-charts
+          permission-contents: write
+
+      - name: Push master and tag to public repo
+        env:
+          GH_TOKEN: ${{ steps.release-bot-token.outputs.token }}
+          TAG: ${{ needs.package.outputs.tag_name }}
+        run: |
+          set -euo pipefail
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/${PUBLIC_REPO}.git" public
+          cd public
+          # Fast-forward public master to the EMU master release commit. This
+          # must be a fast-forward; if it is not, the public repo has moved and
+          # needs manual reconciliation.
+          git fetch "https://x-access-token:${GH_TOKEN}@github.com/ping-internal/ppds-helm-charts.git" master
+          git merge --ff-only FETCH_HEAD
+          git push origin master
+          git tag "${TAG}" FETCH_HEAD
+          git push origin "${TAG}"
+
+      - name: Publish the draft release
+        env:
+          GH_TOKEN: ${{ steps.release-bot-token.outputs.token }}
+          RELEASE_ID: ${{ needs.draft.outputs.release_id }}
+        run: |
+          set -euo pipefail
+          curl -sS -o /dev/null -w '%{http_code}\n' -X PATCH \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            "https://api.github.com/repos/${PUBLIC_REPO}/releases/${RELEASE_ID}" \
+            -d '{"draft":false}' | grep -qx 200
+
+      - name: Verify public release and asset
+        env:
+          GH_TOKEN: ${{ steps.release-bot-token.outputs.token }}
+          TAG: ${{ needs.package.outputs.tag_name }}
+          VERSION: ${{ needs.package.outputs.chart_version }}
+        run: |
+          set -euo pipefail
+          # External verification: release published and asset resolves. The
+          # Helm repo index (docs/index.yaml on public master, served at
+          # helm.pingidentity.com/index.yaml via the Pages deploy) may lag a
+          # few minutes behind the push while the public docs action runs, so
+          # verify the index on the freshly pushed public master rather than
+          # the Pages URL here. HTML docs live at developer.pingidentity.com
+          # (helm.pingidentity.com is only a redirect stub + index.yaml).
+          state="$(gh api "repos/${PUBLIC_REPO}/releases/${{ needs.draft.outputs.release_id }}" --jq .draft)"
+          [ "$state" = "false" ] || { echo "::error::release still draft"; exit 1; }
+          curl -sSf -o /dev/null "https://github.com/${PUBLIC_REPO}/releases/download/${TAG}/ping-devops-${VERSION}.tgz"
+          index_version="$(curl -sSf "https://raw.githubusercontent.com/${PUBLIC_REPO}/master/docs/index.yaml" | grep -m1 "version: ${VERSION}$" || true)"
+          [ -n "$index_version" ] || { echo "::error::docs/index.yaml on public master does not contain version ${VERSION}"; exit 1; }
+          echo "public release verified: ${TAG} (asset + index)"
+
+      - name: Notify Slack
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          TAG: ${{ needs.package.outputs.tag_name }}
+          VERSION: ${{ needs.package.outputs.chart_version }}
+        run: |
+          set -euo pipefail
+          curl -sS -X POST "${SLACK_WEBHOOK}" \
+            -H 'Content-type: application/json' \
+            -d '{"text":"Helm chart release published: '"${TAG}"' (chart version '"${VERSION}"') — https://github.com/'"${PUBLIC_REPO}"'/releases/tag/'"${TAG}"'"}'
