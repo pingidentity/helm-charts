@@ -266,10 +266,11 @@ jobs:
               echo "deleted stale asset from prior attempt"
             fi
           else
+            # -F (not -f) sends typed values: draft must be a JSON boolean.
             release_id="$(gh api -X POST "repos/${PUBLIC_REPO}/releases" \
               -f tag_name="${TAG}" \
               -f name="${TAG}" \
-              -f draft=true \
+              -F draft=true \
               -f body="Ping Identity helm charts release ${VERSION}." \
               --jq .id)"
             echo "created draft release ${release_id} for ${TAG}"
