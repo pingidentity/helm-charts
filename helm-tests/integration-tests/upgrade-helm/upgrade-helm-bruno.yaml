@@ -30,20 +30,20 @@ testFramework:
 
   testSteps:
     - name: 00a-kubectl-version
-      image: alpine/k8s:1.20.7
+      image: ${DEPS_REGISTRY}alpine/k8s:1.20.7
       command:
         - kubectl
         - version
 
     - name: 00b-kubectl-get-pvcs
-      image: alpine/k8s:1.20.7
+      image: ${DEPS_REGISTRY}alpine/k8s:1.20.7
       command:
         - kubectl
         - get
         - pvc
 
     - name: 00c-add-repo
-      image: alpine/k8s:1.20.7
+      image: ${DEPS_REGISTRY}alpine/k8s:1.20.7
       command:
         - helm
         - repo
@@ -56,7 +56,7 @@ testFramework:
         - "/var/run/shared/.cache/helm/repository/pingidentity-index.yaml"
 
     - name: 00d-search-repo
-      image: alpine/k8s:1.20.7
+      image: ${DEPS_REGISTRY}alpine/k8s:1.20.7
       command:
         - helm
         - search
@@ -67,7 +67,7 @@ testFramework:
         - "/var/run/shared/.config/helm/repositories.yaml"
 
     - name: 01-update-value-file
-      image: alpine/k8s:1.20.7
+      image: ${DEPS_REGISTRY}alpine/k8s:1.20.7
       command:
         - helm
         - upgrade
