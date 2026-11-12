@@ -254,6 +254,13 @@ jobs:
           VERSION: ${{ needs.package.outputs.chart_version }}
         run: |
           set -euo pipefail
+          # Hygiene: delete orphaned drafts from earlier failed runs (e.g. the
+          # tagless draft created when the tag output key was empty). Drafts
+          # are invisible to customers but would otherwise linger forever.
+          orphan_ids="$(gh api "repos/${PUBLIC_REPO}/releases" --jq '.[] | select(.draft==true and ((.tag_name // "") == "")) | .id' || true)"
+          for oid in $orphan_ids; do
+            gh api -X DELETE "repos/${PUBLIC_REPO}/releases/${oid}" && echo "deleted orphaned draft ${oid}"
+          done
           # Idempotency: if a draft for this tag already exists (retry after a
           # failed run), reuse it rather than stacking duplicates.
           release_id="$(gh api "repos/${PUBLIC_REPO}/releases" --jq ".[] | select(.tag_name==\"${TAG}\" and .draft==true) | .id" | head -1 || true)"
