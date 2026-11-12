@@ -4,9 +4,6 @@ name: Helm chart release
 # pingidentity/helm-charts repository.
 #
 # Trigger paths:
-#  - Push to master: runs the package job only (validation + packaging smoke).
-#    The public master mirror is updated as part of the release publish, so a
-#    plain master push here does not touch the public repo.
 #  - Push of a ping-devops-* tag: the workflow validates the tag against
 #    Chart.yaml, packages the chart, regenerates docs/index.yaml, creates a
 #    DRAFT release on the public repo with the exact packaged .tgz, and stops.
@@ -16,6 +13,10 @@ name: Helm chart release
 #  - workflow_dispatch publish: completes the release by verifying the draft
 #    (tag, .tgz asset, index digest pairing), pushing master + tag to the
 #    public repo, publishing the draft, and notifying Slack.
+#
+# No master-push trigger: master gating is the Template tests job in
+# helm-tests.yml (runs on PRs and master pushes); packaging is exercised on
+# every tag push and dry-run.
 #
 # Byte-identical invariant: the .tgz referenced by docs/index.yaml MUST be the
 # exact file attached to the public release. Repackaging changes tarball
@@ -32,8 +33,6 @@ on:
   push:
     tags:
       - 'ping-devops-*'
-    branches:
-      - master
   workflow_dispatch:
     inputs:
       mode:
@@ -71,7 +70,7 @@ jobs:
     name: Validate and package
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    if: ${{ github.event_name == 'push' && github.ref_type != 'tag' || github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/ping-devops-') }}
+    if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/ping-devops-') }}
     outputs:
       chart_version: ${{ steps.version.outputs.chart_version }}
       tag_name: ${{ steps.version.outputs.tag_name }}
