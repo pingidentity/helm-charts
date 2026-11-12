@@ -593,7 +593,12 @@ for _helmTest in ${_helmTests}; do
         _brunoEnvConfigMap="${_helmRelease}-generated.bruno-environment.json"
         _brunoEnvFile="${_tmpDir}/${_brunoEnvConfigMap}"
 
-        getBrunoEnvJson ".*-env-vars$" > "${_brunoEnvFile}"
+        # Scope the scrape to THIS release's *-env-vars CMs: pool namespaces
+        # can hold two concurrent suites (e.g. a smoke + an integration job of
+        # the same dispatch), and a namespace-wide scrape would cross-
+        # contaminate same-named variables (e.g. PD_CONSOLE_PRIVATE_HOSTNAME)
+        # between releases.
+        getBrunoEnvJson "^${_helmRelease}-.*-env-vars$" > "${_brunoEnvFile}"
 
         kubectl delete configmap "${_brunoEnvConfigMap}" "${NS_OPT[@]}" 2> /dev/null > /dev/null
         kubectl create configmap "${_brunoEnvConfigMap}" "${NS_OPT[@]}" --from-file="file=${_brunoEnvFile}"
