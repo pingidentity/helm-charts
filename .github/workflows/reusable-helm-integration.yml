@@ -172,6 +172,7 @@ jobs:
           {
             printf 'HELM_CI_NAMESPACE=%s\n' "${ns}"
             printf 'HELM_CI_POOL=%s\n' "${pool}"
+            printf 'CI_RUN_ID=%s\n' "${GITHUB_RUN_ID}"
           } >> "${GITHUB_ENV}"
           printf 'Claimed %s\n' "${ns}"
 
@@ -262,13 +263,18 @@ jobs:
       - name: Clean up integration artifacts and release pool claim
         if: ${{ always() && env.HELM_CI_NAMESPACE != '' }}
         run: |
-          # Pods/statefulsets/deployments too: a cancelled job's cleanup never
-          # runs, leaving product pods (e.g. a failed PA StatefulSet) squatting
-          # on the pool node and blocking later suites. Pools are exclusively
-          # ours; these deletes stay inside the claimed namespace.
-          kubectl delete pod,sts,deploy,replicaset,statefulset,pvc,configmap,secret -n "${HELM_CI_NAMESPACE}" --all \
+          # Delete only THIS run's resources (run-id label stamped by
+          # run_helm_tests.sh via helm --labels and kubectl --labels). Pools
+          # are shared namespaces: parallel suites run in the same pool, so
+          # an --all delete here would destroy the neighboring suites mid-run
+          # (run 43328361118). A cancelled/failed earlier attempt of this same
+          # run leaves its run-id behind; the sweep in run_helm_tests.sh also
+          # matches on run-id, and dead runs older than 2h are swept there too.
+          kubectl delete pod,sts,deploy,replicaset,statefulset,pvc,configmap,secret -n "${HELM_CI_NAMESPACE}" \
+            -l "ppds.pingidentity.com/run-id=${GITHUB_RUN_ID}" \
             --ignore-not-found=true --wait=false || true
-          kubectl delete pvc,configmap,secret -n "${HELM_CI_NAMESPACE}" --all \
+          kubectl delete pvc,configmap,secret -n "${HELM_CI_NAMESPACE}" \
+            -l "ppds.pingidentity.com/run-id=${GITHUB_RUN_ID}" \
             --ignore-not-found=true || true
           kubectl get all,pvc,configmap,secret -n "${HELM_CI_NAMESPACE}" || true
 
