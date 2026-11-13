@@ -74,14 +74,14 @@ jobs:
       ARTIFACTORY_REGISTRY: ${{ vars.ARTIFACTORY_REGISTRY || 'docker.corp.pingidentity.com:5300' }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: false
           fetch-depth: 1
 
       - name: Create submodule GitHub App token
         id: submodule-app-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.SUBMODULE_APP_ID }}
           private-key: ${{ secrets.SUBMODULE_APP_PRIVATE_KEY }}
@@ -116,7 +116,7 @@ jobs:
         uses: ./.github/actions/setup-tools
 
       - name: Assume CI role via OIDC
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::574076504146:role/helm-charts-ci
           aws-region: ${{ vars.AWS_REGION }}
