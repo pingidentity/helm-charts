@@ -186,6 +186,10 @@ jobs:
           set -euo pipefail
           # Suite directories now hold only the Bruno yaml (newman suites
           # deleted, PDI-2452), so dir enumeration resolves unambiguously.
+          # RELEASES_FILE collects release names run_helm_tests.sh installs
+          # (for the label-scoped cleanup step below).
+          export RELEASES_FILE="${PWD}/installed-releases-${EXPECTED_ARCH}.txt"
+          touch "${RELEASES_FILE}"
           for attempt in 1 2 3; do
             printf 'smoke_attempt=%s\n' "$attempt" | tee -a "smoke-${EXPECTED_ARCH}.log"
             if ./ci_scripts/run_helm_smoke.sh --product "${SMOKE_PRODUCT}" --namespace "${HELM_CI_NAMESPACE}" 2>&1 | tee -a "smoke-${EXPECTED_ARCH}.log"; then
@@ -204,20 +208,28 @@ jobs:
       - name: Clean up smoke artifacts and release pool claim
         if: ${{ always() && env.HELM_CI_NAMESPACE != '' }}
         run: |
-          # Delete only THIS run's resources (run-id label stamped by
-          # run_helm_tests.sh via helm --labels and kubectl --labels). Pools
-          # are shared namespaces: parallel smoke suites of the same pipeline
-          # run in the same pool, so an --all delete here would destroy the
-          # neighboring suites mid-run (run 43328361118). A cancelled/failed
-          # earlier attempt of this same run leaves its run-id behind; the
-          # sweep in run_helm_tests.sh also matches on run-id, and dead runs
-          # older than 2h are swept there too.
-          kubectl delete pod,sts,deploy,replicaset,statefulset,pvc,configmap,secret -n "${HELM_CI_NAMESPACE}" \
-            -l "ppds.pingidentity.com/run-id=${GITHUB_RUN_ID}" \
-            --ignore-not-found=true --wait=false || true
-          kubectl delete pvc,configmap,secret -n "${HELM_CI_NAMESPACE}" \
-            -l "ppds.pingidentity.com/run-id=${GITHUB_RUN_ID}" \
-            --ignore-not-found=true || true
+          # Delete only THIS suite's resources (release label stamped by
+          # run_helm_tests.sh via helm --labels and kubectl label). Pools are
+          # shared namespaces: parallel smoke suites of the same pipeline run
+          # in the same pool AND share GITHUB_RUN_ID, so selecting on run-id
+          # here would delete the concurrent suites' helm release storage
+          # secrets, killing them with "release: not found" (run
+          # 43448047735). The release name is the per-suite identity,
+          # collected in RELEASES_FILE by run_helm_tests.sh.
+          # Dead runs are reclaimed by the >2h stale sweep in
+          # run_helm_tests.sh.
+          _releases_file="installed-releases-${EXPECTED_ARCH}.txt"
+          if test -f "${_releases_file}"; then
+            while IFS= read -r _release; do
+              test -z "${_release}" && continue
+              kubectl delete pod,sts,deploy,replicaset,statefulset,pvc,configmap,secret -n "${HELM_CI_NAMESPACE}" \
+                -l "ppds.pingidentity.com/release=${_release}" \
+                --ignore-not-found=true --wait=false || true
+              kubectl delete pvc,configmap,secret -n "${HELM_CI_NAMESPACE}" \
+                -l "ppds.pingidentity.com/release=${_release}" \
+                --ignore-not-found=true || true
+            done < "${_releases_file}"
+          fi
           kubectl get all,pvc,configmap,secret -n "${HELM_CI_NAMESPACE}" || true
 
       - name: Remove kubeconfig
