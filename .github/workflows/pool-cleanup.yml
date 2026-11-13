@@ -1,18 +1,30 @@
 name: Pool cleanup
 
-# TEMPORARY — one-time clean of pre-label leftovers in the CI pool
-# namespaces. Resource-labeling landed in PRs #510/#511: everything created
-# after those merges carries ppds.pingidentity.com/run-id and
-# ppds.pingidentity.com/release labels, so the in-CI sweeps manage their
-# lifecycle. Resources created BEFORE #510 carry no labels; the 2h stale
-# sweep only matches labeled resources, so old unlabeled PVCs/configmaps/
-# secrets in the pools would otherwise sit forever (bound PVCs also block
-# nothing directly, but they consume storage and pollute `kubectl get`).
+# Manual pool hygiene for the shared CI pool namespaces (ppds-ci-pool-0..4
+# on helm-charts-runner and helm-charts-runner-arm). Pools cannot be created
+# by CI, so every run claims one via GITHUB_RUN_ID % 5; resource lifecycle is
+# label-based since PRs #510/#511 (ppds.pingidentity.com/release per suite,
+# ppds.pingidentity.com/run-id per pipeline, >2h stale-run sweep).
 #
-# Run this once per cluster via workflow_dispatch (env per arch), verify the
-# pool contents are just the built-in fixtures (aws-ecr-registry, default
-# serviceaccount), then DELETE this workflow in the same PR it lands in —
-# or before it merges.
+# When to use this workflow:
+#   - A run's always() cleanup never ran (runner crash, force-cancel, quota
+#     kill) and its labeled leftovers are still inside the 2h stale-sweep
+#     window — clean that run-id now instead of waiting.
+#   - One-time removal of resources created before the labeling scheme
+#     existed (they carry no labels and nothing matches them).
+#
+# Safety:
+#   dry_run=true (default) only lists what would be deleted.
+#   mode=run-id (default) touches ONLY resources labeled with the given
+#     run id — safe to run while other suites are active.
+#   mode=all-unlabeled sweeps every unlabeled resource (minus pool
+#     fixtures). Cross-fire hazard: this is the same namespace-wide delete
+#     that killed run 43328361118. Only run it when no matrix is active —
+#     check https://github.com/ping-internal/ppds-helm-charts/actions
+#     first. Labeled resources are never touched by this mode.
+#
+# Note: runs from a branch need chore/* or feature/* in the helm-test
+# deployment branch policy (master is always allowed).
 
 on:
   workflow_dispatch:
@@ -25,23 +37,70 @@ on:
           - x86_64
           - aarch64
         default: x86_64
+      mode:
+        description: run-id = delete only the given run's resources (safe while other suites run). all-unlabeled = sweep every unlabeled resource (only when no matrix is active).
+        type: choice
+        required: true
+        options:
+          - run-id
+          - all-unlabeled
+        default: run-id
+      run_id:
+        description: GITHUB_RUN_ID whose resources to delete (mode=run-id only)
+        type: string
+        required: false
+      dry_run:
+        description: List targets without deleting
+        type: boolean
+        required: true
+        default: true
 
 jobs:
   clean-pool:
-    name: Clean pools (${{ inputs.arch }})
+    name: Clean pools (${{ inputs.arch }} / ${{ inputs.mode }} / dry=${{ inputs.dry_run }})
     runs-on: ${{ inputs.arch == 'x86_64' && 'ping-internal-x86' || 'ping-internal-arm' }}
     environment: helm-test
+    permissions:
+      id-token: write  # OIDC role assumption (caller must grant it too)
     env:
       EXPECTED_ARCH: ${{ inputs.arch }}
       AWS_REGION: ${{ vars.AWS_REGION }}
       EKS_CLUSTER: ${{ inputs.arch == 'x86_64' && 'helm-charts-runner' || 'helm-charts-runner-arm' }}
       EKS_SERVER: ${{ inputs.arch == 'x86_64' && 'https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com' || 'https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com' }}
     steps:
-      - name: Set up tools
-        uses: ./.github/actions/setup-tools
+      # No checkout: this workflow runs nothing from the repo. A checkout
+      # fails auth on non-master dispatches from the private runners
+      # ("could not read Username for 'https://github.com'"). The runners
+      # have neither kubectl nor aws — setup-tools installs both but needs
+      # a checkout; install inline with the same sources/versions.
+      - name: Install kubectl + AWS CLI
+        run: |
+          set -euo pipefail
+          arch=$(uname -m)
+          case "$arch" in
+            x86_64) karch=amd64; warch=x86_64 ;;
+            aarch64|arm64) karch=arm64; warch=aarch64 ;;
+            *) echo "Unsupported architecture: $arch" >&2; exit 1 ;;
+          esac
+
+          AWSCLI_VERSION=2.36.41
+          archive="awscli-exe-linux-${warch}-${AWSCLI_VERSION}.zip"
+          curl --fail --silent --show-error --location \
+            "https://awscli.amazonaws.com/${archive}" --output "${RUNNER_TEMP}/${archive}"
+          unzip -q -o "${RUNNER_TEMP}/${archive}" -d "${RUNNER_TEMP}/awscli"
+          sudo "${RUNNER_TEMP}/awscli/aws/install" --update
+          aws --version
+
+          KUBECTL_VERSION=1.36.3
+          curl --fail --silent --show-error --location \
+            "https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/${karch}/kubectl" \
+            --output "${RUNNER_TEMP}/kubectl"
+          sudo install -m 0755 "${RUNNER_TEMP}/kubectl" /usr/local/bin/kubectl
+          kubectl version --client
+          jq --version
 
       - name: Assume CI role via OIDC
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::574076504146:role/helm-charts-ci
           aws-region: ${{ vars.AWS_REGION }}
@@ -80,47 +139,77 @@ jobs:
             context: {cluster: ${EKS_CLUSTER}, user: helm-charts-ci}
           current-context: ${EKS_CLUSTER}
           EOF
+          # Step-scoped KUBECONFIG would fall back to the runner's in-cluster
+          # identity (arc-runners SA, no permissions) in later steps.
+          printf 'KUBECONFIG=%s\n' "${KUBECONFIG}" >> "${GITHUB_ENV}"
           kubectl version --client=false
+
+      - name: Validate inputs
+        run: |
+          set -euo pipefail
+          if test "${{ inputs.mode }}" = "run-id"; then
+            test -n "${{ inputs.run_id }}" || { echo "mode=run-id requires run_id input"; exit 1; }
+          fi
+          if test "${{ inputs.dry_run }}" != "true" && test "${{ inputs.mode }}" = "all-unlabeled"; then
+            echo "DESTRUCTIVE MODE: all-unlabeled sweep without dry-run."
+            echo "Confirm no helm-tests matrix is active (it would cross-fire)."
+          fi
 
       - name: Inventory before
         run: |
           for ns in ppds-ci-pool-0 ppds-ci-pool-1 ppds-ci-pool-2 ppds-ci-pool-3 ppds-ci-pool-4; do
-            banner "${ns}"
+            echo "===== ${ns} ====="
             kubectl get all,pvc,configmap,secret -n "${ns}" || true
           done
 
-      - name: Delete unlabeled leftovers
+      - name: Select targets
         run: |
           set -euo pipefail
-          # Delete everything in the pools EXCEPT what must survive:
-          #  - labeled resources (current scheme manages its own lifecycle)
-          #  - aws-ecr-registry (pool fixture created by before-script; the
-          #    next run recreates it if missing, but keeping it avoids a
-          #    first-run image-pull race)
-          #  - default serviceaccount + kube-root-ca.crt (k8s-managed)
-          # helm release storage secrets (sh.helm.release.v1.*) have no
-          # owner once their release's labels are gone — they match
-          # "unlabeled" and are deleted.
-          for ns in ppds-ci-pool-0 ppds-ci-pool-1 ppds-ci-pool-2 ppds-ci-pool-3 ppds-ci-pool-4; do
-            banner "Cleaning ${ns}"
-            kubectl get pod,sts,deploy,replicaset,statefulset,pvc,configmap,secret -n "${ns}" -o json \
-              | jq -r '.items[] | select(
-                  (.metadata.labels["ppds.pingidentity.com/run-id"] == null)
-                  and (.metadata.name != "aws-ecr-registry")
-                  and (.metadata.name != "default")
-                  and (.metadata.name != "kube-root-ca.crt")
-                ) | "\(.kind)/\(.metadata.name)"' \
-              | while IFS= read -r res; do
-                  test -z "${res}" && continue
-                  echo "deleting ${res}"
-                  kubectl delete "${res}" -n "${ns}" --ignore-not-found=true
-                done
-          done
+          _mode="${{ inputs.mode }}"
+          _runId="${{ inputs.run_id }}"
+
+          if test "${_mode}" = "run-id"; then
+            # Everything labeled with the given run id, all pools.
+            # Kubernetes label values must be alphanumeric/-/./_ — GITHUB_RUN_ID is.
+            kubectl get pod,sts,deploy,replicaset,statefulset,pvc,configmap,secret \
+              -A -l "ppds.pingidentity.com/run-id=${_runId}" -o json \
+              | jq -r '.items[] | "\(.metadata.namespace) \(.kind)/\(.metadata.name)"' > targets.txt
+          else
+            # All unlabeled, minus pool fixtures and k8s-managed objects.
+            # kubectl takes a single -n; query each pool and merge.
+            : > targets.txt
+            for ns in ppds-ci-pool-0 ppds-ci-pool-1 ppds-ci-pool-2 ppds-ci-pool-3 ppds-ci-pool-4; do
+              kubectl get pod,sts,deploy,replicaset,statefulset,pvc,configmap,secret \
+                -n "${ns}" -o json 2>/dev/null \
+                | jq -r '.items[]
+                    | select(
+                        (.metadata.labels["ppds.pingidentity.com/run-id"] == null)
+                        and (.metadata.name != "aws-ecr-registry")
+                        and (.metadata.name != "default")
+                        and (.metadata.name != "kube-root-ca.crt")
+                      )
+                    | "\(.metadata.namespace) \(.kind)/\(.metadata.name)"' >> targets.txt
+            done
+          fi
+
+          echo "=== targets ($(wc -l < targets.txt | tr -d ' ')) ==="
+          cat targets.txt
+
+      - name: Delete targets
+        if: ${{ inputs.dry_run == false }}
+        run: |
+          set -euo pipefail
+          test -s targets.txt || { echo "nothing to delete"; exit 0; }
+          while read -r ns res; do
+            test -z "${ns}" && continue
+            echo "deleting ${res} in ${ns}"
+            kubectl delete "${res}" -n "${ns}" --ignore-not-found=true --wait=false
+          done < targets.txt
 
       - name: Inventory after
         if: always()
         run: |
           for ns in ppds-ci-pool-0 ppds-ci-pool-1 ppds-ci-pool-2 ppds-ci-pool-3 ppds-ci-pool-4; do
-            banner "${ns}"
+            echo "===== ${ns} ====="
             kubectl get all,pvc,configmap,secret -n "${ns}" || true
           done

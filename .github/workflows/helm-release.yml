@@ -79,7 +79,7 @@ jobs:
       digest: ${{ steps.digest.outputs.digest }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: false
           fetch-depth: 0
@@ -213,7 +213,7 @@ jobs:
           echo "digest verified: ${actual_digest}"
 
       - name: Upload packaged chart and index
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-package-${{ steps.version.outputs.chart_version }}
           retention-days: 7
@@ -230,14 +230,14 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: false
           fetch-depth: 1
 
       - name: Create release-bot App token
         id: release-bot-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
           private-key: ${{ secrets.RELEASE_BOT_APP_PRIVATE_KEY }}
@@ -246,7 +246,7 @@ jobs:
           permission-contents: write
 
       - name: Download packaged chart and index
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: release-package-${{ needs.package.outputs.chart_version }}
 
@@ -324,7 +324,7 @@ jobs:
     steps:
       - name: Create release-bot App token
         id: release-bot-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
           private-key: ${{ secrets.RELEASE_BOT_APP_PRIVATE_KEY }}
