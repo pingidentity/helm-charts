@@ -74,6 +74,7 @@ fi
 _helm_tests_dir="${CI_PROJECT_DIR}/helm-tests"
 _post_renderer_script=""
 declare -a _external_resource_files
+_helmTests=""
 
 while test -n "${1}"; do
     case "${1}" in
@@ -213,12 +214,14 @@ _final() {
         fi
     else
         #
-        # Shared pool namespace: delete THIS run's leftover non-release
+        # Shared pool namespace: delete THIS suite's leftover non-release
         # resources (kubectl-created configmaps/secrets; the helm release and
-        # its hook pods were removed by the uninstall above). Scoped to the
-        # run-id label — parallel suites in the same pool must survive.
+        # its hook pods were removed by the uninstall above). Select on the
+        # release label — run-id is shared by all parallel suites of the
+        # pipeline, so selecting on it here would delete a concurrent
+        # suite's helm release storage secrets (run 43448047735).
         #
-        kubectl delete configmap,secret -l "${_RUN_LABEL}" "${NS_OPT[@]}" \
+        kubectl delete configmap,secret -l "ppds.pingidentity.com/release=${_helmRelease}" "${NS_OPT[@]}" \
             --ignore-not-found=true 2> /dev/null > /dev/null || true
         echo_red "Warning: Keeping artifacts created (i.e. pvcs, configmaps, secrets)"
     fi
@@ -324,7 +327,8 @@ createBrunoCollectionConfigMap() {
     COPYFILE_DISABLE=1 tar --exclude='./.claude' --exclude='./.git' --exclude='./node_modules' --no-xattrs -czf "${_brunoTarFile}" -C "${_brunoSlugDir}" . 2> /dev/null
 
     kubectl delete configmap "${_brunoTarName}" "${NS_OPT[@]}" 2> /dev/null > /dev/null
-    kubectl create configmap "${_brunoTarName}" "${NS_OPT[@]}" --from-file="file=${_brunoTarFile}" --labels "${_RUN_LABEL}"
+    kubectl create configmap "${_brunoTarName}" "${NS_OPT[@]}" --from-file="file=${_brunoTarFile}"
+    _kubectlLabel "${_brunoTarName}" configmap
 }
 
 ################################################################################
@@ -401,14 +405,25 @@ export TEST_PREFIX="dbt-"
 export TEST_SUFFIX="testframework"
 
 #
-# Run-ownership label. Pools are shared namespaces (they cannot be created by
-# CI), and multiple suites may run concurrently in one pool (parallel matrix
-# jobs of the same pipeline). Every resource this invocation creates — helm
-# release objects (via --labels) and kubectl-created configmaps/secrets — is
-# stamped with this label, and every delete (pre-install sweep, end-of-run
-# cleanup) selects on it, so suites never destroy each other's resources.
-# CI_RUN_ID is exported by the GitHub workflow; GitLab pipelines map it from
-# CI_PIPELINE_ID in before_script.sh; local runs get a per-invocation value.
+# Ownership labels. Pools are shared namespaces (they cannot be created by
+# CI), and multiple suites run concurrently in one pool (parallel matrix
+# jobs of the same pipeline). Two labels on every resource:
+#
+#   ppds.pingidentity.com/release — the helm release name, unique per suite.
+#     All LIVE deletes select on this: pre-install sweep, end-of-run
+#     cleanup, and the workflow job-end cleanup step. Selecting on run-id
+#     here would let one suite's cleanup delete a concurrent suite's helm
+#     release storage secrets (helm --labels stamps them too), which is
+#     exactly what killed run 43448047735 ("Error: release: not found" on
+#     all 22 jobs).
+#
+#   ppds.pingidentity.com/run-id — pipeline identity (CI_RUN_ID, exported by
+#     the GitHub workflow; GitLab falls back to gitlab-${CI_PIPELINE_ID};
+#     local runs get a per-invocation value). Used ONLY by the stale sweep
+#     (resources of a dead run whose newest object is >2h old).
+#
+# kubectl create has no --labels flag (verified v1.36), so resources are
+# labeled after creation via `kubectl label --overwrite`.
 #
 if test -z "${CI_RUN_ID}"; then
     if test -n "${CI_PIPELINE_ID}"; then
@@ -418,7 +433,24 @@ if test -z "${CI_RUN_ID}"; then
     fi
     export CI_RUN_ID
 fi
-_RUN_LABEL="ppds.pingidentity.com/run-id=${CI_RUN_ID}"
+_RUN_ID_LABEL="ppds.pingidentity.com/run-id"
+_RUN_LABEL="${_RUN_ID_LABEL}=${CI_RUN_ID}"
+
+# Label a kubectl-created resource with both ownership labels. kubectl
+# create has no --labels flag, so this runs after each create. The release
+# label is only set when known (callers inside the per-test loop pass it);
+# the end-of-run cleanup selects on it, so a created-without-release-label
+# resource would survive that cleanup — acceptable for run-level assets
+# (devops-secret, aws-ecr-registry) that outlive a single suite.
+_kubectlLabel() {
+    _resName="${1}"
+    _resKind="${2}"
+    _labelArgs=(--overwrite "${_RUN_LABEL}")
+    if test -n "${_currentRelease:-}"; then
+        _labelArgs+=("ppds.pingidentity.com/release=${_currentRelease}")
+    fi
+    kubectl label "${_resKind}" "${_resName}" "${_labelArgs[@]}" "${NS_OPT[@]}" > /dev/null 2>&1 || true
+}
 
 #
 # Determine the NAMESPACE to use
@@ -512,25 +544,25 @@ _devopsSecretName="devops-secret"
 
 #
 # Sweep leftover resources before installing:
-#   1. Own run-id: a cancelled/failed earlier attempt of this same pipeline
-#      skips its cleanup step, leaving product pods (e.g. a crashed PA
+#   1. This suite's release: a cancelled/failed earlier attempt of this same
+#      suite skips its cleanup step, leaving product pods (e.g. a crashed PA
 #      StatefulSet) that consume node CPU/memory.
 #   2. Stale runs: any run-id whose newest object is older than 2h, from a
 #      run whose cleanup never ran and that will never come back for it.
-# Never touch other live runs in the shared pool namespace — parallel matrix
+# Never touch other suites' or other runs' resources — parallel matrix
 # suites of the same pipeline and concurrent pipelines both share the pool.
-# Runs once per script invocation, before any helm install.
+# Runs once per script invocation, before any helm install. The release name
+# is not known yet at this point (the sweep predates the per-test loop), so
+# the own-release sweep inside the loop (just before helm install) covers
+# case 1; this namespace-level pass only handles case 2.
 #
 banner "Pre-install sweep of stale workloads in ${NS}"
-kubectl delete pod,sts,deploy,replicaset,statefulset,pvc,configmap,secret \
-    -l "${_RUN_LABEL}" "${NS_OPT[@]}" \
-    --ignore-not-found=true --wait=false 2> /dev/null > /dev/null || true
 _staleRunIds=$(kubectl get pod,sts,deploy,replicaset,statefulset,pvc,configmap,secret "${NS_OPT[@]}" \
-    -l ppds.pingidentity.com/run-id -o go-template='{{range .items}}{{index .metadata.labels "ppds.pingidentity.com/run-id"}}{{"\n"}}{{end}}' 2> /dev/null | sort -u)
+    -l "${_RUN_ID_LABEL}" -o go-template='{{range .items}}{{index .metadata.labels "ppds.pingidentity.com/run-id"}}{{"\n"}}{{end}}' 2> /dev/null | sort -u)
 for _staleRunId in ${_staleRunIds}; do
     test "${_staleRunId}" = "${CI_RUN_ID}" && continue
     _newest=$(kubectl get pod,sts,deploy,replicaset,statefulset,pvc,configmap,secret "${NS_OPT[@]}" \
-        -l "ppds.pingidentity.com/run-id=${_staleRunId}" -o json 2> /dev/null |
+        -l "${_RUN_ID_LABEL}=${_staleRunId}" -o json 2> /dev/null |
         jq -r '[.items[].metadata.creationTimestamp] | max // empty')
     test -z "${_newest}" && continue
     # Because date on MacOSX and Unix are different
@@ -543,7 +575,7 @@ for _staleRunId in ${_staleRunIds}; do
     if test ${_ageSeconds} -gt 7200; then
         banner "Sweeping stale resources of dead run ${_staleRunId} (newest object ${_ageSeconds}s old)"
         kubectl delete pod,sts,deploy,replicaset,statefulset,pvc,configmap,secret \
-            -l "ppds.pingidentity.com/run-id=${_staleRunId}" "${NS_OPT[@]}" \
+            -l "${_RUN_ID_LABEL}=${_staleRunId}" "${NS_OPT[@]}" \
             --ignore-not-found=true --wait=false 2> /dev/null > /dev/null || true
     fi
 done
@@ -553,8 +585,7 @@ kubectl delete secret "${_devopsSecretName}" "${NS_OPT[@]}" 2> /dev/null > /dev/
 kubectl create secret generic "${_devopsSecretName}" "${NS_OPT[@]}" \
     --from-literal=PING_IDENTITY_DEVOPS_USER="${PING_IDENTITY_DEVOPS_USER}" \
     --from-literal=PING_IDENTITY_DEVOPS_KEY="${PING_IDENTITY_DEVOPS_KEY}" \
-    --from-literal=PING_IDENTITY_ACCEPT_EULA="YES" \
-    --labels "${_RUN_LABEL}"
+    --from-literal=PING_IDENTITY_ACCEPT_EULA="YES"
 
 #
 # Global assets to be imported for configmaps
@@ -572,6 +603,16 @@ for _helmTest in ${_helmTests}; do
     _testName="$(basename "${_helmTest}" | sed 's/\.y.*ml$//')"
 
     _helmRelease="${TEST_PREFIX}${_testName}${_namespace_suffix}"
+    _currentRelease="${_helmRelease}"
+
+    #
+    # Publish installed release names for the workflow's job-end cleanup
+    # step (it selects deletions on the release ownership label). Appended
+    # across all suites/invocations in the job workspace.
+    #
+    if test -n "${RELEASES_FILE:-}"; then
+        echo "${_helmRelease}" >> "${RELEASES_FILE}"
+    fi
 
     banner "
                    Installing
@@ -602,6 +643,19 @@ for _helmTest in ${_helmTests}; do
 
     # Word-split is expected behavior for helm variables. Disable shellcheck.
     # shellcheck disable=SC2086
+    #
+    # Own-release sweep: a cancelled/failed earlier attempt of this suite
+    # skips its cleanup, leaving pods/PVCs that block this install (ports,
+    # PVC names, node capacity). Select on this release's ownership label —
+    # never on run-id, which concurrent suites of this pipeline share.
+    #
+    banner "Pre-install sweep of leftover workloads from release ${_helmRelease}"
+    kubectl delete pod,sts,deploy,replicaset,statefulset,pvc,configmap,secret \
+        -l "ppds.pingidentity.com/release=${_helmRelease}" "${NS_OPT[@]}" \
+        --ignore-not-found=true --wait=false 2> /dev/null > /dev/null || true
+
+    # Word-split is expected behavior for helm variables. Disable shellcheck.
+    # shellcheck disable=SC2086
     helm install "${_helmRelease}" "${HELM_CHART_NAME}" \
         ${_versionOpt} \
         "${NS_OPT[@]}" \
@@ -615,7 +669,7 @@ for _helmTest in ${_helmTests}; do
         --set "global.externalImage.pingtoolkit.image.repositoryFqn=${DEPS_REGISTRY}pingidentity/pingtoolkit" \
         --set "global.externalImage.pingtoolkit.image.tag=latest" \
         --set "global.addReleaseNameToResource=prepend" \
-        --labels "${_RUN_LABEL}"
+        --labels "${_RUN_LABEL},ppds.pingidentity.com/release=${_helmRelease}"
 
     _returnCode=${?}
 
@@ -658,7 +712,8 @@ for _helmTest in ${_helmTests}; do
         getBrunoEnvJson "^${_helmRelease}-.*-env-vars$" > "${_brunoEnvFile}"
 
         kubectl delete configmap "${_brunoEnvConfigMap}" "${NS_OPT[@]}" 2> /dev/null > /dev/null
-        kubectl create configmap "${_brunoEnvConfigMap}" "${NS_OPT[@]}" --from-file="file=${_brunoEnvFile}" --labels "${_RUN_LABEL}"
+        kubectl create configmap "${_brunoEnvConfigMap}" "${NS_OPT[@]}" --from-file="file=${_brunoEnvFile}"
+        _kubectlLabel "${_brunoEnvConfigMap}" configmap
 
         # The chart's pinglib.addreleasename helper truncates ConfigMap names to 63
         # chars, which can drop the ".json" suffix on long release names and break
@@ -666,7 +721,8 @@ for _helmTest in ${_helmTests}; do
         _brunoEnvConfigMapTrunc="$(echo "${_brunoEnvConfigMap}" | cut -c1-63)"
 
         kubectl delete configmap "${_brunoEnvConfigMapTrunc}" "${NS_OPT[@]}" 2> /dev/null > /dev/null
-        kubectl create configmap "${_brunoEnvConfigMapTrunc}" "${NS_OPT[@]}" --from-file="file=${_brunoEnvFile}" --labels "${_RUN_LABEL}"
+        kubectl create configmap "${_brunoEnvConfigMapTrunc}" "${NS_OPT[@]}" --from-file="file=${_brunoEnvFile}"
+        _kubectlLabel "${_brunoEnvConfigMapTrunc}" configmap
 
         #
         # Upload bruno collection tarball as a single ConfigMap asset (no-op when
@@ -685,7 +741,8 @@ for _helmTest in ${_helmTests}; do
             _assetConfigMapName="${_helmRelease}-${_assetName}"
 
             kubectl delete configmap "${_assetConfigMapName}" "${NS_OPT[@]}" 2> /dev/null > /dev/null
-            kubectl create configmap "${_assetConfigMapName}" "${NS_OPT[@]}" --from-file="file=${_asset}" --labels "${_RUN_LABEL}"
+            kubectl create configmap "${_assetConfigMapName}" "${NS_OPT[@]}" --from-file="file=${_asset}"
+            _kubectlLabel "${_assetConfigMapName}" configmap
         done
 
         #
