@@ -22,6 +22,11 @@ name: Pool cleanup
 #     that killed run 43328361118. Only run it when no matrix is active —
 #     check https://github.com/ping-internal/ppds-helm-charts/actions
 #     first. Labeled resources are never touched by this mode.
+#   Scheduled runs (daily 06:00 UTC, both clusters) use all-unlabeled with
+#     an activity guard: if any pool holds a resource labeled with a run-id
+#     whose newest object is younger than 3h, that pool is skipped — a run
+#     may be active. Stale labeled residue (>=2h) is left to the in-CI
+#     stale sweep of the next run that claims the pool.
 #
 # Note: runs from a branch need chore/* or feature/* in the helm-test
 # deployment branch policy (master is always allowed).
@@ -54,19 +59,29 @@ on:
         type: boolean
         required: true
         default: true
+  schedule:
+    # Daily 06:00 UTC (01:00 America/Chicago) — well clear of the MWF
+    # 13:00 UTC canary and typical working-hours dispatches.
+    - cron: '0 6 * * *'
 
 jobs:
   clean-pool:
-    name: Clean pools (${{ inputs.arch }} / ${{ inputs.mode }} / dry=${{ inputs.dry_run }})
-    runs-on: ${{ inputs.arch == 'x86_64' && 'ping-internal-x86' || 'ping-internal-arm' }}
+    name: Clean pools (${{ inputs.arch || 'x86_64+aarch64 (scheduled)' }} / ${{ inputs.mode || 'all-unlabeled (scheduled)' }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { arch: x86_64, runner: ping-internal-x86, cluster: helm-charts-runner, server: 'https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com', ca: EKS_X86_CA }
+          - { arch: aarch64, runner: ping-internal-arm, cluster: helm-charts-runner-arm, server: 'https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com', ca: EKS_ARM_CA }
+    runs-on: ${{ (github.event_name == 'schedule' && matrix.runner) || (inputs.arch == 'x86_64' && 'ping-internal-x86' || 'ping-internal-arm') }}
     environment: helm-test
     permissions:
       id-token: write  # OIDC role assumption (caller must grant it too)
     env:
-      EXPECTED_ARCH: ${{ inputs.arch }}
+      EXPECTED_ARCH: ${{ github.event_name == 'schedule' && matrix.arch || inputs.arch }}
       AWS_REGION: ${{ vars.AWS_REGION }}
-      EKS_CLUSTER: ${{ inputs.arch == 'x86_64' && 'helm-charts-runner' || 'helm-charts-runner-arm' }}
-      EKS_SERVER: ${{ inputs.arch == 'x86_64' && 'https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com' || 'https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com' }}
+      EKS_CLUSTER: ${{ matrix.cluster }}
+      EKS_SERVER: ${{ matrix.server }}
     steps:
       # No checkout: this workflow runs nothing from the repo. A checkout
       # fails auth on non-master dispatches from the private runners
@@ -108,15 +123,10 @@ jobs:
       - name: Configure test cluster access
         env:
           KUBECONFIG: ${{ runner.temp }}/kubeconfig
-          EKS_CA_X86: ${{ vars.EKS_X86_CA }}
-          EKS_CA_ARM: ${{ vars.EKS_ARM_CA }}
+          EKS_CA: ${{ vars[matrix.ca] }}
         run: |
           set -euo pipefail
-          case "${EXPECTED_ARCH}" in
-            x86_64) EKS_CA="${EKS_CA_X86}" ;;
-            aarch64) EKS_CA="${EKS_CA_ARM}" ;;
-            *) echo "Unknown arch ${EXPECTED_ARCH}"; exit 1 ;;
-          esac
+          test -n "${EKS_CA}" || { echo "Missing cluster CA variable"; exit 1; }
           test -n "${EKS_CA}" || { echo "Missing cluster CA variable"; exit 1; }
           cat > "${KUBECONFIG}" <<EOF
           apiVersion: v1
@@ -144,15 +154,25 @@ jobs:
           printf 'KUBECONFIG=%s\n' "${KUBECONFIG}" >> "${GITHUB_ENV}"
           kubectl version --client=false
 
+      - name: Resolve mode
+        run: |
+          set -euo pipefail
+          # Scheduled runs always sweep all-unlabeled, guarded below.
+          if test "${{ github.event_name }}" = "schedule"; then
+            echo "MODE=all-unlabeled" >> "${GITHUB_ENV}"
+            echo "DRY_RUN=false" >> "${GITHUB_ENV}"
+            echo "IS_SCHEDULED=true" >> "${GITHUB_ENV}"
+          else
+            echo "MODE=${{ inputs.mode }}" >> "${GITHUB_ENV}"
+            echo "DRY_RUN=${{ inputs.dry_run }}" >> "${GITHUB_ENV}"
+            echo "IS_SCHEDULED=false" >> "${GITHUB_ENV}"
+          fi
+
       - name: Validate inputs
         run: |
           set -euo pipefail
-          if test "${{ inputs.mode }}" = "run-id"; then
+          if test "${MODE}" = "run-id"; then
             test -n "${{ inputs.run_id }}" || { echo "mode=run-id requires run_id input"; exit 1; }
-          fi
-          if test "${{ inputs.dry_run }}" != "true" && test "${{ inputs.mode }}" = "all-unlabeled"; then
-            echo "DESTRUCTIVE MODE: all-unlabeled sweep without dry-run."
-            echo "Confirm no helm-tests matrix is active (it would cross-fire)."
           fi
 
       - name: Inventory before
@@ -165,20 +185,44 @@ jobs:
       - name: Select targets
         run: |
           set -euo pipefail
-          _mode="${{ inputs.mode }}"
-          _runId="${{ inputs.run_id }}"
+          # Activity guard for scheduled sweeps: a pool holding a labeled
+          # resource newer than 3h may have an active run in it — skip that
+          # pool entirely. Unlabeled deletes inside an active pool would be
+          # cross-fire (run 43328361118).
+          _guardSeconds=10800
+          _now=$(date +%s)
+          for ns in ppds-ci-pool-0 ppds-ci-pool-1 ppds-ci-pool-2 ppds-ci-pool-3 ppds-ci-pool-4; do
+            if test "${IS_SCHEDULED}" = "true"; then
+              _newest=$(kubectl get pod,sts,deploy,replicaset,statefulset,pvc,configmap,secret \
+                -n "${ns}" -l ppds.pingidentity.com/run-id -o json 2>/dev/null \
+                | jq -r '[.items[].metadata.creationTimestamp] | max // empty')
+              if test -n "${_newest}"; then
+                if test "$(uname -s)" = "Darwin"; then
+                  _epoch=$(date -j -f "%Y-%m-%dT%TZ" "${_newest}" "+%s" 2>/dev/null || echo 0)
+                else
+                  _epoch=$(date -d "${_newest}" +%s 2>/dev/null || echo 0)
+                fi
+                _age=$(( ${_now} - ${_epoch} ))
+                if test ${_age} -lt ${_guardSeconds}; then
+                  echo "SKIPPING ${ns}: newest labeled resource is ${_age}s old (<${_guardSeconds}s guard) — possible active run"
+                  echo "${ns}" >> skipped-pools.txt
+                  continue
+                fi
+              fi
+            fi
+            echo "${ns}" >> candidate-pools.txt
+          done
 
-          if test "${_mode}" = "run-id"; then
-            # Everything labeled with the given run id, all pools.
-            # Kubernetes label values must be alphanumeric/-/./_ — GITHUB_RUN_ID is.
-            kubectl get pod,sts,deploy,replicaset,statefulset,pvc,configmap,secret \
-              -A -l "ppds.pingidentity.com/run-id=${_runId}" -o json \
-              | jq -r '.items[] | "\(.metadata.namespace) \(.kind)/\(.metadata.name)"' > targets.txt
-          else
-            # All unlabeled, minus pool fixtures and k8s-managed objects.
-            # kubectl takes a single -n; query each pool and merge.
-            : > targets.txt
-            for ns in ppds-ci-pool-0 ppds-ci-pool-1 ppds-ci-pool-2 ppds-ci-pool-3 ppds-ci-pool-4; do
+          : > targets.txt
+          for ns in $(cat candidate-pools.txt 2>/dev/null); do
+            if test "${MODE}" = "run-id"; then
+              # Everything labeled with the given run id, all candidate pools.
+              # Kubernetes label values must be alphanumeric/-/./_ — GITHUB_RUN_ID is.
+              kubectl get pod,sts,deploy,replicaset,statefulset,pvc,configmap,secret \
+                -n "${ns}" -l "ppds.pingidentity.com/run-id=${{ inputs.run_id }}" -o json 2>/dev/null \
+                | jq -r '.items[] | "\(.metadata.namespace) \(.kind)/\(.metadata.name)"' >> targets.txt
+            else
+              # All unlabeled, minus pool fixtures and k8s-managed objects.
               kubectl get pod,sts,deploy,replicaset,statefulset,pvc,configmap,secret \
                 -n "${ns}" -o json 2>/dev/null \
                 | jq -r '.items[]
@@ -189,14 +233,18 @@ jobs:
                         and (.metadata.name != "kube-root-ca.crt")
                       )
                     | "\(.metadata.namespace) \(.kind)/\(.metadata.name)"' >> targets.txt
-            done
-          fi
+            fi
+          done
 
           echo "=== targets ($(wc -l < targets.txt | tr -d ' ')) ==="
           cat targets.txt
+          if test -s skipped-pools.txt; then
+            echo "=== skipped pools (activity guard) ==="
+            cat skipped-pools.txt
+          fi
 
       - name: Delete targets
-        if: ${{ inputs.dry_run == false }}
+        if: ${{ env.DRY_RUN == 'false' }}
         run: |
           set -euo pipefail
           test -s targets.txt || { echo "nothing to delete"; exit 0; }
