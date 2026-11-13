@@ -83,7 +83,7 @@ jobs:
         id: submodule-app-token
         uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ secrets.SUBMODULE_APP_ID }}
+          client-id: ${{ secrets.SUBMODULE_APP_ID }}
           private-key: ${{ secrets.SUBMODULE_APP_PRIVATE_KEY }}
           owner: ping-internal
           repositories: cdi-shared-configs
