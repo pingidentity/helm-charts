@@ -176,13 +176,13 @@ _run_helm_test() {
         # image's 83-change-password hook — generate one when unset.
         if test -z "${PA_DEFAULT_PASSWORD:-}"; then
             # PA admin-password policy: 8-64 chars, >=1 upper, >=1 lower, >=1 digit.
-        # Take 24 alphanumerics from a random pool, then force one char of each
-        # required class at fixed positions (deterministic policy satisfaction).
-        _pa_pw_pool="$(openssl rand -base64 64 2>/dev/null | tr -dc "A-Za-z0-9")"
-        _pa_pw_a="$(printf '%s' "${_pa_pw_pool}" | cut -c1-8)"
-        _pa_pw_b="$(printf '%s' "${_pa_pw_pool}" | cut -c9-16)"
-        _pa_pw_c="$(printf '%s' "${_pa_pw_pool}" | cut -c17-24)"
-        PA_DEFAULT_PASSWORD="${_pa_pw_a}Aa9${_pa_pw_b}7zX${_pa_pw_c}"
+            # Take 24 alphanumerics from a random pool, then force one char of each
+            # required class at fixed positions (deterministic policy satisfaction).
+            _pa_pw_pool="$(openssl rand -base64 64 2> /dev/null | tr -dc "A-Za-z0-9")"
+            _pa_pw_a="$(printf '%s' "${_pa_pw_pool}" | cut -c1-8)"
+            _pa_pw_b="$(printf '%s' "${_pa_pw_pool}" | cut -c9-16)"
+            _pa_pw_c="$(printf '%s' "${_pa_pw_pool}" | cut -c17-24)"
+            PA_DEFAULT_PASSWORD="${_pa_pw_a}Aa9${_pa_pw_b}7zX${_pa_pw_c}"
         fi
         _cmd="${_cmd} --helm-set-values global.envs.PING_IDENTITY_PASSWORD=${PA_DEFAULT_PASSWORD}"
     fi

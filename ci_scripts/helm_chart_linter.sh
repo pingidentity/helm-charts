@@ -1,11 +1,7 @@
 #!/usr/bin/env bash
 # Copyright © 2026 Ping Identity Corporation
 
-if test -n "$CI_COMMIT_BRANCH"; then
-    git clone -b "$CI_COMMIT_BRANCH" "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
-else
-    git clone "https://${GITLAB_USER}:${GITLAB_TOKEN}@${INTERNAL_GITLAB_URL}/devops-program/helm-charts"
-fi
-
-cd helm-charts || exit
+# Run from the checked-out workspace (no clone; CI_PROJECT_DIR is provided
+# at workflow level in helm-tests.yml; fallback covers local runs).
+cd "${CI_PROJECT_DIR:-$(cd "$(dirname "${0}")/.." && pwd)}" || exit
 helm lint charts/ping-devops || exit
