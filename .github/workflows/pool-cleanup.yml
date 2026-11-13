@@ -1,0 +1,126 @@
+name: Pool cleanup
+
+# TEMPORARY — one-time clean of pre-label leftovers in the CI pool
+# namespaces. Resource-labeling landed in PRs #510/#511: everything created
+# after those merges carries ppds.pingidentity.com/run-id and
+# ppds.pingidentity.com/release labels, so the in-CI sweeps manage their
+# lifecycle. Resources created BEFORE #510 carry no labels; the 2h stale
+# sweep only matches labeled resources, so old unlabeled PVCs/configmaps/
+# secrets in the pools would otherwise sit forever (bound PVCs also block
+# nothing directly, but they consume storage and pollute `kubectl get`).
+#
+# Run this once per cluster via workflow_dispatch (env per arch), verify the
+# pool contents are just the built-in fixtures (aws-ecr-registry, default
+# serviceaccount), then DELETE this workflow in the same PR it lands in —
+# or before it merges.
+
+on:
+  workflow_dispatch:
+    inputs:
+      arch:
+        description: Cluster to clean (x86_64 or aarch64)
+        type: choice
+        required: true
+        options:
+          - x86_64
+          - aarch64
+        default: x86_64
+
+jobs:
+  clean-pool:
+    name: Clean pools (${{ inputs.arch }})
+    runs-on: ${{ inputs.arch == 'x86_64' && 'ping-internal-x86' || 'ping-internal-arm' }}
+    environment: helm-test
+    env:
+      EXPECTED_ARCH: ${{ inputs.arch }}
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      EKS_CLUSTER: ${{ inputs.arch == 'x86_64' && 'helm-charts-runner' || 'helm-charts-runner-arm' }}
+      EKS_SERVER: ${{ inputs.arch == 'x86_64' && 'https://6F90538AF4A1A3064D4BFAC6FC95D48D.gr7.us-west-2.eks.amazonaws.com' || 'https://8FEAE34D9303428734C0216C6C33B964.gr7.us-west-2.eks.amazonaws.com' }}
+    steps:
+      - name: Set up tools
+        uses: ./.github/actions/setup-tools
+
+      - name: Assume CI role via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::574076504146:role/helm-charts-ci
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Configure test cluster access
+        env:
+          KUBECONFIG: ${{ runner.temp }}/kubeconfig
+          EKS_CA_X86: ${{ vars.EKS_X86_CA }}
+          EKS_CA_ARM: ${{ vars.EKS_ARM_CA }}
+        run: |
+          set -euo pipefail
+          case "${EXPECTED_ARCH}" in
+            x86_64) EKS_CA="${EKS_CA_X86}" ;;
+            aarch64) EKS_CA="${EKS_CA_ARM}" ;;
+            *) echo "Unknown arch ${EXPECTED_ARCH}"; exit 1 ;;
+          esac
+          test -n "${EKS_CA}" || { echo "Missing cluster CA variable"; exit 1; }
+          cat > "${KUBECONFIG}" <<EOF
+          apiVersion: v1
+          kind: Config
+          clusters:
+          - name: ${EKS_CLUSTER}
+            cluster:
+              server: ${EKS_SERVER}
+              certificate-authority-data: ${EKS_CA}
+          users:
+          - name: helm-charts-ci
+            user:
+              exec:
+                apiVersion: client.authentication.k8s.io/v1beta1
+                command: aws
+                args: ["eks", "get-token", "--cluster-name", "${EKS_CLUSTER}", "--region", "${AWS_REGION}"]
+                interactiveMode: Never
+          contexts:
+          - name: ${EKS_CLUSTER}
+            context: {cluster: ${EKS_CLUSTER}, user: helm-charts-ci}
+          current-context: ${EKS_CLUSTER}
+          EOF
+          kubectl version --client=false
+
+      - name: Inventory before
+        run: |
+          for ns in ppds-ci-pool-0 ppds-ci-pool-1 ppds-ci-pool-2 ppds-ci-pool-3 ppds-ci-pool-4; do
+            banner "${ns}"
+            kubectl get all,pvc,configmap,secret -n "${ns}" || true
+          done
+
+      - name: Delete unlabeled leftovers
+        run: |
+          set -euo pipefail
+          # Delete everything in the pools EXCEPT what must survive:
+          #  - labeled resources (current scheme manages its own lifecycle)
+          #  - aws-ecr-registry (pool fixture created by before-script; the
+          #    next run recreates it if missing, but keeping it avoids a
+          #    first-run image-pull race)
+          #  - default serviceaccount + kube-root-ca.crt (k8s-managed)
+          # helm release storage secrets (sh.helm.release.v1.*) have no
+          # owner once their release's labels are gone — they match
+          # "unlabeled" and are deleted.
+          for ns in ppds-ci-pool-0 ppds-ci-pool-1 ppds-ci-pool-2 ppds-ci-pool-3 ppds-ci-pool-4; do
+            banner "Cleaning ${ns}"
+            kubectl get pod,sts,deploy,replicaset,statefulset,pvc,configmap,secret -n "${ns}" -o json \
+              | jq -r '.items[] | select(
+                  (.metadata.labels["ppds.pingidentity.com/run-id"] == null)
+                  and (.metadata.name != "aws-ecr-registry")
+                  and (.metadata.name != "default")
+                  and (.metadata.name != "kube-root-ca.crt")
+                ) | "\(.kind)/\(.metadata.name)"' \
+              | while IFS= read -r res; do
+                  test -z "${res}" && continue
+                  echo "deleting ${res}"
+                  kubectl delete "${res}" -n "${ns}" --ignore-not-found=true
+                done
+          done
+
+      - name: Inventory after
+        if: always()
+        run: |
+          for ns in ppds-ci-pool-0 ppds-ci-pool-1 ppds-ci-pool-2 ppds-ci-pool-3 ppds-ci-pool-4; do
+            banner "${ns}"
+            kubectl get all,pvc,configmap,secret -n "${ns}" || true
+          done
