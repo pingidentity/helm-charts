@@ -709,8 +709,11 @@ for _helmTest in ${_helmTests}; do
         while test "${_poll_helm_test}" = true; do
             echo "Polling pods for terminated states..."
 
-            # Get the names of all pods in the namespace
-            podsList=$(kubectl get pods "${NS_OPT[@]}" -o json | jq -r ".items[].metadata.name")
+            # Only THIS release's pods. The pool namespace is shared with
+            # concurrent suites; their pods legitimately exit non-zero (their
+            # own hook/init failures) and must not fail this test.
+            podsList=$(kubectl get pods "${NS_OPT[@]}" \
+                -l "app.kubernetes.io/instance=${_helmRelease}" -o json | jq -r ".items[].metadata.name")
 
             # Loop through each pod to check statuses for terminated states.
             for podName in ${podsList}; do
@@ -732,8 +735,16 @@ for _helmTest in ${_helmTests}; do
                     kubectl logs "${podName}" "${NS_OPT[@]}" -f > "${_podLogsDir}/${podName}" &
                 fi
 
-                # If the pod has a terminated state, jq will return a json object, else null
-                terminated_state_json="$(jq -er ".status.containerStatuses[].lastState.terminated" <<< "${pod_status_json}")"
+                # A container whose CURRENT state is terminated non-zero is a
+                # real failure. lastState.terminated is NOT: it describes a
+                # previous crash, and the container may have restarted and be
+                # running fine now (e.g. a transient startup crash under
+                # parallel-suite load) — killing the helm test for it made a
+                # fully-green run fail (feature-branch validation 43450757276,
+                # pingdirectory: wait-for/bruno/completion all Passed while
+                # the poll loop killed the test over a long-recovered
+                # restart).
+                terminated_state_json="$(jq -er '.status.containerStatuses[] | select(.state.terminated != null) | .state.terminated' <<< "${pod_status_json}")"
                 #If jq returns non-zero exitcode, the output is null or false
                 test ${?} -ne 0 && continue
 
@@ -763,7 +774,10 @@ for _helmTest in ${_helmTests}; do
         if ps -p ${_test_pid} > /dev/null; then
             # Kill the helm test process as it is still running.
             echo "A pod has terminated with a non-zero exit code. Killing helm test ${_helmRelease}..."
-            _kill_pid ${_test_pid}
+            # _kill_pid lives in run_helm_smoke.sh (the parent), which is a
+            # separate process — kill the helm test tree here directly.
+            pkill -TERM -P "${_test_pid}" 2> /dev/null
+            kill "${_test_pid}" 2> /dev/null
         fi
 
         #Either the helm test command completed or was killed. Either way, wait captures and returns the exit code of the process.
