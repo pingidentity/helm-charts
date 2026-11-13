@@ -299,7 +299,7 @@ jobs:
 
       - name: Upload integration diagnostics
         if: ${{ always() && (inputs.retain_logs || failure()) }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: helm-integration-${{ inputs.test_directory }}-${{ inputs.expected_arch }}-${{ github.run_id }}
           if-no-files-found: warn
