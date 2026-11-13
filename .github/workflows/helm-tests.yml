@@ -4,27 +4,32 @@ name: Helm tests
 # (initialization/test.template/test.smoke/test.integration) with GitHub
 # Actions needs-gating:
 #
-#   template -> smoke (parallel, both arches) -> integration (parallel, both arches)
+#   lint -> template -> smoke (parallel, both arches) -> integration (parallel, both arches)
 #
 # Stage gate: a stage runs only if every job of the previous stage succeeded
-# (needs:). A smoke failure skips integration, exactly like the GitLab stage
-# ordering.
+# (needs:). A lint or smoke failure skips everything downstream, exactly like
+# the GitLab initialization stage running first.
 #
 # Triggers:
-#  - pull_request -> Template tests only (the org ruleset's required check).
+#  - pull_request -> Lint + Template tests (Template tests is the org
+#    ruleset's required check).
 #  - push to master -> FULL parity with the GitLab master pipeline:
-#    template -> 11 smoke products x2 arch -> 5 integration suites x2 arch.
-#  - schedule (07:00 America/Chicago Mon/Wed/Fri) -> canary: template ->
-#    pingdataconsole smoke x2 arch. Catches runner/registry/credential rot
-#    between merges; not a coverage run.
-#  - workflow_dispatch -> per-toggle inputs (template, smoke per arch,
+#    lint -> template -> 11 smoke products x2 arch -> 5 integration suites x2 arch.
+#  - schedule (07:00 America/Chicago Mon/Wed/Fri) -> canary: lint ->
+#    template -> pingdataconsole smoke x2 arch. Catches runner/registry/
+#    credential rot between merges; not a coverage run.
+#  - workflow_dispatch -> per-toggle inputs (lint, template, smoke per arch,
 #    integration per arch) for targeted runs.
 #
-# Not ported from GitLab: chartlinter (separate lint chunk), the NIGHTLY-only
-# jobs (pa-pf-pd-fips integration + examples-test suites — the GitLab schedule
-# that set NIGHTLY=true was inactive since 2026-01, so these were already
-# dead in practice). The FIPS suite remains dispatch-runnable via the
-# integration_test input (integration_test=pa-pf-pd-fips).
+# The lint job reproduces GitLab's intel.i.chartlinter (helm lint on the
+# chart) and intel.i.shfmt (shfmt --diff, run unconditionally rather than
+# only when ci_scripts/* changes — full coverage, ~5s on hosted runners).
+#
+# Not ported from GitLab: the NIGHTLY-only jobs (pa-pf-pd-fips integration +
+# examples-test suites — the GitLab schedule that set NIGHTLY=true was
+# inactive since 2026-01, so these were already dead in practice). The FIPS
+# suite remains dispatch-runnable via the integration_test input
+# (integration_test=pa-pf-pd-fips).
 
 on:
   pull_request:
@@ -38,6 +43,11 @@ on:
     - cron: '0 13 * * 1,3,5'
   workflow_dispatch:
     inputs:
+      run_lint:
+        description: Run the lint job (helm lint + shfmt)
+        type: boolean
+        required: true
+        default: true
       run_template_tests:
         description: Run the focused and complete template suites
         type: boolean
@@ -98,12 +108,43 @@ env:
   CI_JOB_ID: ${{ github.job }}
 
 jobs:
+  lint:
+    name: Lint (helm lint + shfmt)
+    # Initialization-stage parity: cheapest checks first; a lint failure skips
+    # the entire test pipeline (template needs lint). Runs on every PR and
+    # master push, unconditionally (GitLab gated shfmt on ci_scripts/* changes
+    # to save runner minutes; hosted-runner cost is ~5s, full coverage is
+    # drift-proof). Not a required check yet.
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.run_lint }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          submodules: false
+          fetch-depth: 1
+
+      - name: Set up tools
+        uses: ./.github/actions/setup-tools
+
+      - name: helm lint (chartlinter parity)
+        run: ./ci_scripts/helm_chart_linter.sh
+
+      - name: shfmt --diff (shell format parity)
+        run: ./ci_scripts/shfmt.sh --diff
+
   template:
     name: Template tests
+    needs: lint
     # Always run on PRs (required check must report) and master pushes (the
     # release gate: master must be green before a release tag is cut). On
     # schedule: template gates the canary smoke. Dispatch honors the input.
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.run_template_tests }}
+    # needs: lint gives the GitLab initialization-stage ordering (lint
+    # failure skips template, smoke, and integration). 'skipped' lint is
+    # allowed so dispatching with run_lint=false still runs the template
+    # suite standalone.
+    if: ${{ always() && (needs.lint.result == 'success' || needs.lint.result == 'skipped') && (github.event_name != 'workflow_dispatch' || inputs.run_template_tests) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -147,7 +188,9 @@ jobs:
             template-tests.log
 
   # --------------------------------------------------------------------
-  # Smoke stage: product x arch matrix, parallel, needs-gated on template.
+  # Smoke stage: product x arch matrix, parallel, needs-gated on template
+  # (which is needs-gated on lint — the transitive chain carries the stage
+  # gate from initialization through template).
   # push (merge parity): all 11 products, both arches — the GitLab master
   # pipeline's test.smoke stage. schedule (MWF canary): pingdataconsole only.
   # workflow_dispatch: the toggled arch(es) for the chosen product.
@@ -156,6 +199,8 @@ jobs:
     name: Smoke ${{ matrix.product }} (${{ matrix.arch_name }})
     needs: template
     if: ${{ always() && needs.template.result == 'success' }}
+    # Stage gate is carried transitively: template only reaches 'success'
+    # when lint succeeded (or was dispatch-skipped), so smoke implies lint.
     strategy:
       fail-fast: false
       matrix:

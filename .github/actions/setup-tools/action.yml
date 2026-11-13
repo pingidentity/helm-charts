@@ -8,7 +8,7 @@ inputs:
   shfmt-version:
     description: shfmt release version to install when shfmt is unavailable
     required: false
-    default: '3.13.1'
+    default: '3.14.1'
   shellcheck-version:
     description: shellcheck release version to install when shellcheck is unavailable
     required: false
