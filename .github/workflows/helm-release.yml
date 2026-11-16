@@ -25,9 +25,9 @@ name: Helm chart release
 #
 # Credentials: RELEASE_BOT_APP_ID / RELEASE_BOT_APP_PRIVATE_KEY are helm-release
 # environment secrets on this repo (GitHub App ppds-helm-charts-release-bot,
-# Contents write on pingidentity/helm-charts only — DEVHELP-48200). The
-# helm-release environment should be configured with required reviewers so the
-# publish is a human-authorized step.
+# Contents + Workflows write on pingidentity/helm-charts only — DEVHELP-48200,
+# DEVHELP-48348). The helm-release environment should be configured with
+# required reviewers so the publish is a human-authorized step.
 
 on:
   push:
@@ -331,6 +331,13 @@ jobs:
           owner: pingidentity
           repositories: helm-charts
           permission-contents: write
+          # The mirror push carries .github/workflows/*.yml (public docs.yaml
+          # Pages deploy depends on it). GitHub rejects pushes that
+          # create/update workflow files unless the token itself holds the
+          # workflows permission (GH013) — the App-level grant alone is not
+          # enough, and specifying any permission-* input scopes the token to
+          # exactly those permissions (DEVHELP-48348).
+          permission-workflows: write
 
       - name: Push master and tag to public repo
         env:
