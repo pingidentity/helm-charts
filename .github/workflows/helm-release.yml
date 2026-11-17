@@ -225,6 +225,9 @@ jobs:
     name: Create draft release on public repo
     needs: package
     if: ${{ github.event_name == 'push' && github.ref_type == 'tag' || github.event_name == 'workflow_dispatch' }}
+    outputs:
+      release_id: ${{ steps.draft.outputs.release_id }}
+      draft_url: ${{ steps.draft.outputs.draft_url }}
     runs-on: ubuntu-24.04
     environment: helm-release
     timeout-minutes: 10
@@ -358,8 +361,10 @@ jobs:
           git fetch "https://x-access-token:${EMU_TOKEN}@github.com/ping-internal/ppds-helm-charts.git" master
           git merge --ff-only FETCH_HEAD
           git push origin master
-          git tag "${TAG}" FETCH_HEAD
-          git push origin "${TAG}"
+          # Re-run after a partial publish: the tag may already exist here and
+          # point at the same commit (releases are cut from merged master).
+          git tag -f "${TAG}" FETCH_HEAD
+          git push origin "${TAG}" --force
 
       - name: Publish the draft release
         env:
