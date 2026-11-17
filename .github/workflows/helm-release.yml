@@ -5,14 +5,18 @@ name: Helm chart release
 #
 # Trigger paths:
 #  - Push of a ping-devops-* tag: the workflow validates the tag against
-#    Chart.yaml, packages the chart, regenerates docs/index.yaml, creates a
-#    DRAFT release on the public repo with the exact packaged .tgz, and stops.
+#    Chart.yaml and merged master, packages the chart, merges the entry into
+#    docs/index.yaml, creates a DRAFT release on the public repo with the
+#    exact packaged .tgz, and stops. Its release-package artifact carries the
+#    merged index — land it on EMU master via the index PR (runbook step 6)
+#    BEFORE dispatching publish.
 #  - workflow_dispatch dry-run: identical pipeline, never publishes. Use this
 #    to rehearse a release (probe_tag input controls the draft tag name; must
 #    NOT match the chart version).
-#  - workflow_dispatch publish: completes the release by verifying the draft
-#    (tag, .tgz asset, index digest pairing), pushing master + tag to the
-#    public repo, publishing the draft, and notifying Slack.
+#  - workflow_dispatch publish: completes the release by re-packaging the
+#    chart, rebuilding/verifying the draft against the merged index on EMU
+#    master (tag, .tgz asset, index digest pairing), pushing master + tag to
+#    the public repo, publishing the draft, and notifying Slack.
 #
 # No master-push trigger: master gating is the Template tests job in
 # helm-tests.yml (runs on PRs and master pushes); packaging is exercised on
@@ -20,8 +24,13 @@ name: Helm chart release
 #
 # Byte-identical invariant: the .tgz referenced by docs/index.yaml MUST be the
 # exact file attached to the public release. Repackaging changes tarball
-# timestamps and therefore digests; the workflow packages exactly once and
-# reuses that archive everywhere.
+# timestamps and therefore digests; each run packages exactly once and reuses
+# that archive everywhere. The publish re-packages (new digest) AND rewrites
+# docs/index.yaml from that packaging — it never mixes a tag-push digest with
+# a publish digest. The index PR from the tag-push run exists to gate the
+# publish (index merged on EMU master before public mirror), not to pin the
+# digest: publish verifies its own freshly-built index against the EMU-master
+# version, so a stale PR index fails the run rather than shipping a mismatch.
 #
 # Credentials: RELEASE_BOT_APP_ID / RELEASE_BOT_APP_PRIVATE_KEY are helm-release
 # environment secrets on this repo (GitHub App ppds-helm-charts-release-bot,
@@ -56,6 +65,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: helm-release-${{ github.ref }}
@@ -99,7 +109,11 @@ jobs:
               tag="ping-devops-${chart_version}"
             fi
           else
-            mode=dry-run
+            # Tag push = release mode: draft-only run whose artifact carries
+            # the merged docs/index.yaml for the runbook's index PR. (It used
+            # to resolve as dry-run, which made that artifact useless — the
+            # index was never merged; see PDI-2542 follow-up.)
+            mode=release
             tag='${{ github.ref_name }}'
           fi
           chart_version="$(grep '^version:' ${CHART_DIR}/Chart.yaml | awk '{print $2}')"
@@ -164,8 +178,11 @@ jobs:
         run: |
           set -euo pipefail
           # index.yaml must be the last artifact touched.
-          # Release mode: merge the packaged chart into the existing index with
-          # the public download URL (--merge preserves prior versions).
+          # Release mode (tag push) and publish mode: merge the packaged chart
+          # into the existing index with the public download URL (--merge
+          # preserves prior versions). In release mode the merged index rides
+          # the artifact for the human index PR; in publish mode it is the
+          # authoritative index verified against EMU master before mirroring.
           # Dry-run mode: the current chart version may already exist in the
           # index (it shipped in a prior release) and --merge keeps the OLD
           # entry on version collision, so build a standalone index instead —
@@ -189,8 +206,8 @@ jobs:
           # Byte-identical invariant: the index digest must equal the sha256 of
           # the packaged .tgz. helm repo index computes it from the same file,
           # but verify rather than trust. In dry-run mode the freshly built
-          # standalone index.yaml (repo root) is checked; in release mode the
-          # merged docs/index.yaml is.
+          # standalone index.yaml (repo root) is checked; in release/publish
+          # mode the merged docs/index.yaml is.
           version='${{ steps.version.outputs.chart_version }}'
           index_file="docs/index.yaml"
           if [ '${{ steps.version.outputs.mode }}' = 'dry-run' ]; then
@@ -325,6 +342,12 @@ jobs:
     environment: helm-release
     timeout-minutes: 10
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          submodules: false
+          fetch-depth: 1
+
       - name: Create release-bot App token
         id: release-bot-token
         uses: actions/create-github-app-token@v3
@@ -341,6 +364,46 @@ jobs:
           # enough, and specifying any permission-* input scopes the token to
           # exactly those permissions (DEVHELP-48348).
           permission-workflows: write
+
+      - name: Install Helm
+        run: |
+          set -euo pipefail
+          helm_version='4.2.4'
+          if ! command -v helm >/dev/null 2>&1 || ! helm version --short | grep -q "v${helm_version}"; then
+            curl -sSL "https://get.helm.sh/helm-v${helm_version}-linux-amd64.tar.gz" | tar -xz -C "$RUNNER_TEMP"
+            sudo install "$RUNNER_TEMP/linux-amd64/helm" /usr/local/bin/helm
+          fi
+          helm version --short
+
+      - name: Re-verify merged index on EMU master
+        env:
+          TAG: ${{ needs.package.outputs.tag_name }}
+          VERSION: ${{ needs.package.outputs.chart_version }}
+          EXPECTED_DIGEST: ${{ needs.package.outputs.digest }}
+        run: |
+          set -euo pipefail
+          # Gate: the index PR (runbook step 6) must be merged to EMU master
+          # before this job mirrors anything to the public repo. The merged
+          # index entry must reference THIS run's digest — the publish run
+          # re-packages (tarball timestamps change the digest), and the draft
+          # asset uploaded by the draft job came from this run's packaging.
+          # If the PR index still carries the tag-push run's digest, fail
+          # here with an explicit instruction instead of shipping a
+          # digest/asset mismatch to the public repo.
+          git fetch "https://x-access-token:${{ github.token }}@github.com/ping-internal/ppds-helm-charts.git" master
+          git show FETCH_HEAD:docs/index.yaml > /tmp/emu-index.yaml
+          block="$(awk '
+            /^  - apiVersion/ {in_entry=1; ver=""; dig=""}
+            in_entry && /^    version: / {ver=$2}
+            in_entry && /^    digest: / {dig=$2}
+            in_entry && ver=="'"${VERSION}"'" && dig!="" {print dig; exit}
+          ' /tmp/emu-index.yaml)"
+          [ -n "$block" ] || { echo "::error::docs/index.yaml on EMU master has no ${VERSION} entry; land the index PR (runbook step 6) before publishing"; exit 1; }
+          if [ "$block" != "$EXPECTED_DIGEST" ]; then
+            echo "::error::EMU-master index digest for ${VERSION} is ${block}, this run packaged ${EXPECTED_DIGEST}; regenerate the index from this run's release-package-${VERSION} artifact (fresh index PR) before publishing"
+            exit 1
+          fi
+          echo "EMU master index entry verified: ${VERSION} digest ${block}"
 
       - name: Push master and tag to public repo
         env:
